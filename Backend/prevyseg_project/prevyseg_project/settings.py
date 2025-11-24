@@ -131,3 +131,29 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "http://localhost:3000",  # Puerto común de Create React App
 ]
+
+
+# settings.py
+# ... tus otras configuraciones ...
+
+# 1. Configuración del Modelo de Usuario
+AUTH_USER_MODEL = 'prevyseg_app.Usuario' 
+
+# 2. Configuración de DRF
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    # ... otras configuraciones de DRF ...
+}
+
+# 3. Configuración de Simple JWT
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60), 
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    # Configuramos JWT para usar el RUT como identificador en el token
+    'USER_ID_FIELD': 'rut',
+    'USER_ID_CLAIM': 'user_rut', 
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
