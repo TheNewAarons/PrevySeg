@@ -1,0 +1,44 @@
+# ------------------------------------
+# 1. ENTORNO VIRTUAL Y CACHÉ PYTHON
+# ------------------------------------
+
+# Carpeta del entorno virtual (en el backend)
+/backend/venv/
+# Archivos de compilación de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+# Archivos de logs de Django
+*.log
+# Archivos de base de datos SQLite (si no usas Docker)
+/backend/db.sqlite3
+# Archivos de media subidos por el usuario (si los pones en la raíz del backend)
+/backend/media
+# Carpetas de migración de Python para caché
+*/migrations/*.pyc
+# ------------------------------------
+# 2. DEPENDENCIAS Y CACHÉ NODE.JS
+# ------------------------------------
+
+# Carpeta de módulos de Node (en el frontend)
+/frontend/node_modules
+# Carpeta de compilación de React/Vite (se genera al hacer build)
+/frontend/dist
+# Archivos de caché npm
+npm-debug.log*
+.npm
+# Archivos de entorno y claves sensibles
+/frontend/.env
+# ------------------------------------
+# 3. ARCHIVOS DE SISTEMA Y IDE
+# ------------------------------------
+
+# macOS
+.DS_Store
+
+# Visual Studio Code (si lo usas)
+.vscode/
+
+# Varios (si usas Docker)
+.dockerignore
