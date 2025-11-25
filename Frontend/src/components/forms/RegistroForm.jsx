@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
-import authService from '../../services/authService';
-// IMPORTANTE: Se necesita 'Link' para el último punto
-import { useNavigate, Link } from 'react-router-dom'; 
-import '../../styles/components/forms/RegistroForm.css'; 
+import authService from '../../services/authService'; // Asegurarse que la ruta sea correcta
+import { useNavigate } from 'react-router-dom';
 
 const RegistroForm = () => {
     const navigate = useNavigate();
     
+    // Definición de los estados iniciales del formulario, reflejando el Modelo Lógico (USUARIO)
     const [formData, setFormData] = useState({
         rut: '',
         password: '',
         nombre: '',
-        fecha_nacimiento: '',
+        fecha_nacimiento: '', // Formato YYYY-MM-DD
         telefono: '',
         domicilio: '',
         email: '',
@@ -22,14 +21,17 @@ const RegistroForm = () => {
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
 
+    // Función para manejar el cambio en cualquier campo del formulario
     const handleChange = (e) => {
         setFormData({
             ...formData,
             [e.target.name]: e.target.value,
         });
+        // Limpiar errores al empezar a escribir
         if (error) setError(null);
     };
 
+    // Función para manejar el envío del formulario
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -37,19 +39,20 @@ const RegistroForm = () => {
         setSuccess(false);
 
         try {
-            await authService.register(formData);
+            // Se llama a la función de registro del servicio de API
+            const response = await authService.register(formData);
             
             setLoading(false);
             setSuccess(true);
             
-            setTimeout(() => {
-                navigate('/cliente/dashboard'); 
-            }, 1500);
+            // Redirigir al cliente a su panel después del registro exitoso
+            console.log("Registro exitoso:", response);
+            navigate('/cliente/dashboard'); 
 
         } catch (err) {
             setLoading(false);
+            // Mostrar un mensaje de error más amigable para el usuario
             setError(err.message || 'Ocurrió un error inesperado durante el registro.');
-            setSuccess(false);
             console.error('Error al registrar:', err);
         }
     };
@@ -82,7 +85,7 @@ const RegistroForm = () => {
                     />
                 </fieldset>
                 
-                {/* Bloque de Información Personal */}
+                {/* Bloque de Información Personal (HU-1) */}
                 <fieldset>
                     <legend>Información Personal</legend>
                     <input
@@ -101,8 +104,8 @@ const RegistroForm = () => {
                         onChange={handleChange}
                         required
                     />
-                    <div className="input-group-fix">
-                        <span className="input-label-text">* Fecha de Nacimiento:</span>
+                    <label>
+                        * Fecha de Nacimiento:
                         <input
                             type="date"
                             name="fecha_nacimiento"
@@ -110,7 +113,7 @@ const RegistroForm = () => {
                             onChange={handleChange}
                             required
                         />
-                    </div>
+                    </label>
                     <input
                         type="tel"
                         name="telefono"
@@ -137,18 +140,13 @@ const RegistroForm = () => {
                 </fieldset>
 
                 {/* Mensajes de Estado */}
-                {error && <div className="message error-message">{error}</div>}
-                {success && <div className="message success-message">¡Registro exitoso! Redirigiendo...</div>}
+                {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+                {success && <p style={{ color: 'green' }}>¡Registro exitoso! Redirigiendo...</p>}
                 
                 <button type="submit" disabled={loading}>
                     {loading ? 'Registrando...' : 'Registrarme en PrevySeg'}
                 </button>
             </form>
-
-            {/* 3. SOLUCIÓN: Enlace de Login */}
-            <p className="login-prompt">
-                ¿Ya tienes una cuenta? <Link to="/login">Inicia sesión aquí</Link>
-            </p>
         </div>
     );
 };
