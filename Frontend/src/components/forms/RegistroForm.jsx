@@ -30,13 +30,40 @@ const RegistroForm = () => {
         // Limpiar errores al empezar a escribir
         if (error) setError(null);
     };
-
-    // Función para manejar el envío del formulario
+    const validatePassword = (password) => {
+        const passwordErrors = [];
+        if (password.length < 8) {
+            passwordErrors.push("La contraseña debe tener mas de 8 caracteres");
+        }
+        if (!/[a-zA-Z]/.test(password)) {
+            passwordErrors.push("La contraseña debe tener al menos 1 mayuscula");
+        }
+        if (!/[0-9]/.test(password)) {
+            passwordErrors.push("La contraseña debe tener al menos 1 digito");
+        }
+        if (!/[@./+/-/_]/.test(password)) {
+            passwordErrors.push("La contraseña debe tener algun caracter especial (@, ., /, +, -, _)");
+        }
+        return passwordErrors;
+    };
+    // Función para manejar el envío del formulario()
     const handleSubmit = async (e) => {
         e.preventDefault();
+        //llamado a la funcion de validacion para la contraseña
+        const passwordErrors = validatePassword(formData.password);
+        //Verificacion que la array de errores no esta vacio
+        if (passwordErrors.length > 0 ){
+            setError(passwordErrors.join(', '));
+            return; 
+        }
+
         setLoading(true);
         setError(null);
         setSuccess(false);
+
+        //Validaciones para el formulario sobre la contraseña
+        
+        
 
         try {
             // Se llama a la función de registro del servicio de API
@@ -145,6 +172,9 @@ const RegistroForm = () => {
                 
                 <button type="submit" disabled={loading}>
                     {loading ? 'Registrando...' : 'Registrarme en PrevySeg'}
+                </button>
+                <button type='button' onClick={() => navigate('/')}>
+                    Volver al Home
                 </button>
             </form>
         </div>
