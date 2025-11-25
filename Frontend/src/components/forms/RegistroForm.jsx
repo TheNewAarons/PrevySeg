@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import authService from '../../services/authService'; // Asegúrate que la ruta sea correcta
-// Importar useNavigate si planeas hacer la redirección
+import authService from '../../services/authService'; // Asegurarse que la ruta sea correcta
 import { useNavigate } from 'react-router-dom';
 
 const RegistroForm = () => {
