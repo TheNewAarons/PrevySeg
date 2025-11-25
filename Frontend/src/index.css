@@ -20,10 +20,15 @@
 }
 
 body {
-  font-family: "Inter", sans-serif;
-  line-height: 1.6;
-  color: var(--text-primary);
-  background-color: var(--background);
+    font-family: "Inter", sans-serif;
+    line-height: 1.6;
+    color: var(--text-primary);
+    background-color: var(--background);
+    min-height: 100vh; /* Obliga al body a ser tan alto como la ventana */
+    display: flex; /* Habilita el centrado flexible */
+    align-items: center; /* Centrado vertical */
+    justify-content: center; /* Centrado horizontal */
+    padding: 20px; /* Margen de seguridad para móviles */
 }
 
 .container {
