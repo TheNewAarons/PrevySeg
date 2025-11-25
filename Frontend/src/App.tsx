@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 
 // Importación de Componentes
 import RegistroForm from './components/forms/RegistroForm'
-import LoginForm from './components/forms/LoginForm' // Nuevo: Importamos el LoginForm
+import LoginForm from './components/forms/LoginForm' 
 
 // Importamos los dashboards placeholder
 import ClienteDashboard from './pages/dashboards/ClienteDashboard'

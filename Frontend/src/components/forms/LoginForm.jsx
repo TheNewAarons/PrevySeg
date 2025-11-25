@@ -38,7 +38,7 @@ const LoginForm = () => {
                 dashboardPath = `/${rolLower}/dashboard`;
             } else {
                  // Por defecto, va al dashboard del cliente
-                 dashboardPath = '/cliente/dashboard';
+                dashboardPath = '/cliente/dashboard';
             }
             
             navigate(dashboardPath, { replace: true });
