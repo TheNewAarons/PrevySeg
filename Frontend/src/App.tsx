@@ -2,6 +2,8 @@ import './index.css' // Importa los estilos globales
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom' 
 import RegistroForm from './components/forms/RegistroForm'
 import LoginForm from './components/forms/LoginForm'
+import AdminDashboard from './pages/AdminDash'
+
 function Home() {
 // En React, no usamos document.querySelectorAll() ni lógica de manipulación DOM directa.
 // Reemplazaremos la lógica de script.js con Hooks (useEffect) y Event Handlers de React más adelante.
@@ -27,6 +29,7 @@ return (
                             <Link to={"/Login"}>
                                 <button className='btn-primary'>Iniciar Sesion  </button>
                             </Link>
+                            
                         </div>
                     </div>
                 </header>
@@ -288,6 +291,7 @@ function App (){
                 <Route path='/' element={<Home/>}/>
                 <Route path='/inscripcion' element={<RegistroForm/>}/>
                 <Route path='/login' element={<LoginForm/>}/>
+                <Route path='/administrador/dashboard' element={<AdminDashboard/>}/>
             </Routes>
         </Router>
     )

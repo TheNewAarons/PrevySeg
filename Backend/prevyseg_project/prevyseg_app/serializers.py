@@ -4,7 +4,13 @@ from django.contrib.auth import authenticate
 import re
 
 # --- Serializers ---
+class RolSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Rol
+        fields = ["id_rol", "nombre_rol"]
 class UserSerializer(serializers.ModelSerializer):
+    #Se implementa id_rol para identificar nombre de rol al momento de listar
+    id_rol = RolSerializer()
     class Meta:
         model = Usuario
         fields = (
