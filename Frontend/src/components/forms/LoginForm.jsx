@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import authService from '../../services/authService'; // Servicio para manejar el login
-import '../../styles/components/forms/LoginForm.css'; // Estilos
+ // Estilos
 
 // Renombrado a LoginForm para ser consistente con RegistroForm
 const LoginForm = () => { 

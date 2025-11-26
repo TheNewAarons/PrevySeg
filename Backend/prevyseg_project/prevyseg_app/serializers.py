@@ -4,6 +4,22 @@ from django.contrib.auth import authenticate
 import re
 
 # --- Serializers ---
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Usuario
+        fields = (
+            'id_usuario',
+            'rut',
+            'nombre',
+            'fecha_nacimiento',
+            'telefono',
+            'domicilio',
+            'email',
+            'lugar_trabajo',
+            'id_rol'
+        )
+        read_only_fields = ('rut', 'id_usuario')
+
 
 class RegistroSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
