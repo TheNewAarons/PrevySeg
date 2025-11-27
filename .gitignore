@@ -42,3 +42,5 @@ npm-debug.log*
 
 # Varios (si usas Docker)
 .dockerignore
+
+Frontend/yarn.lock

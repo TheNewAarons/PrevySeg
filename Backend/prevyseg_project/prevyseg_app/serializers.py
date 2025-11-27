@@ -82,3 +82,21 @@ class LoginSerializer(serializers.Serializer):
 
         attrs['user'] = user
         return attrs
+
+
+
+class UserDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Usuario
+        fields = (
+            'rut',
+            'nombre',
+            'fecha_nacimiento',
+            'telefono',
+            'domicilio',
+            'email',
+            'lugar_trabajo',
+            'id_rol',
+        )
+        read_only_fields = fields
+

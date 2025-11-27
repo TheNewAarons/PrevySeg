@@ -2,10 +2,11 @@ from django.shortcuts import render
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import RegistroSerializer, LoginSerializer
+from .serializers import RegistroSerializer, LoginSerializer, UserDetailSerializer
 from .models import Usuario, Rol
 from rest_framework.views import APIView
 from django.db import IntegrityError
+from .permissions import IsAdminRole
 
 # --- Vistas de Autenticación (HU-1, HU-3, HU-ADM-1) ---
 
@@ -66,3 +67,33 @@ class LoginView(APIView):
             "user_id": user.id_usuario,
             "rol": rol_nombre
         }, status=status.HTTP_200_OK)
+
+
+# --- Buscar usuario (REQ-ADM-005) ---
+
+
+class SearchUserView(APIView):
+    # Verifica que el usuario haya iniciado sesion y que tenga un rol de administrador
+    permission_classes = [permissions.IsAuthenticated, IsAdminRole]
+    def get(self, request):
+        rut = request.query_params.get("rut")
+
+        if not rut:
+            return Response(
+                {"error": "Debe ingrear un rut valido"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        rut_limpio = Usuario.objects.normalize_rut(rut.strip())
+
+        try:
+            usuario = Usuario.objects.get(rut=rut_limpio)
+        except Usuario.DoesNotExist:
+            return Response(
+                {"error": "Usuario no encontrado"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = UserDetailSerializer(usuario)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
