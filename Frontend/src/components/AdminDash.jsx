@@ -22,6 +22,12 @@ const AdminDashboard = () => {
                 >
                     Cerrar Sesión
                 </button>
+                <button 
+                    onClick={() => navigate('/administrador/crear-user')}
+                    style={{ background: 'red', color: 'white', border: 'none', padding: '10px', cursor: 'pointer' }}
+                >
+                    Crear Usuario
+                </button>
             </nav>
 
             {/* --- Contenido Principal --- */}
@@ -29,7 +35,7 @@ const AdminDashboard = () => {
                 <h3>Gestión de Usuarios</h3>
                 <p>Bienvenido, Administrador. Aquí está la lista de usuarios registrados:</p>
                 
-                {/* Aquí renderizamos tu lista que acabamos de arreglar */}
+                {/* Aquí renderizamos la lista que arreglamos */}
                 <UsuarioList /> 
             </main>
         </div>

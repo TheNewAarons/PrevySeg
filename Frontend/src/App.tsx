@@ -2,7 +2,8 @@ import './index.css' // Importa los estilos globales
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom' 
 import RegistroForm from './components/forms/RegistroForm'
 import LoginForm from './components/forms/LoginForm'
-import AdminDashboard from './pages/AdminDash'
+import AdminDashboard from './components/AdminDash'
+import CreateUserPage from './pages/CreateUserPage'
 
 function Home() {
 // En React, no usamos document.querySelectorAll() ni lógica de manipulación DOM directa.
@@ -292,6 +293,7 @@ function App (){
                 <Route path='/inscripcion' element={<RegistroForm/>}/>
                 <Route path='/login' element={<LoginForm/>}/>
                 <Route path='/administrador/dashboard' element={<AdminDashboard/>}/>
+                <Route path='/administrador/crear-user' element={<CreateUserPage/>}/>
             </Routes>
         </Router>
     )

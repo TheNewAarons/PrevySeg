@@ -92,7 +92,7 @@ const UsuarioList = () => {
                 <p><strong>Domicilio:</strong> {u.domicilio}</p>
                 <p><strong>Email:</strong> {u.email}</p>
                 <p><strong>Lugar de trabajo:</strong> {u.lugar_trabajo}</p>
-                <p><strong>Rol:</strong> {u.id_rol?.nombre_rol || "Sin rol"}</p>
+                <p><strong>Rol:</strong> {u.datos_rol?.nombre_rol || "Sin rol"}</p>
 
                 </li>
             ))}

@@ -2,13 +2,16 @@ from django.shortcuts import render
 from rest_framework import generics, permissions, status, viewsets
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import RegistroSerializer, LoginSerializer, UserSerializer
+from .serializers import RegistroSerializer, LoginSerializer, UserSerializer, RolSerializer
 from .models import Usuario, Rol
 from rest_framework.views import APIView
 from django.db import IntegrityError
 from .permissions import IsSelforAdmin
 
 # --- Vistas de Autenticación (HU-1, HU-3, HU-ADM-1) ---
+class RolViewSet(viewsets.ReadOnlyModelViewSet):  
+    queryset = Rol.objects.all()
+    serializer_class = RolSerializer
 
 class RegistroView(generics.CreateAPIView):
     """
