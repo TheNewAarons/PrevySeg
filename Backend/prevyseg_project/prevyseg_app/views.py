@@ -1,13 +1,17 @@
 from django.shortcuts import render
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions, status, viewsets
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import RegistroSerializer, LoginSerializer
+from .serializers import RegistroSerializer, LoginSerializer, UserSerializer, RolSerializer
 from .models import Usuario, Rol
 from rest_framework.views import APIView
 from django.db import IntegrityError
+from .permissions import IsSelforAdmin
 
 # --- Vistas de Autenticación (HU-1, HU-3, HU-ADM-1) ---
+class RolViewSet(viewsets.ReadOnlyModelViewSet):  
+    queryset = Rol.objects.all()
+    serializer_class = RolSerializer
 
 class RegistroView(generics.CreateAPIView):
     """
@@ -39,6 +43,22 @@ class RegistroView(generics.CreateAPIView):
         except Exception as e:
             # Captura errores de validación de serializador o base de datos
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+#Visualizacion del crud restante al registro(POST) 
+class UsuarioViewSet(viewsets.ModelViewSet):
+    queryset = Usuario.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated, IsSelforAdmin]
+
+    lookup_field = 'id_usuario' #Permitimos el URL de tipo /usuario/0/
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.id_rol.nombre_rol == 'Administrador':
+            return Usuario.objects.all()
+
+        return Usuario.objects.filter(id_usuario=user.id_usuario)
 
 
 class LoginView(APIView):

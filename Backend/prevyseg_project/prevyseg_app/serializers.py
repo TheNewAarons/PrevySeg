@@ -4,6 +4,71 @@ from django.contrib.auth import authenticate
 import re
 
 # --- Serializers ---
+class RolSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Rol
+        fields = ["id_rol", "nombre_rol"]
+class UserSerializer(serializers.ModelSerializer):
+    #Se implementa id_rol para identificar nombre de rol al momento de listar
+    
+    datos_rol = RolSerializer(source='id_rol', read_only=True)
+
+    # 2. ESCRITURA: Para seleccionar el rol enviando solo el ID (int)
+    id_rol = serializers.PrimaryKeyRelatedField(queryset=Rol.objects.all())
+
+    # 3. PASSWORD: Campo solo escritura para crear usuarios
+    password = serializers.CharField(write_only=True, required=False)
+    class Meta:
+        model = Usuario
+        fields = (
+            'id_usuario',
+            'rut',
+            'nombre',
+            'fecha_nacimiento',
+            'telefono',
+            'domicilio',
+            'email',
+            'lugar_trabajo',
+            'id_rol',
+            'datos_rol',
+            'password',
+        )
+        read_only_fields = ('id_usuario',)
+
+    def validate_password(self, value):
+        if len(value) < 8:
+            raise serializers.ValidationError("La clave debe tener al menos 8 caracteres.")
+        if not re.search('[A-Z]', value):
+            raise serializers.ValidationError("La clave debe contener al menos una mayúscula.")
+        if not re.search('[0-9]', value):
+            raise serializers.ValidationError("La clave debe contener al menos un número.")
+        return value
+
+    def validate_rut(self, value):
+        """ Valida unicidad y formato del RUT """
+        # Asumimos que tienes el método normalize_rut en tu Manager
+        rut_limpio = Usuario.objects.normalize_rut(value)
+        
+        # Verificamos si existe otro usuario con este RUT
+        if Usuario.objects.filter(rut=rut_limpio).exists():
+            raise serializers.ValidationError("Ya existe un usuario con este RUT.")
+        return rut_limpio
+
+    # --- CREACIÓN (Con encriptación) ---
+
+    def create(self, validated_data):
+        # Sacamos la password para tratarla aparte
+        password = validated_data.pop('password', None)
+        
+        # Creamos la instancia con los datos restantes (incluido el id_rol que ya viene validado)
+        instance = self.Meta.model(**validated_data)
+        
+        if password:
+            instance.set_password(password) # Encriptamos (Hash)
+        
+        instance.save()
+        return instance
+
 
 class RegistroSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
