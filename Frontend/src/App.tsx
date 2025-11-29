@@ -4,6 +4,7 @@ import RegistroForm from './components/forms/RegistroForm'
 import LoginForm from './components/forms/LoginForm'
 import AdminDashboard from './components/AdminDash'
 import CreateUserPage from './pages/CreateUserPage'
+import ClienteDashboard from './components/dashboards/ClienteDashboard'
 
 function Home() {
 // En React, no usamos document.querySelectorAll() ni lógica de manipulación DOM directa.
@@ -292,6 +293,7 @@ function App (){
                 <Route path='/' element={<Home/>}/>
                 <Route path='/inscripcion' element={<RegistroForm/>}/>
                 <Route path='/login' element={<LoginForm/>}/>
+                <Route path='/cliente/dashboard' element={<ClienteDashboard/>}/>
                 <Route path='/administrador/dashboard' element={<AdminDashboard/>}/>
                 <Route path='/administrador/crear-user' element={<CreateUserPage/>}/>
             </Routes>

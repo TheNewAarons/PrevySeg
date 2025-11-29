@@ -28,17 +28,19 @@ const LoginForm = () => {
         setError(null);
 
         try {
-            const user = await authService.login(formData.rut, formData.password);
-            
-            // HU-ADM-1: Redirección basada en el rol
-            let dashboardPath = '/';
-            if (user && user.rol) {
-                // Normaliza el rol para la URL (ej: 'Administrador' -> '/admin/dashboard')
-                const rolLower = user.rol.toLowerCase();
-                dashboardPath = `/${rolLower}/dashboard`;
-            } else {
-                 // Por defecto, va al dashboard del cliente
-                dashboardPath = '/cliente/dashboard';
+            const data = await authService.login(formData.rut, formData.password);
+            setLoading(false);
+
+            // Obtener rol desde la respuesta (fallback a localStorage por si acaso)
+            const rol = data?.rol || (JSON.parse(localStorage.getItem('user') || '{}').rol);
+
+            // Mapeo explícito de rutas por rol
+            let dashboardPath = '../dashboards/ClienteDashboard.jsx';
+            if (rol) {
+                const rolLower = rol.toLowerCase();
+                if (rolLower === 'administrador') dashboardPath = '/administrador/dashboard';
+                else if (rolLower === 'empresa') dashboardPath = '/empresa/dashboard';
+                else dashboardPath = '../dashboards/ClienteDashboard.jsx';
             }
             
             navigate(dashboardPath, { replace: true });
