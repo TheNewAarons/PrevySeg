@@ -1,16 +1,16 @@
+// ...existing code...
 import React, { useState } from 'react';
-import authService from '../../services/authService'; // Asegurarse que la ruta sea correcta
+import authService from '../../services/authService';
 import { useNavigate } from 'react-router-dom';
+import './styles/RegistroForm.css';
 
 const RegistroForm = () => {
     const navigate = useNavigate();
-    
-    // Definición de los estados iniciales del formulario, reflejando el Modelo Lógico (USUARIO)
     const [formData, setFormData] = useState({
         rut: '',
         password: '',
         nombre: '',
-        fecha_nacimiento: '', // Formato YYYY-MM-DD
+        fecha_nacimiento: '',
         telefono: '',
         domicilio: '',
         email: '',
@@ -21,162 +21,207 @@ const RegistroForm = () => {
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
 
-    // Función para manejar el cambio en cualquier campo del formulario
     const handleChange = (e) => {
         setFormData({
             ...formData,
             [e.target.name]: e.target.value,
         });
-        // Limpiar errores al empezar a escribir
         if (error) setError(null);
     };
+
     const validatePassword = (password) => {
         const passwordErrors = [];
-        if (password.length < 8) {
-            passwordErrors.push("La contraseña debe tener mas de 8 caracteres");
-        }
-        if (!/[a-zA-Z]/.test(password)) {
-            passwordErrors.push("La contraseña debe tener al menos 1 mayuscula");
-        }
-        if (!/[0-9]/.test(password)) {
-            passwordErrors.push("La contraseña debe tener al menos 1 digito");
-        }
-        if (!/[@./+/-/_]/.test(password)) {
-            passwordErrors.push("La contraseña debe tener algun caracter especial (@, ., /, +, -, _)");
-        }
+        if (password.length < 8) passwordErrors.push("La contraseña debe tener más de 8 caracteres");
+        if (!/[A-Z]/.test(password)) passwordErrors.push("La contraseña debe tener al menos 1 mayúscula");
+        if (!/[0-9]/.test(password)) passwordErrors.push("La contraseña debe tener al menos 1 dígito");
+        if (!/[@./+/\-/_]/.test(password)) passwordErrors.push("La contraseña debe tener algún caracter especial (@, ., /, +, -, _)");
         return passwordErrors;
     };
-    // Función para manejar el envío del formulario()
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        //llamado a la funcion de validacion para la contraseña
         const passwordErrors = validatePassword(formData.password);
-        //Verificacion que la array de errores no esta vacio
-        if (passwordErrors.length > 0 ){
+        if (passwordErrors.length > 0) {
             setError(passwordErrors.join(', '));
-            return; 
+            return;
         }
 
         setLoading(true);
         setError(null);
         setSuccess(false);
 
-        //Validaciones para el formulario sobre la contraseña
-        
-        
-
         try {
-            // Se llama a la función de registro del servicio de API
             const response = await authService.register(formData);
-            
             setLoading(false);
             setSuccess(true);
-            
-            // Redirigir al cliente a su panel después del registro exitoso
             console.log("Registro exitoso:", response);
-            navigate('/cliente/dashboard'); 
-
+            navigate('/cliente/dashboard');
         } catch (err) {
             setLoading(false);
-            // Mostrar un mensaje de error más amigable para el usuario
             setError(err.message || 'Ocurrió un error inesperado durante el registro.');
             console.error('Error al registrar:', err);
         }
     };
 
     return (
-        <div className="registro-container">
-            <h2>Registro de Nuevo Cliente</h2>
-            <p>Por favor, ingrese sus datos personales. (* Campos obligatorios)</p>
+        <div className="register-container">
+            <div className="register-card">
+                <div className="logo-container">
+                    <div className="logo-icon" aria-hidden>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                    </div>
+                    <h1 className="brand-name">PrevySeg</h1>
+                    <p className="brand-subtitle">Formulario de Inscripción</p>
+                </div>
 
-            <form onSubmit={handleSubmit} className="form-registro">
-                
-                {/* Bloque de Autenticación */}
-                <fieldset>
-                    <legend>Credenciales de Acceso</legend>
-                    <input
-                        type="text"
-                        name="rut"
-                        placeholder="* RUT (Ej: 12345678-k)"
-                        value={formData.rut}
-                        onChange={handleChange}
-                        required
-                    />
-                    <input
-                        type="password"
-                        name="password"
-                        placeholder="* Clave de Acceso (Mín. 8 caracteres, mayúscula y número)"
-                        value={formData.password}
-                        onChange={handleChange}
-                        required
-                    />
-                </fieldset>
-                
-                {/* Bloque de Información Personal (HU-1) */}
-                <fieldset>
-                    <legend>Información Personal</legend>
-                    <input
-                        type="text"
-                        name="nombre"
-                        placeholder="* Nombre Completo"
-                        value={formData.nombre}
-                        onChange={handleChange}
-                        required
-                    />
-                    <input
-                        type="email"
-                        name="email"
-                        placeholder="* Correo Electrónico"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                    />
-                    <label>
-                        * Fecha de Nacimiento:
+                <form id="registerForm" onSubmit={handleSubmit}>
+                    <h3 className="section-title">Datos Personales</h3>
+
+                    <div className="row mb-3">
+                        <div className="col-md-6">
+                            <label htmlFor="rut" className="form-label">RUT</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                id="rut"
+                                name="rut"
+                                placeholder="12.345.678-9"
+                                value={formData.rut}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                        <div className="col-md-6">
+                            <label htmlFor="nombre" className="form-label">Nombre Completo</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                id="nombre"
+                                name="nombre"
+                                placeholder="Juan Pérez González"
+                                value={formData.nombre}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div className="row mb-3">
+                        <div className="col-md-6">
+                            <label htmlFor="fecha_nacimiento" className="form-label">Fecha de Nacimiento</label>
+                            <input
+                                type="date"
+                                className="form-control"
+                                id="fecha_nacimiento"
+                                name="fecha_nacimiento"
+                                value={formData.fecha_nacimiento}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                        <div className="col-md-6">
+                            <label htmlFor="telefono" className="form-label">Teléfono</label>
+                            <input
+                                type="tel"
+                                className="form-control"
+                                id="telefono"
+                                name="telefono"
+                                placeholder="+56 9 1234 5678"
+                                value={formData.telefono}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div className="mb-3">
+                        <label htmlFor="domicilio" className="form-label">Domicilio</label>
                         <input
-                            type="date"
-                            name="fecha_nacimiento"
-                            value={formData.fecha_nacimiento}
+                            type="text"
+                            className="form-control"
+                            id="domicilio"
+                            name="domicilio"
+                            placeholder="Calle Principal #123, Comuna, Ciudad"
+                            value={formData.domicilio}
                             onChange={handleChange}
                             required
                         />
-                    </label>
-                    <input
-                        type="tel"
-                        name="telefono"
-                        placeholder="* Teléfono de Contacto"
-                        value={formData.telefono}
-                        onChange={handleChange}
-                        required
-                    />
-                    <input
-                        type="text"
-                        name="domicilio"
-                        placeholder="* Domicilio"
-                        value={formData.domicilio}
-                        onChange={handleChange}
-                        required
-                    />
-                    <input
-                        type="text"
-                        name="lugar_trabajo"
-                        placeholder="Lugar de Trabajo (Opcional)"
-                        value={formData.lugar_trabajo}
-                        onChange={handleChange}
-                    />
-                </fieldset>
+                    </div>
 
-                {/* Mensajes de Estado */}
-                {error && <p style={{ color: 'red' }}>Error: {error}</p>}
-                {success && <p style={{ color: 'green' }}>¡Registro exitoso! Redirigiendo...</p>}
-                
-                <button type="submit" disabled={loading}>
-                    {loading ? 'Registrando...' : 'Registrarme en PrevySeg'}
-                </button>
-                <button type='button' onClick={() => navigate('/')}>
-                    Volver al Home
-                </button>
-            </form>
+                    <h3 className="section-title mt-4">Contacto y Datos Laborales</h3>
+
+                    <div className="mb-3">
+                        <label htmlFor="email" className="form-label">Correo Electrónico</label>
+                        <input
+                            type="email"
+                            className="form-control"
+                            id="email"
+                            name="email"
+                            placeholder="tu@ejemplo.com"
+                            value={formData.email}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+
+                    <div className="mb-3">
+                        <label htmlFor="lugar_trabajo" className="form-label">Lugar de Trabajo</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            id="lugar_trabajo"
+                            name="lugar_trabajo"
+                            placeholder="Empresa o lugar donde trabaja"
+                            value={formData.lugar_trabajo}
+                            onChange={handleChange}
+                        />
+                    </div>
+
+                    <h3 className="section-title mt-4">Seguridad</h3>
+
+                    <div className="row mb-3">
+                        <div className="col-md-6">
+                            <label htmlFor="password" className="form-label">Contraseña</label>
+                            <input
+                                type="password"
+                                className="form-control"
+                                id="password"
+                                name="password"
+                                placeholder="••••••••"
+                                value={formData.password}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                        <div className="col-md-6">
+                            <label htmlFor="confirm_password" className="form-label">Confirmar Contraseña</label>
+                            <input
+                                type="password"
+                                className="form-control"
+                                id="confirm_password"
+                                name="confirm_password"
+                                placeholder="••••••••"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    {error && <div className="alert alert-danger" role="alert">{error}</div>}
+                    {success && <div className="alert alert-success" role="alert">¡Registro exitoso! Redirigiendo...</div>}
+
+                    <button type="submit" className="btn-primary-custom mt-3" disabled={loading}>
+                        {loading ? 'Registrando...' : 'Completar Inscripción'}
+                    </button>
+
+                    <div className="divider" style={{marginTop: '1rem'}}><span>O</span></div>
+
+                    <div className="login-link" style={{marginTop: '0.75rem'}}>
+                        ¿Ya tienes una cuenta? <a href="/login" className="link-primary">Inicia sesión aquí</a>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 };
