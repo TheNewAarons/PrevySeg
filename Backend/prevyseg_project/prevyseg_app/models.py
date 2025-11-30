@@ -76,3 +76,42 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         verbose_name_plural = "Usuarios"
+
+
+
+class Curso(models.Model):
+    MODALIDAD_CHOICES = [
+        ("Presencial", "Presencial"),
+        ("Online", "Online"),
+        ("Mixto", "Mixto"),  
+    ]
+    AREAS = [
+        ('seguridad', 'Seguridad Privada'),
+        ('administracion', 'Administración y Finanzas'),
+        ('tecnologia', 'Tecnología y Sistemas'),
+        ('oficios', 'Oficios Técnicos'),
+        ('alimentos', 'Alimentos y Manipulación'),
+        ('estetica', 'Belleza y Estética'),
+    ]
+    nombre = models.CharField(max_length=200)
+    descripcion = models.TextField()
+    horas = models.PositiveIntegerField()
+    profesor = models.CharField(max_length=150)
+    valor = models.PositiveIntegerField()
+    tipo_certificado = models.CharField(max_length=100)
+    fecha_inicio = models.DateField()
+    cupos_disponibles = models.PositiveIntegerField()
+    documentos_requeridos = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modalidad = models.CharField(
+        max_length=20,
+        choices=MODALIDAD_CHOICES,
+        default="Presencial"
+    )
+    area = models.CharField(
+        max_length=20,
+        choices=AREAS,
+        default='seguridad'
+    )
+    def __str__(self):
+        return self.nombre
