@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from "../../services/authService";
 import './StylesDashboards/ClienteDashboard.css';
+import courseService from '../../services/courseService.jsx'
+
 
 const ClienteDashboard = () => {
   const navigate = useNavigate();
@@ -21,7 +23,40 @@ const ClienteDashboard = () => {
       }
     })();
     return () => { mounted = false; };
+    fetchCursos()
   }, []);
+  //Barra de busqueda
+  const [modalidad, setModalidad] = useState("");
+  const [filters, setFilters] = useState({
+    search:"",
+    modalidad: "",
+    area: "",
+    max_valor:"" ,
+    min_horas:"",
+  });
+  const handleFilterChange = (e) => {
+    setFilters({
+        ...filters,
+        [e.target.name]: e.target.value
+    });
+  };
+
+  const fetchCursos = async () => {
+    try {
+      const data = await courseService.getCourses(filters);
+      console.log(data)
+      setCourses(data)
+    } catch (error) {
+      console.log("filtrar datos error")
+    }finally{
+      setLoading(false)
+    }
+  }
+  // Fin Barra de busqueda
+
+
+
+
 
   const inscribirCurso = async (id) => {
     try {
@@ -66,7 +101,82 @@ const ClienteDashboard = () => {
       <div className="dashboard-container container">
         <h1 className="page-title">Cursos Disponibles</h1>
         <p className="page-subtitle">Explora nuestra oferta de cursos de capacitación en seguridad</p>
+            {/*Barra de busqueda*/}
+        <div className="filters-container mb-4 p-4 bg-light rounded shadow-sm">
+            <h4 className="mb-3">Filtrar cursos</h4>
 
+            <div className="row g-3">
+
+                {/* Buscar por nombre */}
+                <div className="col-md-4">
+                    <input 
+                        type="text"
+                        name="search"
+                        value={filters.search}
+                        onChange={handleFilterChange}
+                        className="form-control"
+                        placeholder="Buscar por nombre..."
+                    />
+                </div>
+
+                {/* Área */}
+                <div className="col-md-3">
+                    <select className="form-control" name="area" value={filters.area} onChange={handleFilterChange} >
+                        <option value="">Todas las áreas</option>
+                        <option value="seguridad">Seguridad</option>
+                        <option value="administracion">Administración</option>
+                        <option value="tecnologia">Tecnología</option>
+                        <option value="oficios">Oficios técnicos</option>
+                        <option value="alimentos">Alimentos</option>
+                        <option value="estetica">Belleza y estetica</option>
+                    </select>
+                </div>
+
+                {/* Modalidad */}
+                <div className="col-md-3">
+                    <select className="form-control" name="modalidad" value={filters.modalidad} onChange={handleFilterChange} >
+                        <option value="">Todas las modalidades</option>
+                        <option value="Presencial">Presencial</option>
+                        <option value="Online">Online</option>
+                        <option value="Mixto">Mixto</option>
+                    </select>
+                </div>
+
+                {/* Horas mínimas */}
+                <div className="col-md-2">
+                    <input 
+                        type="number"
+                        name="min_horas"
+                        value={filters.min_horas}
+                        onChange={handleFilterChange}
+                        className="form-control"
+                        placeholder="Mín. horas"
+                    />
+                </div>
+
+                {/* Valor máximo */}
+                <div className="col-md-2">
+                    <input 
+                        type="number"
+                        name="max_valor"
+                        value={filters.max_valor}
+                        onChange={handleFilterChange}
+                        className="form-control"
+                        placeholder="Valor máx."
+                    />
+                </div>
+
+                {/* Botón aplicar */}
+                <div className="col-md-2">
+                    <button className="btn btn-primary w-100" onClick={() => fetchCursos()}  >
+                        Filtrar
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+    {/*Barra de busqueda fin*/}
         {loading ? (
           <div className="text-center py-5">Cargando cursos...</div>
         ) : (
@@ -75,25 +185,25 @@ const ClienteDashboard = () => {
             {courses.map(course => (
               <div key={course.id} className="col-md-6 col-lg-4">
                 <div className="course-card">
-                  <img src={course.image || `/placeholder.svg?height=200&width=400`} alt={course.title} className="course-image" />
+                  <img src={course.image || `/placeholder.svg?height=200&width=400`} alt={course.nombre} className="course-image" />
                   <div className="course-body">
-                    <h3 className="course-title">{course.title}</h3>
+                    <h3 className="course-title">{course.nombre}</h3>
                     <span className="badge-certificate">
-                      <i className="bi bi-award me-1"></i>{course.certificate || 'Certificado'}
+                      <i className="bi bi-award me-1"></i>{course.tipo_certificado || 'Certificado'}
                     </span>
 
                     <div className="course-info">
                       <div className="info-item">
                         <i className="bi bi-clock-fill"></i>
-                        <span><span className="info-label">Duración:</span> {course.duration || '—'}</span>
+                        <span><span className="info-label">Duración:</span> {course.horas|| '—'}</span>
                       </div>
                       <div className="info-item">
                         <i className="bi bi-person-fill"></i>
-                        <span><span className="info-label">Instructor:</span> {course.instructor || '—'}</span>
+                        <span><span className="info-label">Instructor:</span> {course.profesor|| '—'}</span>
                       </div>
                     </div>
 
-                    <div className="course-price">{course.price ? `$${course.price}` : '—'}</div>
+                    <div className="course-price">{course.valor ? `$${course.valor}` : '—'}</div>
                     <button className="btn-inscribirse" onClick={() => inscribirCurso(course.id)}>
                       <i className="bi bi-check-circle me-2"></i>Inscribirse
                     </button>

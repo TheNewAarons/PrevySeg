@@ -1,9 +1,9 @@
 from django.shortcuts import render
-from rest_framework import generics, permissions, status, viewsets
+from rest_framework import generics, permissions, status, viewsets, filters
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import RegistroSerializer, LoginSerializer, UserSerializer, RolSerializer
-from .models import Usuario, Rol
+from .serializers import RegistroSerializer, LoginSerializer, UserSerializer, RolSerializer, CursoSerializer
+from .models import Usuario, Rol, Curso
 from rest_framework.views import APIView
 from django.db import IntegrityError
 from .permissions import IsSelforAdmin
@@ -86,3 +86,39 @@ class LoginView(APIView):
             "user_id": user.id_usuario,
             "rol": rol_nombre
         }, status=status.HTTP_200_OK)
+
+
+
+class CursoListView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Curso.objects.all().order_by('-created_at')
+    serializer_class = CursoSerializer
+
+    # Habilitar búsqueda y filtros
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+
+    # Buscar por nombre, profesor, área
+    search_fields = ['nombre', 'profesor', 'area']
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        # Filtros manuales
+        area = self.request.query_params.get('area')
+        modalidad = self.request.query_params.get('modalidad')
+        min_horas = self.request.query_params.get('min_horas')
+        max_valor = self.request.query_params.get('max_valor')
+
+        if area:
+            queryset = queryset.filter(area=area)
+
+        if modalidad:
+            queryset = queryset.filter(modalidad=modalidad)
+
+        if min_horas:
+            queryset = queryset.filter(horas__gte=min_horas)
+
+        if max_valor:
+            queryset = queryset.filter(valor__lte=max_valor)
+
+        return queryset
