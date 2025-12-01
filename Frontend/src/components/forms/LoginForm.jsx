@@ -35,12 +35,12 @@ const LoginForm = () => {
             const rol = data?.rol || (JSON.parse(localStorage.getItem('user') || '{}').rol);
 
             // Mapeo explícito de rutas por rol
-            let dashboardPath = '../dashboards/ClienteDashboard.jsx';
+            let dashboardPath = '/cliente/dashboard';
             if (rol) {
                 const rolLower = rol.toLowerCase();
                 if (rolLower === 'administrador') dashboardPath = '/administrador/dashboard';
                 else if (rolLower === 'empresa') dashboardPath = '/empresa/dashboard';
-                else dashboardPath = '../dashboards/ClienteDashboard.jsx';
+                else dashboardPath = '/cliente/dashboard';
             }
             
             navigate(dashboardPath, { replace: true });
