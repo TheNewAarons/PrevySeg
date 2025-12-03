@@ -1,10 +1,11 @@
 from django.urls import path, include
-from .views import RegistroView, LoginView, UsuarioViewSet, RolViewSet
+from .views import RegistroView, LoginView, UsuarioViewSet, RolViewSet, CursoViewSet
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 router.register(r'usuarios', UsuarioViewSet, basename='usuarios')
 router.register(r'roles', RolViewSet, basename='roles')
+router.register(r'cursos', CursoViewSet, basename='cursos')
 
 urlpatterns = [
     # Endpoints de Autenticación (HU-1, HU-3, HU-ADM-1)

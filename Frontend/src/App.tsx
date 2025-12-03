@@ -6,7 +6,8 @@ import AdministradorDashboard from './components/dashboards/AdministradorDashboa
 import EmpresaDashboard from './components/dashboards/EmpresaDashboard'
 import CreateUserPage from './pages/CreateUserPage'
 import ClienteDashboard from './components/dashboards/ClienteDashboard'
-
+import CrearCurso from './components/dashboards/CrearCurso'
+import UserList from './components/UsersList'
 function Home() {
     // En React, no usamos document.querySelectorAll() ni lógica de manipulación DOM directa.
     // Reemplazaremos la lógica de script.js con Hooks (useEffect) y Event Handlers de React más adelante.
@@ -295,9 +296,16 @@ function App() {
                 <Route path='/inscripcion' element={<RegistroForm />} />
                 <Route path='/login' element={<LoginForm />} />
                 <Route path='/cliente/dashboard' element={<ClienteDashboard />} />
+
+
+
+
+
                 <Route path='/administrador/dashboard' element={<AdministradorDashboard />} />
                 <Route path='/empresa/dashboard' element={<EmpresaDashboard />} />
                 <Route path='/administrador/crear-user' element={<CreateUserPage />} />
+                <Route path='/administrador/agregar-curso' element={<CrearCurso />} />
+                <Route path='/administrador/buscar-clientes' element={<UserList />} />
             </Routes>
         </Router>
     )

@@ -86,3 +86,40 @@ class LoginView(APIView):
             "user_id": user.id_usuario,
             "rol": rol_nombre
         }, status=status.HTTP_200_OK)
+
+
+
+class CursoViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated, IsSelforAdmin]
+    queryset = Curso.objects.all().order_by('-created_at')
+    serializer_class = CursoSerializer
+
+    # Habilitar búsqueda y filtros
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+
+    # Buscar por nombre, profesor, área
+    search_fields = ['nombre', 'profesor', 'area']
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        # Filtros manuales
+        area = self.request.query_params.get('area')
+        modalidad = self.request.query_params.get('modalidad')
+        min_horas = self.request.query_params.get('min_horas')
+        max_valor = self.request.query_params.get('max_valor')
+
+        if area:
+            queryset = queryset.filter(area=area)
+
+        if modalidad:
+            queryset = queryset.filter(modalidad=modalidad)
+
+        if min_horas:
+            queryset = queryset.filter(horas__gte=min_horas)
+
+        if max_valor:
+            queryset = queryset.filter(valor__lte=max_valor)
+
+        return queryset
+
