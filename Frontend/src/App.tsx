@@ -2,6 +2,15 @@ import './index.css' // Importa los estilos globales
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import RegistroForm from './components/forms/RegistroForm'
 import LoginForm from './components/forms/LoginForm'
+
+
+
+
+
+
+
+
+
 import AdministradorDashboard from './components/dashboards/AdministradorDashboard'
 import EmpresaDashboard from './components/dashboards/EmpresaDashboard'
 import CreateUserPage from './pages/CreateUserPage'
@@ -296,6 +305,8 @@ function App() {
                 <Route path='/inscripcion' element={<RegistroForm />} />
                 <Route path='/login' element={<LoginForm />} />
                 <Route path='/cliente/dashboard' element={<ClienteDashboard />} />
+
+
 
 
 
