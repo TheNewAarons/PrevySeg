@@ -1,9 +1,9 @@
 from django.shortcuts import render
-from rest_framework import generics, permissions, status, viewsets
+from rest_framework import generics, permissions, status, viewsets, filters
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import RegistroSerializer, LoginSerializer, UserSerializer, RolSerializer
-from .models import Usuario, Rol
+from .serializers import RegistroSerializer, LoginSerializer, UserSerializer, RolSerializer, CursoSerializer
+from .models import Usuario, Rol, Curso
 from rest_framework.views import APIView
 from django.db import IntegrityError
 from .permissions import IsSelforAdmin
@@ -89,8 +89,9 @@ class LoginView(APIView):
 
 
 
-class CursoViewSet(viewsets.ModelViewSet):
-    permission_classes = [permissions.IsAuthenticated, IsSelforAdmin]
+
+class CursoListView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
     queryset = Curso.objects.all().order_by('-created_at')
     serializer_class = CursoSerializer
 

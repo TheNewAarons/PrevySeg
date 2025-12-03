@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Rol, Usuario
+from .models import Rol, Usuario, Curso
 from django.contrib.auth import authenticate
 import re
 
@@ -147,3 +147,10 @@ class LoginSerializer(serializers.Serializer):
 
         attrs['user'] = user
         return attrs
+
+
+
+class CursoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Curso
+        fields = '__all__'
