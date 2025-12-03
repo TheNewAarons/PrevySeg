@@ -10,7 +10,7 @@ const CreateUserForm = ({ onUserCreated }) => {
         domicilio: '',
         fecha_nacimiento: '',
         lugar_trabajo: '',
-        id_rol: 2 
+        id_rol: 2
     });
 
     const handleChange = (e) => {
@@ -21,8 +21,14 @@ const CreateUserForm = ({ onUserCreated }) => {
         e.preventDefault();
         try {
             const userStorage = localStorage.getItem('user');
-            if (!userStorage) throw new Error("No hay sesión activa");
-            const token = JSON.parse(userStorage).token;
+            if (!userStorage) {
+                alert("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.");
+                window.location.href = '/login';
+                return;
+            }
+
+            const userData = JSON.parse(userStorage);
+            let token = userData.token;
 
             // Creamos una copia y si está vacío, mandamos null.
             const dataToSend = { ...formData };
@@ -39,7 +45,15 @@ const CreateUserForm = ({ onUserCreated }) => {
                 },
                 body: JSON.stringify(dataToSend) // Enviamos los datos limpios
             });
-            
+
+            // Si el token expiró (401), redirigir al login
+            if (response.status === 401) {
+                alert("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.");
+                localStorage.removeItem('user');
+                window.location.href = '/login';
+                return;
+            }
+
             if (!response.ok) {
                 // Leemos la respuesta del servidor (que dice POR QUÉ falló)
                 const errorData = await response.json();
@@ -53,29 +67,29 @@ const CreateUserForm = ({ onUserCreated }) => {
 
                 throw new Error(errorMessages || "Error desconocido al crear usuario");
             }
-            
+
             alert("Usuario creado exitosamente");
-            onUserCreated(); 
+            onUserCreated();
         } catch (error) {
             console.error(error);
             alert(`No se pudo crear: ${error.message}`);
         }
-    }  
+    }
 
     return (
-        <div className="form-container" style={{border: '1px solid #ddd', padding: '20px', marginBottom: '20px'}}>
+        <div className="form-container" style={{ border: '1px solid #ddd', padding: '20px', marginBottom: '20px' }}>
             <h3>Registrar Nuevo Usuario</h3>
             <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '10px', gridTemplateColumns: '1fr 1fr' }}>
-                
+
                 <input name="rut" placeholder="RUT (12.345.678-9)" onChange={handleChange} value={formData.rut} required />
                 <input name="nombre" placeholder="Nombre Completo" onChange={handleChange} value={formData.nombre} required />
                 <input name="email" type="email" placeholder="Correo Electrónico" onChange={handleChange} value={formData.email} required />
                 <input name="password" type="password" placeholder="Contraseña" onChange={handleChange} value={formData.password} required />
-                
+
                 <input name="telefono" placeholder="Teléfono" onChange={handleChange} value={formData.telefono} required />
                 <input name="domicilio" placeholder="Domicilio" onChange={handleChange} value={formData.domicilio} required />
 
-                
+
                 <input name="fecha_nacimiento" type="date" onChange={handleChange} value={formData.fecha_nacimiento} />
                 <input name="lugar_trabajo" placeholder="Lugar de Trabajo" onChange={handleChange} value={formData.lugar_trabajo} />
 

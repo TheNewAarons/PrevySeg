@@ -11,7 +11,5 @@ urlpatterns = [
     # Endpoints de Autenticación (HU-1, HU-3, HU-ADM-1)
     path('auth/register/', RegistroView.as_view(), name='auth-register'),
     path('auth/login/', LoginView.as_view(), name='auth-login'),
-    path('cursos/', CursoListView.as_view(), name='cursos-list'),
-    path('', include(router.urls) ),
-    
+    path('', include(router.urls)),
 ]

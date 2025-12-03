@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import './StylesDashboards/AdministradorDashboard.css';
-import authService from '../services/authService';
 
 const AdministradorDashboard = () => {
     const navigate = useNavigate();
@@ -31,8 +30,8 @@ const AdministradorDashboard = () => {
             navigate('/administrador/agregar-curso');
         } else if (modulo === 'ingresar-clientes') {
             navigate('/administrador/crear-user');
-        } else if (modulo === 'buscar-clientes') {
-            navigate('/administrador/buscar-clientes');
+        } else if (modulo === 'list-users') {
+            navigate('/administrador/list-users');
         } else {
             alert(`Módulo: ${modulo}\nEsta funcionalidad se implementará próximamente.`);
         }
@@ -130,7 +129,7 @@ const AdministradorDashboard = () => {
                     </div>
 
                     {/* Buscar Usuario */}
-                    <div className="module-card" onClick={() => navegarModulo('buscar-clientes')}>
+                    <div className="module-card" onClick={() => navegarModulo('list-users')}>
                         <div className="module-icon">
                             <i className="bi bi-search"></i>
                         </div>
