@@ -1,106 +1,198 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import BotonVolver from "./ButtonBack";
 
 const UsuarioList = () => {
     const [usuarios, setUsuarios] = useState([]);
-    const [cargando, setCargando] = useState(true);
-    const [error, setError] = useState(null);
-    //Lista filtrada (lo que se muestra en pantalla)
     const [filtrados, setFiltrados] = useState([]);
-
-    //Estado del buscador (RUT ingresado por el usuario)
     const [busqueda, setBusqueda] = useState("");
+    const [selectedUser, setSelectedUser] = useState(null); // Modal
+    const navigate = useNavigate();
 
-    
-    useEffect(() => {
-        const fetchUsuarios = async () => {
+    const fetchUsuarios = async () => {
         try {
-            const userStorage = localStorage.getItem('user');
-                
-                if (!userStorage) {
-                    throw new Error("No has iniciado sesión.");
-                }
+            const userStorage = localStorage.getItem("user");
+            if (!userStorage) throw new Error("No has iniciado sesión.");
 
-                const userData = JSON.parse(userStorage);
-                
-                //Extraemos el token desde dentro del objeto
-                const token = userData.token; 
+            const token = JSON.parse(userStorage).token;
 
-                if (!token) {
-                    throw new Error("Token no válido o sesión expirada.");
-                }
             const response = await fetch("http://localhost:8000/api/usuarios/", {
                 headers: {
-                    "Authorization" : `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                }        
-            })
-            if (!response.ok) {
-                    if (response.status === 401) throw new Error("Sesión caducada. Inicia sesión de nuevo.");
-                    if (response.status === 403) throw new Error("No tienes permisos de Administrador.");
-                    throw new Error("Error al obtener usuarios del servidor.");
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (response.status === 401) {
+                alert("Sesión caducada.");
+                localStorage.removeItem("user");
+                navigate("/login");
+                return;
             }
+
             const data = await response.json();
             setUsuarios(data);
             setFiltrados(data);
-        } catch(err){
-            setError(err.message)
-        } finally{
-            setCargando(false)
+        } catch (err) {
+            alert(err.message);
+        };
+
+        useEffect(() => {
+            fetchUsuarios();
+        }, []);
+
+        const handleBusqueda = (e) => {
+            const valor = e.target.value;
+            setBusqueda(valor);
+            const resultados = usuarios.filter((u) =>
+                u.rut.toLowerCase().includes(valor.toLowerCase())
+            );
+            setFiltrados(resultados);
         }
-    };
-    fetchUsuarios();
-    }, []);
 
-    //Funcion para filtrar por rut
-    const handleBusqueda = (e) => {
-        const valor = e.target.value;
-        setBusqueda(valor)
+        const handleDelete = async () => {
+            try {
+                const userStorage = localStorage.getItem("user");
+                const token = JSON.parse(userStorage).token;
+                const currentUser = JSON.parse(userStorage);
 
-        //Filtracion dinamica
-        const resultados = usuarios.filter((u) => u.rut.toLowerCase().includes(valor.toLowerCase()))
-        setFiltrados(resultados)
+                if (currentUser.user_id === selectedUser.id_usuario) {
+                    alert("No puedes eliminar tu propio usuario.");
+                    setSelectedUser(null);
+                    return;
+                }
+
+                const response = await fetch(
+                    `http://localhost:8000/api/usuarios/${selectedUser.id_usuario}/`,
+                    {
+                        method: "DELETE",
+                        headers: { Authorization: `Bearer ${token}` },
+                    }
+                );
+
+                if (response.status === 204 || response.ok) {
+                    alert("Usuario eliminado.");
+                    setSelectedUser(null);
+                    fetchUsuarios(); //vuelve a cargar la lista
+                }
+            } catch {
+                alert("Error al eliminar usuario.");
+            }
+        };
+
+        if (cargando) return <p>Cargando usuarios...</p>;
+        if (error) return <p>{error}</p>;
+
+        return (
+            <>
+                <div style={{ padding: "20px" }}>
+                    <h2>Usuarios Registrados</h2>
+                    <BotonVolver />
+                    <input
+                        placeholder="Buscar por RUT..."
+                        value={busqueda}
+                        onChange={handleBusqueda}
+                        style={{
+                            width: "100%",
+                            padding: "10px",
+                            marginBottom: "20px",
+                            borderRadius: "5px",
+                            border: "1px solid #ccc",
+                        }}
+                    />
+                    <div style={{ display: "grid", gap: "15px" }}></div>
+                    {filtrados.map((u) => (
+                        <div
+                            key={u.id_usuario}
+                            style={{
+                                border: "1px solid #ddd",
+                                padding: "15px",
+                                borderRadius: "10px",
+                                display: "flex",
+                                justifyContent: "space-between",
+                            }}
+                        >
+                            <strong>{u.nombre}</strong>
+                            <span>{u.rut}</span>
+
+                            <div style={{ display: "flex", gap: "10px" }}>
+                                <button
+                                    style={{ padding: "8px 12px", background: "#007bff", color: "#fff" }}
+                                    onClick={() =>
+                                        navigate(`/administrador/usuario/${u.id_usuario}`)
+                                    }
+                                >
+                                    Ver
+                                </button>
+
+                                <button
+                                    style={{ padding: "8px 12px", background: "#ffc107", color: "#000" }}
+                                    onClick={() =>
+                                        navigate(`/administrador/usuario/editar/${u.id_usuario}`)
+                                    }
+                                >
+                                    Editar
+                                </button>
+
+                                <button
+                                    style={{ padding: "8px 12px", background: "#dc3545", color: "#fff" }}
+                                    onClick={() => setSelectedUser(u)} // Modal aparece
+                                >
+                                    Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div >
+                {/* Modal */}
+                {
+                    selectedUser && (
+                        <div
+                            style={{
+                                position: "fixed",
+                                top: 0,
+                                left: 0,
+                                width: "100%",
+                                height: "100%",
+                                background: "rgba(0,0,0,0.6)",
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                            }}
+                        >
+                            <div
+                                style={{
+                                    background: "white",
+                                    padding: "20px",
+                                    borderRadius: "10px",
+                                    width: "300px",
+                                    textAlign: "center",
+                                }}
+                            >
+                                <h3>¿Eliminar Usuario?</h3>
+                                <p>
+                                    {selectedUser.nombre} ({selectedUser.rut})
+                                </p>
+
+                                <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+                                    <button
+                                        style={{ background: "#dc3545", color: "white", padding: "8px 12px" }}
+                                        onClick={handleDelete}
+                                    >
+                                        Eliminar
+                                    </button>
+                                    <button
+                                        style={{ background: "#6c757d", color: "white", padding: "8px 12px" }}
+                                        onClick={() => setSelectedUser(null)}
+                                    >
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                }
+            </>
+        );
     }
-    if (cargando) return <p>Cargando usuarios...</p>
-    if (error) return <p>{error}</p>
-    return (
-        <div style={{ padding: "20px", maxWidth: "700px" }}>
-        <h1>Lista de Usuarios</h1>
-
-        <input
-            type="text"
-            placeholder="Buscar por RUT..."
-            value={busqueda}
-            onChange={handleBusqueda}
-            style={{
-            width: "100%",
-            padding: "10px",
-            marginBottom: "20px",
-            fontSize: "16px",
-            }}
-        />
-
-        {filtrados.length > 0 ? (
-            <ul>
-            {filtrados.map((u) => (
-                <li key={u.id_usuario} style={{ marginBottom: "20px", listStyle: "none", padding: "10px", borderBottom: "1px solid #ccc" }}>
-                
-                <p><strong>ID usuario:</strong> {u.id_usuario}</p>
-                <p><strong>RUT:</strong> {u.rut}</p>
-                <p><strong>Nombre:</strong> {u.nombre}</p>
-                <p><strong>Fecha nacimiento:</strong> {u.fecha_nacimiento}</p>
-                <p><strong>Teléfono:</strong> {u.telefono}</p>
-                <p><strong>Domicilio:</strong> {u.domicilio}</p>
-                <p><strong>Email:</strong> {u.email}</p>
-                <p><strong>Lugar de trabajo:</strong> {u.lugar_trabajo}</p>
-                <p><strong>Rol:</strong> {u.datos_rol?.nombre_rol || "Sin rol"}</p>
-
-                </li>
-            ))}
-            </ul>
-        ) : (
-            <p>No se encontraron usuarios.</p>
-        )}
-        </div>
-    );
 }
 export default UsuarioList
