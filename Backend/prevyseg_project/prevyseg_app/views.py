@@ -89,6 +89,7 @@ class LoginView(APIView):
 
 
 
+
 class CursoListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     queryset = Curso.objects.all().order_by('-created_at')
@@ -122,3 +123,4 @@ class CursoListView(generics.ListAPIView):
             queryset = queryset.filter(valor__lte=max_valor)
 
         return queryset
+

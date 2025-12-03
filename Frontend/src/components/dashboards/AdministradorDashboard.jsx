@@ -18,8 +18,6 @@ const AdministradorDashboard = () => {
 
     const logout = () => {
         if (window.confirm('¿Estás seguro de que deseas cerrar sesión?')) {
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
             localStorage.removeItem('user');
             sessionStorage.clear();
             navigate('/login', { replace: true });
@@ -28,9 +26,15 @@ const AdministradorDashboard = () => {
 
     const navegarModulo = (modulo) => {
         console.log('Navegando a módulo:', modulo);
-        // Aquí puedes implementar la navegación real cuando existan las rutas
-        // navigate(`/administrador/${modulo}`);
-        alert(`Módulo: ${modulo}\nEsta funcionalidad se implementará próximamente.`);
+        if (modulo === 'agregar-curso') {
+            navigate('/administrador/agregar-curso');
+        } else if (modulo === 'ingresar-clientes') {
+            navigate('/administrador/crear-user');
+        } else if (modulo === 'buscar-clientes') {
+            navigate('/administrador/buscar-clientes');
+        } else {
+            alert(`Módulo: ${modulo}\nEsta funcionalidad se implementará próximamente.`);
+        }
     };
 
     return (
@@ -125,7 +129,7 @@ const AdministradorDashboard = () => {
                     </div>
 
                     {/* Buscar Usuario */}
-                    <div className="module-card" onClick={() => navegarModulo('buscar-usuario')}>
+                    <div className="module-card" onClick={() => navegarModulo('buscar-clientes')}>
                         <div className="module-icon">
                             <i className="bi bi-search"></i>
                         </div>
