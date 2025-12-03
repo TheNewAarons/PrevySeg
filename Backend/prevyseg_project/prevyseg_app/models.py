@@ -115,3 +115,29 @@ class Curso(models.Model):
     )
     def __str__(self):
         return self.nombre
+
+
+class TipoDocumento(models.Model):
+    id_tipo_doc = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.nombre
+
+class DocumentoSubido(models.Model):
+    ESTADOS = [
+        ('APROBADO', 'Aprobado'),
+        ('EN_REVISION', 'En revisión'),
+        ('RECHAZADO', 'Rechazado'),
+    ]
+
+    id_doc_subido = models.AutoField(primary_key=True)
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    tipo_documento = models.ForeignKey(TipoDocumento, on_delete=models.CASCADE)
+    url_archivo = models.FileField(upload_to="documentos/")
+    estado_revision = models.CharField(max_length=20, choices=ESTADOS, default='EN_REVISION')
+    observaciones_rechazo = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.usuario.rut} - {self.tipo_documento.nombre}"
+
