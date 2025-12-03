@@ -2,21 +2,14 @@ import './index.css' // Importa los estilos globales
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import RegistroForm from './components/forms/RegistroForm'
 import LoginForm from './components/forms/LoginForm'
-
-
-
-
-
-
-
-
-
+import ListUsers from './pages/ListUser'
+import UserDetailPage from './pages/UserDetailPage'
+import EditUser from './pages/EditUser'
 import AdministradorDashboard from './components/dashboards/AdministradorDashboard'
 import EmpresaDashboard from './components/dashboards/EmpresaDashboard'
 import CreateUserPage from './pages/CreateUserPage'
 import ClienteDashboard from './components/dashboards/ClienteDashboard'
 import CrearCurso from './components/dashboards/CrearCurso'
-import UserList from './components/UsersList'
 function Home() {
     // En React, no usamos document.querySelectorAll() ni lógica de manipulación DOM directa.
     // Reemplazaremos la lógica de script.js con Hooks (useEffect) y Event Handlers de React más adelante.
@@ -305,18 +298,13 @@ function App() {
                 <Route path='/inscripcion' element={<RegistroForm />} />
                 <Route path='/login' element={<LoginForm />} />
                 <Route path='/cliente/dashboard' element={<ClienteDashboard />} />
-
-
-
-
-
-
-
                 <Route path='/administrador/dashboard' element={<AdministradorDashboard />} />
                 <Route path='/empresa/dashboard' element={<EmpresaDashboard />} />
                 <Route path='/administrador/crear-user' element={<CreateUserPage />} />
                 <Route path='/administrador/agregar-curso' element={<CrearCurso />} />
-                <Route path='/administrador/buscar-clientes' element={<UserList />} />
+                <Route path='/administrador/list-users' element={<ListUsers />} />
+                <Route path='/administrador/usuario/:id' element={<UserDetailPage />} />
+                <Route path='/administrador/usuario/editar/:id' element={<EditUser />} />
             </Routes>
         </Router>
     )
