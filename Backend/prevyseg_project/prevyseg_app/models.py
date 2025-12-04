@@ -113,5 +113,16 @@ class Curso(models.Model):
         choices=AREAS,
         default='seguridad'
     )
+    
+    # Campos de horario
+    dias_semana = models.CharField(
+        max_length=100, 
+        blank=True, 
+        null=True,
+        help_text="Días de la semana separados por comas (ej: Lunes,Miércoles,Viernes)"
+    )
+    hora_inicio = models.TimeField(blank=True, null=True)
+    hora_fin = models.TimeField(blank=True, null=True)
+    
     def __str__(self):
         return self.nombre
