@@ -1,6 +1,6 @@
 // Ejemplo de uso en un componente React:
-import authService from '../services/authService';
-import RegistroForm from '../components/forms/RegistroForm';
+import authService from '../../../services/authService';
+import RegistroForm from '../components/RegistroForm';
 const handleLogin = async (rut, password) => {
     try {
         const response = await authService.login(rut, password);
@@ -14,9 +14,9 @@ const handleLogin = async (rut, password) => {
 //Resto del componente
 
 const Registro = () => {
-    return(
+    return (
         <div>
-            <RegistroForm/>
+            <RegistroForm />
         </div>
     )
 };

@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import authService from '../../services/authService'; // Servicio para manejar el login
-import './styles/LoginForm.css'; // Asegúrate de tener los estilos adecuados
+import authService from '../../../services/authService'; // Servicio para manejar el login
+import '../styles/LoginForm.css'; // Asegúrate de tener los estilos adecuados
 
 // Renombrado a LoginForm para ser consistente con RegistroForm
-const LoginForm = () => { 
+const LoginForm = () => {
     const navigate = useNavigate();
-    
+
     const [formData, setFormData] = useState({
         rut: '',
         password: '',
@@ -19,7 +19,7 @@ const LoginForm = () => {
             ...formData,
             [e.target.name]: e.target.value,
         });
-        if (error) setError(null); 
+        if (error) setError(null);
     };
 
     const handleSubmit = async (e) => {
@@ -42,7 +42,7 @@ const LoginForm = () => {
                 else if (rolLower === 'empresa') dashboardPath = '/empresa/dashboard';
                 else dashboardPath = '/cliente/dashboard';
             }
-            
+
             navigate(dashboardPath, { replace: true });
 
         } catch (err) {
@@ -52,7 +52,7 @@ const LoginForm = () => {
         }
     };
 
-     return (
+    return (
         <div className="login-container">
             <div className="login-card">
                 <div className="logo-container">
@@ -70,10 +70,10 @@ const LoginForm = () => {
 
                     <div className="mb-3">
                         <label htmlFor="rut" className="form-label">RUT</label>
-                        <input 
-                            type="text" 
-                            className="form-control" 
-                            id="rut" 
+                        <input
+                            type="text"
+                            className="form-control"
+                            id="rut"
                             name="rut"
                             placeholder="12.345.678-9"
                             value={formData.rut}
@@ -84,10 +84,10 @@ const LoginForm = () => {
 
                     <div className="mb-3">
                         <label htmlFor="password" className="form-label">Contraseña</label>
-                        <input 
-                            type="password" 
-                            className="form-control" 
-                            id="password" 
+                        <input
+                            type="password"
+                            className="form-control"
+                            id="password"
                             name="password"
                             placeholder="••••••••"
                             value={formData.password}
@@ -99,7 +99,7 @@ const LoginForm = () => {
                     <div className="d-flex justify-content-between align-items-center mb-3">
                         <div className="form-check">
                             <input className="form-check-input" type="checkbox" id="rememberMe" />
-                            <label className="form-check-label" htmlFor="rememberMe" style={{fontSize: '.875rem', color: '#666'}}>
+                            <label className="form-check-label" htmlFor="rememberMe" style={{ fontSize: '.875rem', color: '#666' }}>
                                 Recordarme
                             </label>
                         </div>

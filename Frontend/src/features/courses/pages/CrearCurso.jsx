@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './StylesDashboards/AdministradorDashboard.css'; // Reutilizamos estilos por ahora
+import '../../admin/styles/AdminDashboard.css'; // Reutilizamos estilos por ahora
 
 const CrearCurso = () => {
     const navigate = useNavigate();

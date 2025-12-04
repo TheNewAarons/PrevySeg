@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import BotonVolver from "../components/ButtonBack";
+import BotonVolver from "../../../components/common/ButtonBack";
 
 const UserDetailPage = () => {
     const { id } = useParams();

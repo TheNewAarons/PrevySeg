@@ -1,18 +1,18 @@
-import './index.css' // Importa los estilos globales
+import './styles/index.css' // Importa los estilos globales
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
-import RegistroForm from './components/forms/RegistroForm'
-import LoginForm from './components/forms/LoginForm'
-import ListUsers from './pages/ListUser'
-import UserDetailPage from './pages/UserDetailPage'
-import EditUser from './pages/EditUser'
-import AdministradorDashboard from './components/dashboards/AdministradorDashboard'
-import EmpresaDashboard from './components/dashboards/EmpresaDashboard'
-import CreateUserPage from './pages/CreateUserPage'
-import ClienteDashboard from './components/dashboards/ClienteDashboard'
-import CrearCurso from './components/dashboards/CrearCurso'
-import AprobarPapeles from './pages/AprobarPapeles'
-import Horarios from './pages/Horarios'
-import Reportes from './pages/Reportes'
+import RegistroForm from './features/auth/components/RegistroForm'
+import LoginForm from './features/auth/components/LoginForm'
+import ListUsers from './features/admin/pages/ListUser'
+import UserDetailPage from './features/admin/pages/UserDetailPage'
+import EditUser from './features/admin/pages/EditUser'
+import AdministradorDashboard from './features/admin/pages/AdminDashboard'
+import EmpresaDashboard from './features/empresa/pages/EmpresaDashboard'
+import CreateUserPage from './features/admin/pages/CreateUserPage'
+import ClienteDashboard from './features/client/pages/ClienteDashboard'
+import CrearCurso from './features/courses/pages/CrearCurso'
+import AprobarPapeles from './features/admin/pages/AprobarPapeles'
+import Horarios from './features/admin/pages/Horarios'
+import Reportes from './features/admin/pages/Reportes'
 function Home() {
     // En React, no usamos document.querySelectorAll() ni lógica de manipulación DOM directa.
     // Reemplazaremos la lógica de script.js con Hooks (useEffect) y Event Handlers de React más adelante.

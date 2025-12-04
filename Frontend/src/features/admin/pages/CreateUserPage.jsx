@@ -1,7 +1,7 @@
 import React from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import CreateUserForm from "../components/CreateUserAdmin";
-import BotonVolver from "../components/ButtonBack";
+import BotonVolver from "../../../components/common/ButtonBack";
 
 const CreateUserPage = () => {
     const navigate = useNavigate();
