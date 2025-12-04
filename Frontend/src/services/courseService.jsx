@@ -26,7 +26,9 @@ const getCourses = async (params = {}) => {
         const data = await response.json();
 
         if (!response.ok) {
-            throw new Error(data.detail || "Error al obtener cursos");
+            const error = new Error(data.detail || "Error al obtener cursos");
+            error.status = response.status;
+            throw error;
         }
 
         return data;
@@ -40,8 +42,37 @@ const getCourses = async (params = {}) => {
 // Si después quieres inscribir cursos, se agrega acá más métodos.
 // Por ahora solo mostramos cursos.
 
+const enrollCourse = async (courseId) => {
+    try {
+        const user = authService.getCurrentUser();
+        const token = user.token;
+
+        const response = await fetch(`${API_URL}${courseId}/inscribir/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            const error = new Error(data.detail || "Error al inscribir curso");
+            error.status = response.status;
+            throw error;
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Error al inscribir curso:", error);
+        throw error;
+    }
+};
+
 const courseService = {
     getCourses,
+    enrollCourse,
 };
 
 export default courseService;

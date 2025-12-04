@@ -47,7 +47,7 @@ const AdministradorDashboard = () => {
             <nav className="navbar navbar-expand-lg navbar-light">
                 <div className="container-fluid px-4">
                     <a className="navbar-brand" href="/">
-                        <img src="/images/logo.png" alt="PrevySeg Logo" />
+                        <img src="/images/logos/logo.png" alt="PrevySeg Logo" />
                     </a>
 
                     <div className="d-flex align-items-center gap-3 ms-auto">
