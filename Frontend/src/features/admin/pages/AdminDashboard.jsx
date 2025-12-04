@@ -4,17 +4,32 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import '../styles/AdminDashboard.css';
 import authService from '../../../services/authService';
+import courseService from '../../../services/courseService';
 
 const AdministradorDashboard = () => {
     const navigate = useNavigate();
     const [userName, setUserName] = useState('Administrador');
+    const [courseCount, setCourseCount] = useState(0);
 
     useEffect(() => {
         const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
         if (storedUser.nombre) {
             setUserName(storedUser.nombre);
         }
+
+        // Fetch course count
+        fetchCourseCount();
     }, []);
+
+    const fetchCourseCount = async () => {
+        try {
+            const courses = await courseService.getCourses();
+            setCourseCount(courses?.length || 0);
+        } catch (err) {
+            console.error('Error al cargar cursos:', err);
+            // Keep default value of 0 if error
+        }
+    };
 
     const logout = () => {
         if (window.confirm('¿Estás seguro de que deseas cerrar sesión?')) {
@@ -27,6 +42,8 @@ const AdministradorDashboard = () => {
         console.log('Navegando a módulo:', modulo);
         if (modulo === 'agregar-curso') {
             navigate('/administrador/agregar-curso');
+        } else if (modulo === 'cursos') {
+            navigate('/administrador/cursos');
         } else if (modulo === 'ingresar-clientes') {
             navigate('/administrador/crear-user');
         } else if (modulo === 'list-users') {
@@ -77,8 +94,8 @@ const AdministradorDashboard = () => {
                         <div className="stat-value">156</div>
                         <div className="stat-label">Clientes Activos</div>
                     </div>
-                    <div className="stat-card">
-                        <div className="stat-value">12</div>
+                    <div className="stat-card" onClick={() => navegarModulo('cursos')} style={{ cursor: 'pointer' }}>
+                        <div className="stat-value">{courseCount}</div>
                         <div className="stat-label">Cursos Disponibles</div>
                     </div>
                     <div className="stat-card">
