@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import BotonVolver from "../../../components/common/ButtonBack";
 
 const UsuarioList = () => {
     const [usuarios, setUsuarios] = useState([]);
     const [filtrados, setFiltrados] = useState([]);
     const [busqueda, setBusqueda] = useState("");
-    const [selectedUser, setSelectedUser] = useState(null); // Modal
+    const [selectedUser, setSelectedUser] = useState(null);
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
@@ -55,7 +54,9 @@ const UsuarioList = () => {
         const valor = e.target.value;
         setBusqueda(valor);
         const resultados = usuarios.filter((u) =>
-            u.rut.toLowerCase().includes(valor.toLowerCase())
+            u.rut.toLowerCase().includes(valor.toLowerCase()) ||
+            u.nombre.toLowerCase().includes(valor.toLowerCase()) ||
+            u.email?.toLowerCase().includes(valor.toLowerCase())
         );
         setFiltrados(resultados);
     }
@@ -81,127 +82,180 @@ const UsuarioList = () => {
             );
 
             if (response.status === 204 || response.ok) {
-                alert("Usuario eliminado.");
+                alert("Usuario eliminado exitosamente.");
                 setSelectedUser(null);
-                fetchUsuarios(); //vuelve a cargar la lista
+                fetchUsuarios();
             }
         } catch {
             alert("Error al eliminar usuario.");
         }
     };
 
-    if (cargando) return <p>Cargando usuarios...</p>;
-    if (error) return <p>{error}</p>;
+    if (cargando) {
+        return (
+            <div className="text-center py-5">
+                <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Cargando...</span>
+                </div>
+                <p className="mt-3">Cargando usuarios...</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="alert alert-danger" role="alert">
+                <i className="bi bi-exclamation-triangle me-2"></i>
+                {error}
+            </div>
+        );
+    }
 
     return (
         <>
-            <div style={{ padding: "20px" }}>
-                <h2>Usuarios Registrados</h2>
-                <BotonVolver />
-                <input
-                    placeholder="Buscar por RUT..."
-                    value={busqueda}
-                    onChange={handleBusqueda}
-                    style={{
-                        width: "100%",
-                        padding: "10px",
-                        marginBottom: "20px",
-                        borderRadius: "5px",
-                        border: "1px solid #ccc",
-                    }}
-                />
-                <div style={{ display: "grid", gap: "15px" }}></div>
-                {filtrados.map((u) => (
-                    <div
-                        key={u.id_usuario}
-                        style={{
-                            border: "1px solid #ddd",
-                            padding: "15px",
-                            borderRadius: "10px",
-                            display: "flex",
-                            justifyContent: "space-between",
-                        }}
-                    >
-                        <strong>{u.nombre}</strong>
-                        <span>{u.rut}</span>
-
-                        <div style={{ display: "flex", gap: "10px" }}>
+            <div className="card shadow-sm">
+                <div className="card-body">
+                    <div className="row align-items-center mb-4">
+                        <div className="col-md-8">
+                            <div className="input-group">
+                                <span className="input-group-text">
+                                    <i className="bi bi-search"></i>
+                                </span>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Buscar por RUT, nombre o email..."
+                                    value={busqueda}
+                                    onChange={handleBusqueda}
+                                />
+                            </div>
+                        </div>
+                        <div className="col-md-4 text-end mt-3 mt-md-0">
                             <button
-                                style={{ padding: "8px 12px", background: "#007bff", color: "#fff" }}
-                                onClick={() =>
-                                    navigate(`/administrador/usuario/${u.id_usuario}`)
-                                }
+                                className="btn btn-primary w-100 w-md-auto"
+                                onClick={() => navigate('/administrador/crear-user')}
                             >
-                                Ver
-                            </button>
-
-                            <button
-                                style={{ padding: "8px 12px", background: "#ffc107", color: "#000" }}
-                                onClick={() =>
-                                    navigate(`/administrador/usuario/editar/${u.id_usuario}`)
-                                }
-                            >
-                                Editar
-                            </button>
-
-                            <button
-                                style={{ padding: "8px 12px", background: "#dc3545", color: "#fff" }}
-                                onClick={() => setSelectedUser(u)} // Modal aparece
-                            >
-                                Eliminar
+                                <i className="bi bi-person-plus me-2"></i>Crear Usuario
                             </button>
                         </div>
                     </div>
-                ))}
-            </div >
-            {/* Modal */}
-            {
-                selectedUser && (
-                    <div
-                        style={{
-                            position: "fixed",
-                            top: 0,
-                            left: 0,
-                            width: "100%",
-                            height: "100%",
-                            background: "rgba(0,0,0,0.6)",
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                        }}
-                    >
-                        <div
-                            style={{
-                                background: "white",
-                                padding: "20px",
-                                borderRadius: "10px",
-                                width: "300px",
-                                textAlign: "center",
-                            }}
-                        >
-                            <h3>¿Eliminar Usuario?</h3>
-                            <p>
-                                {selectedUser.nombre} ({selectedUser.rut})
-                            </p>
 
-                            <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
-                                <button
-                                    style={{ background: "#dc3545", color: "white", padding: "8px 12px" }}
-                                    onClick={handleDelete}
-                                >
-                                    Eliminar
-                                </button>
-                                <button
-                                    style={{ background: "#6c757d", color: "white", padding: "8px 12px" }}
-                                    onClick={() => setSelectedUser(null)}
-                                >
+                    {filtrados.length === 0 ? (
+                        <div className="text-center py-5">
+                            <i className="bi bi-people" style={{ fontSize: '3rem', color: '#ccc' }}></i>
+                            <p className="mt-3 text-muted">
+                                {busqueda ? 'No se encontraron usuarios.' : 'No hay usuarios registrados.'}
+                            </p>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="table-responsive">
+                                <table className="table table-hover align-middle">
+                                    <thead className="table-light">
+                                        <tr>
+                                            <th>Nombre</th>
+                                            <th>RUT</th>
+                                            <th>Email</th>
+                                            <th>Rol</th>
+                                            <th className="text-center">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {filtrados.map((u) => (
+                                            <tr key={u.id_usuario}>
+                                                <td>
+                                                    <div className="d-flex align-items-center">
+                                                        <div className="avatar-circle me-2">
+                                                            {u.nombre.charAt(0).toUpperCase()}
+                                                        </div>
+                                                        <strong>{u.nombre}</strong>
+                                                    </div>
+                                                </td>
+                                                <td>{u.rut}</td>
+                                                <td>{u.email || '—'}</td>
+                                                <td>
+                                                    <span className={`badge ${u.rol === 'administrador' ? 'bg-danger' :
+                                                            u.rol === 'empresa' ? 'bg-warning text-dark' :
+                                                                'bg-info text-dark'
+                                                        }`}>
+                                                        {u.rol || 'Cliente'}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div className="d-flex justify-content-center gap-2">
+                                                        <button
+                                                            className="btn btn-sm btn-outline-primary"
+                                                            onClick={() => navigate(`/administrador/usuario/${u.id_usuario}`)}
+                                                            title="Ver detalles"
+                                                        >
+                                                            <i className="bi bi-eye"></i>
+                                                        </button>
+                                                        <button
+                                                            className="btn btn-sm btn-outline-warning"
+                                                            onClick={() => navigate(`/administrador/usuario/editar/${u.id_usuario}`)}
+                                                            title="Editar"
+                                                        >
+                                                            <i className="bi bi-pencil"></i>
+                                                        </button>
+                                                        <button
+                                                            className="btn btn-sm btn-outline-danger"
+                                                            onClick={() => setSelectedUser(u)}
+                                                            title="Eliminar"
+                                                        >
+                                                            <i className="bi bi-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div className="mt-3 text-muted">
+                                <small>
+                                    Mostrando {filtrados.length} de {usuarios.length} usuario(s)
+                                </small>
+                            </div>
+                        </>
+                    )}
+                </div>
+            </div>
+
+            {/* Modal de confirmación */}
+            {selectedUser && (
+                <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }} tabIndex="-1">
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="modal-header bg-danger text-white">
+                                <h5 className="modal-title">
+                                    <i className="bi bi-exclamation-triangle me-2"></i>
+                                    Confirmar Eliminación
+                                </h5>
+                                <button type="button" className="btn-close btn-close-white" onClick={() => setSelectedUser(null)}></button>
+                            </div>
+                            <div className="modal-body">
+                                <p className="mb-2">¿Estás seguro de que deseas eliminar este usuario?</p>
+                                <div className="alert alert-warning mb-0">
+                                    <strong>{selectedUser.nombre}</strong>
+                                    <br />
+                                    <small>RUT: {selectedUser.rut}</small>
+                                </div>
+                                <p className="text-muted mt-3 mb-0">
+                                    <small>Esta acción no se puede deshacer.</small>
+                                </p>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={() => setSelectedUser(null)}>
                                     Cancelar
+                                </button>
+                                <button type="button" className="btn btn-danger" onClick={handleDelete}>
+                                    <i className="bi bi-trash me-2"></i>Eliminar Usuario
                                 </button>
                             </div>
                         </div>
                     </div>
-                )
-            }
+                </div>
+            )}
         </>
     );
 }

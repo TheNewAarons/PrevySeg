@@ -17,7 +17,10 @@ const CrearCurso = () => {
         cupos_disponibles: '',
         documentos_requeridos: '',
         modalidad: 'Presencial',
-        area: 'seguridad'
+        area: 'seguridad',
+        dias_semana: '',
+        hora_inicio: '',
+        hora_fin: ''
     });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -165,6 +168,47 @@ const CrearCurso = () => {
                                 <div className="mb-3">
                                     <label className="form-label">Documentos Requeridos</label>
                                     <textarea className="form-control" name="documentos_requeridos" rows="2" value={formData.documentos_requeridos} onChange={handleChange}></textarea>
+                                </div>
+
+                                <hr className="my-4" />
+                                <h5 className="mb-3">Horario del Curso</h5>
+
+                                <div className="row">
+                                    <div className="col-md-12 mb-3">
+                                        <label className="form-label">Días de la Semana</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="dias_semana"
+                                            value={formData.dias_semana}
+                                            onChange={handleChange}
+                                            placeholder="Ej: Lunes,Miércoles,Viernes"
+                                        />
+                                        <small className="text-muted">Separa los días con comas</small>
+                                    </div>
+                                </div>
+
+                                <div className="row">
+                                    <div className="col-md-6 mb-3">
+                                        <label className="form-label">Hora de Inicio</label>
+                                        <input
+                                            type="time"
+                                            className="form-control"
+                                            name="hora_inicio"
+                                            value={formData.hora_inicio}
+                                            onChange={handleChange}
+                                        />
+                                    </div>
+                                    <div className="col-md-6 mb-3">
+                                        <label className="form-label">Hora de Fin</label>
+                                        <input
+                                            type="time"
+                                            className="form-control"
+                                            name="hora_fin"
+                                            value={formData.hora_fin}
+                                            onChange={handleChange}
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="d-flex justify-content-between">
