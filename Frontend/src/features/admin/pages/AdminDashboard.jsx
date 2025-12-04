@@ -10,6 +10,7 @@ const AdministradorDashboard = () => {
     const navigate = useNavigate();
     const [userName, setUserName] = useState('Administrador');
     const [courseCount, setCourseCount] = useState(0);
+    const [inProgressCount, setInProgressCount] = useState(0);
 
     useEffect(() => {
         const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -25,6 +26,9 @@ const AdministradorDashboard = () => {
         try {
             const courses = await courseService.getCourses();
             setCourseCount(courses?.length || 0);
+            // Contar cursos en curso
+            const inProgress = courses?.filter(c => c.estado === 'en_curso').length || 0;
+            setInProgressCount(inProgress);
         } catch (err) {
             console.error('Error al cargar cursos:', err);
             // Keep default value of 0 if error
@@ -41,7 +45,7 @@ const AdministradorDashboard = () => {
     const navegarModulo = (modulo) => {
         console.log('Navegando a módulo:', modulo);
         if (modulo === 'agregar-curso') {
-            navigate('/administrador/agregar-curso');
+            navigate('/administrador/cursos/crear');
         } else if (modulo === 'cursos') {
             navigate('/administrador/cursos');
         } else if (modulo === 'ingresar-clientes') {
@@ -102,8 +106,8 @@ const AdministradorDashboard = () => {
                         <div className="stat-value">23</div>
                         <div className="stat-label">Pendientes Aprobación</div>
                     </div>
-                    <div className="stat-card">
-                        <div className="stat-value">8</div>
+                    <div className="stat-card" onClick={() => navigate('/administrador/cursos/en-curso')} style={{ cursor: 'pointer' }}>
+                        <div className="stat-value">{inProgressCount}</div>
                         <div className="stat-label">Cursos en Curso</div>
                     </div>
                 </div>
@@ -151,6 +155,17 @@ const AdministradorDashboard = () => {
                             Busca y filtra usuarios por diferentes criterios, visualiza perfiles completos y edita información.
                         </p>
                         <span className="module-badge">Consultas</span>
+                    </div>
+
+                    <div className="module-card" onClick={() => navegarModulo('cursos')}>
+                        <div className="module-icon">
+                            <i className="bi bi-book-fill"></i>
+                        </div>
+                        <h3 className="module-title">Gestionar Cursos</h3>
+                        <p className="module-description">
+                            Visualiza, edita y elimina cursos existentes. Gestiona toda la información de los cursos disponibles.
+                        </p>
+                        <span className="module-badge">Catálogo</span>
                     </div>
 
                     <div className="module-card" onClick={() => navegarModulo('agregar-curso')}>

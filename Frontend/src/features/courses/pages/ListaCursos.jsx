@@ -12,6 +12,7 @@ const ListaCursos = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
+    const [estadoFilter, setEstadoFilter] = useState('');
 
     useEffect(() => {
         fetchCourses();
@@ -37,11 +38,38 @@ const ListaCursos = () => {
         }
     };
 
-    const filteredCourses = courses.filter(course =>
-        course.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course.area?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course.profesor?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const handleDelete = async (courseId, courseName) => {
+        if (window.confirm(`¿Estás seguro de que deseas eliminar el curso "${courseName}"?`)) {
+            try {
+                await courseService.deleteCourse(courseId);
+                alert('Curso eliminado exitosamente.');
+                fetchCourses(); // Recargar la lista
+            } catch (err) {
+                console.error('Error al eliminar curso:', err);
+                alert('Error al eliminar el curso. Por favor intenta nuevamente.');
+            }
+        }
+    };
+
+    const getEstadoBadge = (estado) => {
+        const badges = {
+            'por_empezar': { class: 'bg-info', text: 'Por Empezar' },
+            'en_curso': { class: 'bg-success', text: 'En Curso' },
+            'finalizado': { class: 'bg-secondary', text: 'Finalizado' }
+        };
+        const badge = badges[estado] || { class: 'bg-secondary', text: 'Desconocido' };
+        return <span className={`badge ${badge.class}`}>{badge.text}</span>;
+    };
+
+    const filteredCourses = courses.filter(course => {
+        const matchesSearch = course.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            course.area?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            course.profesor?.toLowerCase().includes(searchTerm.toLowerCase());
+
+        const matchesEstado = !estadoFilter || course.estado === estadoFilter;
+
+        return matchesSearch && matchesEstado;
+    });
 
     return (
         <div className="administrador-dashboard">
@@ -67,7 +95,7 @@ const ListaCursos = () => {
                 <div className="card shadow-sm mb-4">
                     <div className="card-body">
                         <div className="row align-items-center mb-3">
-                            <div className="col-md-6">
+                            <div className="col-md-4">
                                 <div className="input-group">
                                     <span className="input-group-text">
                                         <i className="bi bi-search"></i>
@@ -81,10 +109,22 @@ const ListaCursos = () => {
                                     />
                                 </div>
                             </div>
-                            <div className="col-md-6 text-end">
+                            <div className="col-md-3">
+                                <select
+                                    className="form-select"
+                                    value={estadoFilter}
+                                    onChange={(e) => setEstadoFilter(e.target.value)}
+                                >
+                                    <option value="">Todos los estados</option>
+                                    <option value="por_empezar">Por Empezar</option>
+                                    <option value="en_curso">En Curso</option>
+                                    <option value="finalizado">Finalizado</option>
+                                </select>
+                            </div>
+                            <div className="col-md-5 text-end">
                                 <button
                                     className="btn btn-primary"
-                                    onClick={() => navigate('/administrador/agregar-curso')}
+                                    onClick={() => navigate('/administrador/cursos/crear')}
                                 >
                                     <i className="bi bi-plus-circle me-2"></i>Crear Nuevo Curso
                                 </button>
@@ -114,7 +154,7 @@ const ListaCursos = () => {
                                 {!searchTerm && (
                                     <button
                                         className="btn btn-primary mt-2"
-                                        onClick={() => navigate('/administrador/agregar-curso')}
+                                        onClick={() => navigate('/administrador/cursos/crear')}
                                     >
                                         <i className="bi bi-plus-circle me-2"></i>Crear Primer Curso
                                     </button>
@@ -128,11 +168,13 @@ const ListaCursos = () => {
                                             <th>Nombre</th>
                                             <th>Área</th>
                                             <th>Modalidad</th>
+                                            <th>Estado</th>
                                             <th>Horas</th>
                                             <th>Profesor</th>
                                             <th>Valor</th>
                                             <th>Cupos</th>
                                             <th>Fecha Inicio</th>
+                                            <th className="text-center">Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -152,6 +194,7 @@ const ListaCursos = () => {
                                                     </span>
                                                 </td>
                                                 <td>{course.modalidad || '—'}</td>
+                                                <td>{getEstadoBadge(course.estado)}</td>
                                                 <td>{course.horas || '—'}</td>
                                                 <td>{course.profesor || '—'}</td>
                                                 <td>
@@ -165,6 +208,31 @@ const ListaCursos = () => {
                                                     </span>
                                                 </td>
                                                 <td>{course.fecha_inicio || '—'}</td>
+                                                <td>
+                                                    <div className="btn-group" role="group">
+                                                        <button
+                                                            className="btn btn-sm btn-info"
+                                                            onClick={() => navigate(`/administrador/cursos/${course.id}`)}
+                                                            title="Ver detalles"
+                                                        >
+                                                            <i className="bi bi-eye"></i>
+                                                        </button>
+                                                        <button
+                                                            className="btn btn-sm btn-warning"
+                                                            onClick={() => navigate(`/administrador/cursos/${course.id}/editar`)}
+                                                            title="Editar"
+                                                        >
+                                                            <i className="bi bi-pencil"></i>
+                                                        </button>
+                                                        <button
+                                                            className="btn btn-sm btn-danger"
+                                                            onClick={() => handleDelete(course.id, course.nombre)}
+                                                            title="Eliminar"
+                                                        >
+                                                            <i className="bi bi-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>
