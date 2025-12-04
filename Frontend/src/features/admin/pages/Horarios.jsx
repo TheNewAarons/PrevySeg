@@ -1,5 +1,5 @@
 import React from 'react';
-import BotonVolver from '../components/ButtonBack';
+import BotonVolver from '../../../components/common/ButtonBack';
 
 const Horarios = () => {
     return (

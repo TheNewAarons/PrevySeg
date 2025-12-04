@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import BotonVolver from "./ButtonBack";
+import BotonVolver from "../../../components/common/ButtonBack";
 
 const UsuarioList = () => {
     const [usuarios, setUsuarios] = useState([]);

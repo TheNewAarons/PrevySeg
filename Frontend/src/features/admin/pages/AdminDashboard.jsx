@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import './StylesDashboards/AdministradorDashboard.css';
-import authService from '../../services/authService';
+import '../styles/AdminDashboard.css';
+import authService from '../../../services/authService';
 
 const AdministradorDashboard = () => {
     const navigate = useNavigate();
