@@ -3,14 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import './StylesDashboards/AdministradorDashboard.css';
-import authService from '../services/authService';
+import authService from '../../services/authService';
 
 const AdministradorDashboard = () => {
     const navigate = useNavigate();
     const [userName, setUserName] = useState('Administrador');
 
     useEffect(() => {
-        // Cargar nombre de usuario desde localStorage si existe
         const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
         if (storedUser.nombre) {
             setUserName(storedUser.nombre);
@@ -19,8 +18,7 @@ const AdministradorDashboard = () => {
 
     const logout = () => {
         if (window.confirm('¿Estás seguro de que deseas cerrar sesión?')) {
-            localStorage.removeItem('user');
-            sessionStorage.clear();
+            authService.logout();
             navigate('/login', { replace: true });
         }
     };
@@ -31,8 +29,14 @@ const AdministradorDashboard = () => {
             navigate('/administrador/agregar-curso');
         } else if (modulo === 'ingresar-clientes') {
             navigate('/administrador/crear-user');
-        } else if (modulo === 'buscar-clientes') {
-            navigate('/administrador/buscar-clientes');
+        } else if (modulo === 'list-users') {
+            navigate('/administrador/list-users');
+        } else if (modulo === 'aprobar-papeles') {
+            navigate('/administrador/aprobar-papeles');
+        } else if (modulo === 'horarios') {
+            navigate('/administrador/horarios');
+        } else if (modulo === 'reportes') {
+            navigate('/administrador/reportes');
         } else {
             alert(`Módulo: ${modulo}\nEsta funcionalidad se implementará próximamente.`);
         }
@@ -40,7 +44,6 @@ const AdministradorDashboard = () => {
 
     return (
         <div className="administrador-dashboard">
-            {/* Navigation Bar */}
             <nav className="navbar navbar-expand-lg navbar-light">
                 <div className="container-fluid px-4">
                     <a className="navbar-brand" href="/">
@@ -63,15 +66,12 @@ const AdministradorDashboard = () => {
                 </div>
             </nav>
 
-            {/* Main Content */}
             <div className="main-container">
-                {/* Page Header */}
                 <div className="page-header">
                     <h1 className="page-title">Panel de Administración</h1>
                     <p className="page-subtitle">Gestiona todos los aspectos de PrevySeg OTEC</p>
                 </div>
 
-                {/* Stats Row */}
                 <div className="stats-row">
                     <div className="stat-card">
                         <div className="stat-value">156</div>
@@ -91,9 +91,7 @@ const AdministradorDashboard = () => {
                     </div>
                 </div>
 
-                {/* Modules Grid */}
                 <div className="modules-grid">
-                    {/* Ingresar Clientes */}
                     <div className="module-card" onClick={() => navegarModulo('ingresar-clientes')}>
                         <div className="module-icon">
                             <i className="bi bi-person-plus-fill"></i>
@@ -105,7 +103,6 @@ const AdministradorDashboard = () => {
                         <span className="module-badge">Gestión de Usuarios</span>
                     </div>
 
-                    {/* Aprobar Papeles */}
                     <div className="module-card" onClick={() => navegarModulo('aprobar-papeles')}>
                         <div className="module-icon">
                             <i className="bi bi-file-earmark-check-fill"></i>
@@ -117,7 +114,6 @@ const AdministradorDashboard = () => {
                         <span className="module-badge">Documentación</span>
                     </div>
 
-                    {/* Horarios */}
                     <div className="module-card" onClick={() => navegarModulo('horarios')}>
                         <div className="module-icon">
                             <i className="bi bi-calendar-week-fill"></i>
@@ -129,8 +125,7 @@ const AdministradorDashboard = () => {
                         <span className="module-badge">Planificación</span>
                     </div>
 
-                    {/* Buscar Usuario */}
-                    <div className="module-card" onClick={() => navegarModulo('buscar-clientes')}>
+                    <div className="module-card" onClick={() => navegarModulo('list-users')}>
                         <div className="module-icon">
                             <i className="bi bi-search"></i>
                         </div>
@@ -141,7 +136,6 @@ const AdministradorDashboard = () => {
                         <span className="module-badge">Consultas</span>
                     </div>
 
-                    {/* Agregar Curso */}
                     <div className="module-card" onClick={() => navegarModulo('agregar-curso')}>
                         <div className="module-icon">
                             <i className="bi bi-plus-circle-fill"></i>
@@ -153,7 +147,6 @@ const AdministradorDashboard = () => {
                         <span className="module-badge">Catálogo</span>
                     </div>
 
-                    {/* Reportes */}
                     <div className="module-card" onClick={() => navegarModulo('reportes')}>
                         <div className="module-icon">
                             <i className="bi bi-graph-up"></i>
