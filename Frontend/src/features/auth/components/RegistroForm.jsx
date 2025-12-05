@@ -1,8 +1,8 @@
 // ...existing code...
 import React, { useState } from 'react';
-import authService from '../../services/authService';
+import authService from '../../../services/authService';
 import { useNavigate } from 'react-router-dom';
-import './styles/RegistroForm.css';
+import '../styles/RegistroForm.css';
 
 const RegistroForm = () => {
     const navigate = useNavigate();
@@ -215,9 +215,9 @@ const RegistroForm = () => {
                         {loading ? 'Registrando...' : 'Completar Inscripción'}
                     </button>
 
-                    <div className="divider" style={{marginTop: '1rem'}}><span>O</span></div>
+                    <div className="divider" style={{ marginTop: '1rem' }}><span>O</span></div>
 
-                    <div className="login-link" style={{marginTop: '0.75rem'}}>
+                    <div className="login-link" style={{ marginTop: '0.75rem' }}>
                         ¿Ya tienes una cuenta? <a href="/login" className="link-primary">Inicia sesión aquí</a>
                     </div>
                 </form>

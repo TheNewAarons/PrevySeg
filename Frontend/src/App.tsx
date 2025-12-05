@@ -1,12 +1,22 @@
-import './index.css' // Importa los estilos globales
+import './styles/index.css' // Importa los estilos globales
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
-import RegistroForm from './components/forms/RegistroForm'
-import LoginForm from './components/forms/LoginForm'
-import AdministradorDashboard from './components/dashboards/AdministradorDashboard'
-import EmpresaDashboard from './components/dashboards/EmpresaDashboard'
-import CreateUserPage from './pages/CreateUserPage'
-import ClienteDashboard from './components/dashboards/ClienteDashboard'
-
+import RegistroForm from './features/auth/components/RegistroForm'
+import LoginForm from './features/auth/components/LoginForm'
+import ListUsers from './features/admin/pages/ListUser'
+import UserDetailPage from './features/admin/pages/UserDetailPage'
+import EditUser from './features/admin/pages/EditUser'
+import AdministradorDashboard from './features/admin/pages/AdminDashboard'
+import EmpresaDashboard from './features/empresa/pages/EmpresaDashboard'
+import CreateUserPage from './features/admin/pages/CreateUserPage'
+import ClienteDashboard from './features/client/pages/ClienteDashboard'
+import CrearCurso from './features/courses/pages/CrearCurso'
+import EditarCurso from './features/courses/pages/EditarCurso'
+import DetalleCurso from './features/courses/pages/DetalleCurso'
+import ListaCursos from './features/courses/pages/ListaCursos'
+import CursosEnCurso from './features/courses/pages/CursosEnCurso'
+import AprobarPapeles from './features/admin/pages/AprobarPapeles'
+import Horarios from './features/admin/pages/Horarios'
+import Reportes from './features/admin/pages/Reportes'
 function Home() {
     // En React, no usamos document.querySelectorAll() ni lógica de manipulación DOM directa.
     // Reemplazaremos la lógica de script.js con Hooks (useEffect) y Event Handlers de React más adelante.
@@ -298,6 +308,17 @@ function App() {
                 <Route path='/administrador/dashboard' element={<AdministradorDashboard />} />
                 <Route path='/empresa/dashboard' element={<EmpresaDashboard />} />
                 <Route path='/administrador/crear-user' element={<CreateUserPage />} />
+                <Route path='/administrador/cursos' element={<ListaCursos />} />
+                <Route path='/administrador/cursos/crear' element={<CrearCurso />} />
+                <Route path='/administrador/cursos/en-curso' element={<CursosEnCurso />} />
+                <Route path='/administrador/cursos/:id' element={<DetalleCurso />} />
+                <Route path='/administrador/cursos/:id/editar' element={<EditarCurso />} />
+                <Route path='/administrador/list-users' element={<ListUsers />} />
+                <Route path='/administrador/usuario/:id' element={<UserDetailPage />} />
+                <Route path='/administrador/usuario/editar/:id' element={<EditUser />} />
+                <Route path='/administrador/aprobar-papeles' element={<AprobarPapeles />} />
+                <Route path='/administrador/horarios' element={<Horarios />} />
+                <Route path='/administrador/reportes' element={<Reportes />} />
             </Routes>
         </Router>
     )

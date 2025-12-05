@@ -113,6 +113,30 @@ class Curso(models.Model):
         choices=AREAS,
         default='seguridad'
     )
+    
+    # Campos de horario
+    dias_semana = models.CharField(
+        max_length=100, 
+        blank=True, 
+        null=True,
+        help_text="Días de la semana separados por comas (ej: Lunes,Miércoles,Viernes)"
+    )
+    hora_inicio = models.TimeField(blank=True, null=True)
+    hora_fin = models.TimeField(blank=True, null=True)
+    
+    # Estado del curso
+    ESTADO_CHOICES = [
+        ('por_empezar', 'Por Empezar'),
+        ('en_curso', 'En Curso'),
+        ('finalizado', 'Finalizado'),
+    ]
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADO_CHOICES,
+        default='por_empezar',
+        help_text="Estado actual del curso"
+    )
+    
     def __str__(self):
         return self.nombre
 

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import './StylesDashboards/EmpresaDashboard.css';
+import '../styles/EmpresaDashboard.css';
 
 const EmpresaDashboard = () => {
     const navigate = useNavigate();
@@ -41,7 +41,7 @@ const EmpresaDashboard = () => {
             <nav className="navbar navbar-expand-lg">
                 <div className="container-fluid">
                     <a className="navbar-brand" href="/">
-                        <img src="/images/logo.png" alt="PrevySeg Logo" />
+                        <img src="/images/logos/logo.png" alt="PrevySeg Logo" />
                     </a>
                     <div className="user-profile ms-auto">
                         <div className="user-avatar">{userInitial}</div>
