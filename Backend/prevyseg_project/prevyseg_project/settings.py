@@ -157,3 +157,7 @@ SIMPLE_JWT = {
     'USER_ID_CLAIM': 'user_rut', 
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+

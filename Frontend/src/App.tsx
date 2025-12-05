@@ -17,6 +17,7 @@ import CursosEnCurso from './features/courses/pages/CursosEnCurso'
 import AprobarPapeles from './features/admin/pages/AprobarPapeles'
 import Horarios from './features/admin/pages/Horarios'
 import Reportes from './features/admin/pages/Reportes'
+import DetalleDocumento from './features/client/pages/DetalleDocumento.jsx' 
 function Home() {
     // En React, no usamos document.querySelectorAll() ni lógica de manipulación DOM directa.
     // Reemplazaremos la lógica de script.js con Hooks (useEffect) y Event Handlers de React más adelante.
@@ -305,6 +306,7 @@ function App() {
                 <Route path='/inscripcion' element={<RegistroForm />} />
                 <Route path='/login' element={<LoginForm />} />
                 <Route path='/cliente/dashboard' element={<ClienteDashboard />} />
+                <Route path='/cliente/detalle-documento' element={<DetalleDocumento />} />
                 <Route path='/administrador/dashboard' element={<AdministradorDashboard />} />
                 <Route path='/empresa/dashboard' element={<EmpresaDashboard />} />
                 <Route path='/administrador/crear-user' element={<CreateUserPage />} />

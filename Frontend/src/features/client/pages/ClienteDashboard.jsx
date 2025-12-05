@@ -122,6 +122,13 @@ const ClienteDashboard = () => {
       <div className="dashboard-container container">
         <h1 className="page-title">Cursos Disponibles</h1>
         <p className="page-subtitle">Explora nuestra oferta de cursos de capacitación en seguridad</p>
+        <button
+          className="btn btn-primary"
+          onClick={() => navigate("/cliente/detalle-documento")}
+        >
+          Ver Detalle Documento
+        </button>
+
         {/*Barra de busqueda*/}
         <div className="filters-container mb-4 p-4 bg-light rounded shadow-sm">
           <h4 className="mb-3">Filtrar cursos</h4>

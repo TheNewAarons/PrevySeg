@@ -134,7 +134,14 @@ class DocumentosUsuarioView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return DocumentoSubido.objects.filter(usuario=self.request.user)
+        user = self.request.user
+
+        # Si es admin → ve todos los documentos
+        if user.is_staff or user.is_superuser:
+            return DocumentoSubido.objects.all()
+
+        # Si es cliente → solo los suyos
+        return DocumentoSubido.objects.filter(usuario=user)
 
 class AprobarDocumentoView(APIView):
     permission_classes = [permissions.IsAdminUser]
