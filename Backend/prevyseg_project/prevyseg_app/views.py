@@ -2,8 +2,8 @@ from django.shortcuts import render
 from rest_framework import generics, permissions, status, viewsets, filters
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import RegistroSerializer, LoginSerializer, UserSerializer, RolSerializer, CursoSerializer
-from .models import Usuario, Rol, Curso
+from .serializers import RegistroSerializer, LoginSerializer, UserSerializer, RolSerializer, CursoSerializer, DocumentoSubidoSerializer 
+from .models import Usuario, Rol, Curso, DocumentoSubido
 from rest_framework.views import APIView
 from django.db import IntegrityError
 from .permissions import IsSelforAdmin
@@ -126,3 +126,56 @@ class CursoViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(valor__lte=max_valor)
         
         return queryset
+
+
+
+class DocumentosUsuarioView(generics.ListAPIView):
+    serializer_class = DocumentoSubidoSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        # Si es admin → ve todos los documentos
+        if user.is_staff or user.is_superuser:
+            return DocumentoSubido.objects.all()
+
+        # Si es cliente → solo los suyos
+        return DocumentoSubido.objects.filter(usuario=user)
+
+class AprobarDocumentoView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request, pk):
+        try:
+            doc = DocumentoSubido.objects.get(pk=pk)
+        except DocumentoSubido.DoesNotExist:
+            return Response({"error": "Documento no encontrado"}, status=404)
+
+        doc.estado_revision = "APROBADO"
+        doc.observaciones_rechazo = None
+        doc.save()
+
+        return Response({"message": "Documento aprobado"})
+
+
+class RechazarDocumentoView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request, pk):
+        observacion = request.data.get("observacion")
+
+        if not observacion:
+            return Response({"error": "Debe ingresar una observación"}, status=400)
+
+        try:
+            doc = DocumentoSubido.objects.get(pk=pk)
+        except DocumentoSubido.DoesNotExist:
+            return Response({"error": "Documento no encontrado"}, status=404)
+
+        doc.estado_revision = "RECHAZADO"
+        doc.observaciones_rechazo = observacion
+        doc.save()
+
+        return Response({"message": "Documento rechazado"})
+
