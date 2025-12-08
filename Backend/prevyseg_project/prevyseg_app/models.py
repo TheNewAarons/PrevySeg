@@ -76,3 +76,92 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         verbose_name_plural = "Usuarios"
+
+
+
+class Curso(models.Model):
+    MODALIDAD_CHOICES = [
+        ("Presencial", "Presencial"),
+        ("Online", "Online"),
+        ("Mixto", "Mixto"),  
+    ]
+    AREAS = [
+        ('seguridad', 'Seguridad Privada'),
+        ('administracion', 'Administración y Finanzas'),
+        ('tecnologia', 'Tecnología y Sistemas'),
+        ('oficios', 'Oficios Técnicos'),
+        ('alimentos', 'Alimentos y Manipulación'),
+        ('estetica', 'Belleza y Estética'),
+    ]
+    nombre = models.CharField(max_length=200)
+    descripcion = models.TextField()
+    horas = models.PositiveIntegerField()
+    profesor = models.CharField(max_length=150)
+    valor = models.PositiveIntegerField()
+    tipo_certificado = models.CharField(max_length=100)
+    fecha_inicio = models.DateField()
+    cupos_disponibles = models.PositiveIntegerField()
+    documentos_requeridos = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    modalidad = models.CharField(
+        max_length=20,
+        choices=MODALIDAD_CHOICES,
+        default="Presencial"
+    )
+    area = models.CharField(
+        max_length=20,
+        choices=AREAS,
+        default='seguridad'
+    )
+    
+    # Campos de horario
+    dias_semana = models.CharField(
+        max_length=100, 
+        blank=True, 
+        null=True,
+        help_text="Días de la semana separados por comas (ej: Lunes,Miércoles,Viernes)"
+    )
+    hora_inicio = models.TimeField(blank=True, null=True)
+    hora_fin = models.TimeField(blank=True, null=True)
+    
+    # Estado del curso
+    ESTADO_CHOICES = [
+        ('por_empezar', 'Por Empezar'),
+        ('en_curso', 'En Curso'),
+        ('finalizado', 'Finalizado'),
+    ]
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADO_CHOICES,
+        default='por_empezar',
+        help_text="Estado actual del curso"
+    )
+    
+    def __str__(self):
+        return self.nombre
+
+
+class TipoDocumento(models.Model):
+    id_tipo_doc = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.nombre
+
+class DocumentoSubido(models.Model):
+    ESTADOS = [
+        ('APROBADO', 'Aprobado'),
+        ('EN_REVISION', 'En revisión'),
+        ('RECHAZADO', 'Rechazado'),
+    ]
+
+    id_doc_subido = models.AutoField(primary_key=True)
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    tipo_documento = models.ForeignKey(TipoDocumento, on_delete=models.CASCADE)
+    url_archivo = models.FileField(upload_to="documentos/")
+    estado_revision = models.CharField(max_length=20, choices=ESTADOS, default='EN_REVISION')
+    observaciones_rechazo = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.usuario.rut} - {self.tipo_documento.nombre}"
+

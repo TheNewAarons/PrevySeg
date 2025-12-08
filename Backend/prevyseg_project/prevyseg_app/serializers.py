@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Rol, Usuario
+from .models import Rol, Usuario, Curso, DocumentoSubido
 from django.contrib.auth import authenticate
 import re
 
@@ -147,3 +147,28 @@ class LoginSerializer(serializers.Serializer):
 
         attrs['user'] = user
         return attrs
+
+
+
+class CursoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Curso
+        fields = '__all__'
+
+
+class DocumentoSubidoSerializer(serializers.ModelSerializer):
+    tipo_documento_nombre = serializers.CharField(source="tipo_documento.nombre", read_only=True)
+
+    class Meta:
+        model = DocumentoSubido
+        fields = [
+            "id_doc_subido",
+            "usuario",
+            "tipo_documento",
+            "tipo_documento_nombre",
+            "url_archivo",
+            "estado_revision",
+            "observaciones_rechazo",
+        ]
+        read_only_fields = ["estado_revision", "observaciones_rechazo"]
+

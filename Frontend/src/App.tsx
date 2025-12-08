@@ -1,42 +1,52 @@
-import './index.css' // Importa los estilos globales
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom' 
-import RegistroForm from './components/forms/RegistroForm'
-import LoginForm from './components/forms/LoginForm'
-import AdminDashboard from './components/AdminDash'
-import CreateUserPage from './pages/CreateUserPage'
-import ListUsers from './pages/ListUsers'
-import UserDetailPage from './pages/UserDetailPage'
-import EditUser from './pages/EditUser'
-
+import './styles/index.css' // Importa los estilos globales
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
+import RegistroForm from './features/auth/components/RegistroForm'
+import LoginForm from './features/auth/components/LoginForm'
+import ListUsers from './features/admin/pages/ListUser'
+import UserDetailPage from './features/admin/pages/UserDetailPage'
+import EditUser from './features/admin/pages/EditUser'
+import AdministradorDashboard from './features/admin/pages/AdminDashboard'
+import EmpresaDashboard from './features/empresa/pages/EmpresaDashboard'
+import CreateUserPage from './features/admin/pages/CreateUserPage'
+import ClienteDashboard from './features/client/pages/ClienteDashboard'
+import CrearCurso from './features/courses/pages/CrearCurso'
+import EditarCurso from './features/courses/pages/EditarCurso'
+import DetalleCurso from './features/courses/pages/DetalleCurso'
+import ListaCursos from './features/courses/pages/ListaCursos'
+import CursosEnCurso from './features/courses/pages/CursosEnCurso'
+import AprobarPapeles from './features/admin/pages/AprobarPapeles'
+import Horarios from './features/admin/pages/Horarios'
+import Reportes from './features/admin/pages/Reportes'
+import DetalleDocumento from './features/client/pages/DetalleDocumento.jsx' 
 function Home() {
-// En React, no usamos document.querySelectorAll() ni lógica de manipulación DOM directa.
-// Reemplazaremos la lógica de script.js con Hooks (useEffect) y Event Handlers de React más adelante.
-// Por ahora, solo ponemos la estructura HTML.
+    // En React, no usamos document.querySelectorAll() ni lógica de manipulación DOM directa.
+    // Reemplazaremos la lógica de script.js con Hooks (useEffect) y Event Handlers de React más adelante.
+    // Por ahora, solo ponemos la estructura HTML.
 
-return (
-            <>
-                <header className="header">
-                    <div className="container">
-                        <div className="nav">
-                            <div className="logo">
-                                <h2>Prevyseg OTEC</h2>
-                            </div>
-                            <nav className="nav-menu">
-                                <a href="#cursos">Cursos</a>
-                                <a href="#nosotros">Nosotros</a>
-                                <a href="#testimonios">Testimonios</a>
-                                <a href="#contacto">Contacto</a>
-                            </nav>
-                            <Link to={"/Inscripcion"}>
-                                <button className="btn-primary">Inscríbete Ahora</button>
-                            </Link>
-                            <Link to={"/Login"}>
-                                <button className='btn-primary'>Iniciar Sesion  </button>
-                            </Link>
-                            
+    return (
+        <>
+            <header className="header">
+                <div className="container">
+                    <div className="nav">
+                        <div className="logo">
+                            <h2>Prevyseg OTEC</h2>
                         </div>
+                        <nav className="nav-menu">
+                            <a href="#cursos">Cursos</a>
+                            <a href="#nosotros">Nosotros</a>
+                            <a href="#testimonios">Testimonios</a>
+                            <a href="#contacto">Contacto</a>
+                        </nav>
+                        <Link to={"/Inscripcion"}>
+                            <button className="btn-primary">Inscríbete Ahora</button>
+                        </Link>
+                        <Link to={"/Login"}>
+                            <button className='btn-primary'>Iniciar Sesion  </button>
+                        </Link>
+
                     </div>
-                </header>
+                </div>
+            </header>
             <main>
                 <section className="hero">
                     <div className="container">
@@ -60,7 +70,7 @@ return (
                                 </div>
                             </div>
                             <div className="hero-image">
-                                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Estudiantes en capacitación"/>
+                                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Estudiantes en capacitación" />
                             </div>
                         </div>
                     </div>
@@ -185,7 +195,7 @@ return (
                                 </div>
                             </div>
                             <div className="why-choose-image">
-                                <img src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Estudiante exitoso"/>
+                                <img src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Estudiante exitoso" />
                             </div>
                         </div>
                     </div>
@@ -203,7 +213,7 @@ return (
                                     <p>"Gracias al curso de Desarrollo Web conseguí trabajo en una startup. Los instructores son excelentes y el contenido muy actualizado."</p>
                                 </div>
                                 <div className="testimonial-author">
-                                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="Carlos Mendoza"/>
+                                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="Carlos Mendoza" />
                                     <div>
                                         <h4>Carlos Mendoza</h4>
                                         <span>Desarrollador Web</span>
@@ -215,7 +225,7 @@ return (
                                     <p>"El curso de Gestión de Proyectos me ayudó a ascender en mi empresa. La metodología es muy práctica y aplicable."</p>
                                 </div>
                                 <div className="testimonial-author">
-                                    <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="María González"/>
+                                    <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="María González" />
                                     <div>
                                         <h4>María González</h4>
                                         <span>Project Manager</span>
@@ -227,7 +237,7 @@ return (
                                     <p>"Excelente capacitación en soldadura. Ahora trabajo en una empresa minera con un muy buen sueldo."</p>
                                 </div>
                                 <div className="testimonial-author">
-                                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="Roberto Silva"/>
+                                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="Roberto Silva" />
                                     <div>
                                         <h4>Roberto Silva</h4>
                                         <span>Soldador Industrial</span>
@@ -285,23 +295,34 @@ return (
                     </div>
                 </div>
             </footer>
-            </>
-        )
+        </>
+    )
 }
-function App (){
+function App() {
     return (
         <Router>
             <Routes>
-                <Route path='/' element={<Home/>}/>
-                <Route path='/inscripcion' element={<RegistroForm/>}/>
-                <Route path='/login' element={<LoginForm/>}/>
-                <Route path='/administrador/dashboard' element={<AdminDashboard/>}/>
-                <Route path='/administrador/create-user' element={<CreateUserPage/>}/>
-                <Route path='/administrador/list-users' element={<ListUsers/>}/>
-                <Route path='/administrador/usuario/:id' element={<UserDetailPage/>}/>
-                <Route path='/administrador/usuario/editar/:id' element={<EditUser/>}/>
+                <Route path='/' element={<Home />} />
+                <Route path='/inscripcion' element={<RegistroForm />} />
+                <Route path='/login' element={<LoginForm />} />
+                <Route path='/cliente/dashboard' element={<ClienteDashboard />} />
+                <Route path='/cliente/detalle-documento' element={<DetalleDocumento />} />
+                <Route path='/administrador/dashboard' element={<AdministradorDashboard />} />
+                <Route path='/empresa/dashboard' element={<EmpresaDashboard />} />
+                <Route path='/administrador/crear-user' element={<CreateUserPage />} />
+                <Route path='/administrador/cursos' element={<ListaCursos />} />
+                <Route path='/administrador/cursos/crear' element={<CrearCurso />} />
+                <Route path='/administrador/cursos/en-curso' element={<CursosEnCurso />} />
+                <Route path='/administrador/cursos/:id' element={<DetalleCurso />} />
+                <Route path='/administrador/cursos/:id/editar' element={<EditarCurso />} />
+                <Route path='/administrador/list-users' element={<ListUsers />} />
+                <Route path='/administrador/usuario/:id' element={<UserDetailPage />} />
+                <Route path='/administrador/usuario/editar/:id' element={<EditUser />} />
+                <Route path='/administrador/aprobar-papeles' element={<AprobarPapeles />} />
+                <Route path='/administrador/horarios' element={<Horarios />} />
+                <Route path='/administrador/reportes' element={<Reportes />} />
             </Routes>
         </Router>
     )
 }
-export default App      
+export default App
