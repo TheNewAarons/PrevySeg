@@ -133,9 +133,9 @@ const rechazarDocumento = async (id, observacion) => {
 
 const documentoService = {
     getDocumentos,
-  getUsuarioById,
-  aprobarDocumento,
-  rechazarDocumento,
+    getUsuarioById,
+    aprobarDocumento,
+    rechazarDocumento,
 };
 
 export default documentoService;

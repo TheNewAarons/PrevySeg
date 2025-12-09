@@ -59,7 +59,7 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             return Usuario.objects.all()
 
         return Usuario.objects.filter(id_usuario=user.id_usuario)
-
+            
 
 class LoginView(APIView):
     """

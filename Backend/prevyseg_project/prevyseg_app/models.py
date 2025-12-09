@@ -157,11 +157,30 @@ class DocumentoSubido(models.Model):
 
     id_doc_subido = models.AutoField(primary_key=True)
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    curso = models.ForeignKey(Curso, on_delete=models.CASCADE)
     tipo_documento = models.ForeignKey(TipoDocumento, on_delete=models.CASCADE)
     url_archivo = models.FileField(upload_to="documentos/")
     estado_revision = models.CharField(max_length=20, choices=ESTADOS, default='EN_REVISION')
     observaciones_rechazo = models.TextField(blank=True, null=True)
+    fecha_subida = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.usuario.rut} - {self.tipo_documento.nombre}"
+        return f"{self.usuario.rut} - {self.tipo_documento.nombre}" 
+# Complemento a RF-10
+class InscripcionCurso(models.Model):
+    ESTADOS = [
+        ('iNSCRITO', 'Inscrito'),
+        ('EN_CURSO', 'En curso'),
+        ('FINALIZADO', 'FINALIZADO'),
+    ]
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    curso = models.ForeignKey(Curso, on_delete=models.CASCADE)
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='INSCRITO')
+    fecha_inscripcion = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        # Verificamos que el usuario no se inscriba mas de 1 vez al mismo curso
+        unique_together = ('usuario', 'curso')
+
+    def __str__(self):
+        return f"{self.usuario.rut} - {self.curso.nombre}"

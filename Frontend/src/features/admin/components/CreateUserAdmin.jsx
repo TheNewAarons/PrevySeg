@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { use, useEffect, useState } from "react";
 
 const CreateUserForm = ({ onUserCreated }) => {
     const [formData, setFormData] = useState({
@@ -10,8 +10,47 @@ const CreateUserForm = ({ onUserCreated }) => {
         domicilio: '',
         fecha_nacimiento: '',
         lugar_trabajo: '',
-        id_rol: 2
+        id_rol: ''
     });
+    // añadimos estado para los roles
+    const [roles, setRoles] = useState([])
+    const [rolesLoading, setRolesLoanding] = useState(true)
+    const [rolesError, setRolesError] = useState(null)
+    useEffect(() => {
+        const fetchRoles = async () =>{
+            try{
+                setRolesLoanding(true)
+                setRolesError(null)
+
+                const userStorage = localStorage.getItem("user")
+                const token = userStorage ? JSON.parse(userStorage).token : null
+                const res = await fetch("http://localhost:8000/api/roles/", {
+                    headers: token
+                    ? {'Authorization' : `Bearer ${token}`} : {}
+                })
+                if (!res.ok){
+                    throw new Error("No se logro cargar los roles")
+                }
+                const data = await res.json();
+
+                setRoles(data);
+
+                const clienteRol = data.find(r => r.nombre_rol === 'Cliente')
+                if (clienteRol && !formData.id_rol){
+                    setFormData(prev =>({
+                        ...prev,
+                        id_rol : clienteRol.id_rol
+                    }))
+                }
+            }catch(err){
+                console.error("Error cargando roles:", err);
+                setRolesError(err.message);
+            }finally{
+                setRolesLoanding(false)
+            }
+        };
+        fetchRoles()
+    }, [])
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -59,8 +98,6 @@ const CreateUserForm = ({ onUserCreated }) => {
                 const errorData = await response.json();
                 console.log("Error del servidor:", errorData);
 
-                // Convertimos el objeto de error en texto legible
-                // Ej: { rut: ["Ya existe"], password: ["Muy corta"] } -> "rut: Ya existe, password: Muy corta"
                 const errorMessages = Object.entries(errorData)
                     .map(([key, value]) => `${key}: ${value}`)
                     .join(' | ');
@@ -95,11 +132,30 @@ const CreateUserForm = ({ onUserCreated }) => {
 
                 <div style={{ gridColumn: 'span 2' }}>
                     <label>Asignar Rol: </label>
-                    <select name="id_rol" onChange={handleChange} value={formData.id_rol}>
-                        <option value="2">Cliente</option>
-                        <option value="3">Empresa</option>
-                        <option value="1">Administrador</option>
-                    </select>
+
+                    {rolesLoading && <p>Cargando roles...</p>}
+                    {rolesError && <p style={{ color: 'red' }}>Error: {rolesError}</p>}
+
+                    {!rolesLoading && !rolesError && (
+                        <select
+                            name="id_rol"
+                            value={formData.id_rol}
+                            onChange={(e) =>
+                                setFormData({
+                                    ...formData,
+                                    id_rol: parseInt(e.target.value, 10)   // aseguramos número, no string
+                                })
+                            }
+                            required
+                        >
+                            <option value="">Seleccione un rol</option>
+                            {roles.map((rol) => (
+                                <option key={rol.id_rol} value={rol.id_rol}>
+                                    {rol.nombre_rol}
+                                </option>
+                            ))}
+                        </select>
+                    )}
                 </div>
 
                 <button type="submit" style={{ gridColumn: 'span 2', padding: '10px', background: '#007bff', color: 'white', border: 'none' }}>
