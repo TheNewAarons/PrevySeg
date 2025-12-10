@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { getRoleName, getRoleBadgeClass } from "../../../utils/roles";
 const UsuarioList = () => {
     const [usuarios, setUsuarios] = useState([]);
     const [filtrados, setFiltrados] = useState([]);
@@ -110,7 +110,7 @@ const UsuarioList = () => {
             </div>
         );
     }
-
+    
     return (
         <>
             <div className="card shadow-sm">
@@ -161,53 +161,58 @@ const UsuarioList = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {filtrados.map((u) => (
-                                            <tr key={u.id_usuario}>
-                                                <td>
-                                                    <div className="d-flex align-items-center">
-                                                        <div className="avatar-circle me-2">
-                                                            {u.nombre.charAt(0).toUpperCase()}
+                                        {filtrados.map((u) => {
+                                            const roleName = getRoleName(u);
+                                            const badgeClass = getRoleBadgeClass(roleName);
+
+                                            return (
+                                                <tr key={u.id_usuario}>
+                                                    <td>
+                                                        <div className="d-flex align-items-center">
+                                                            <div className="avatar-circle me-2">
+                                                                {u.nombre.charAt(0).toUpperCase()}
+                                                            </div>
+                                                            <strong>{u.nombre}</strong>
                                                         </div>
-                                                        <strong>{u.nombre}</strong>
-                                                    </div>
-                                                </td>
-                                                <td>{u.rut}</td>
-                                                <td>{u.email || '—'}</td>
-                                                <td>
-                                                    <span className={`badge ${u.rol === 'administrador' ? 'bg-danger' :
-                                                            u.rol === 'empresa' ? 'bg-warning text-dark' :
-                                                                'bg-info text-dark'
-                                                        }`}>
-                                                        {u.rol || 'Cliente'}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <div className="d-flex justify-content-center gap-2">
-                                                        <button
-                                                            className="btn btn-sm btn-outline-primary"
-                                                            onClick={() => navigate(`/administrador/usuario/${u.id_usuario}`)}
-                                                            title="Ver detalles"
-                                                        >
-                                                            <i className="bi bi-eye"></i>
-                                                        </button>
-                                                        <button
-                                                            className="btn btn-sm btn-outline-warning"
-                                                            onClick={() => navigate(`/administrador/usuario/editar/${u.id_usuario}`)}
-                                                            title="Editar"
-                                                        >
-                                                            <i className="bi bi-pencil"></i>
-                                                        </button>
-                                                        <button
-                                                            className="btn btn-sm btn-outline-danger"
-                                                            onClick={() => setSelectedUser(u)}
-                                                            title="Eliminar"
-                                                        >
-                                                            <i className="bi bi-trash"></i>
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
+                                                    </td>
+
+                                                    <td>{u.rut}</td>
+                                                    <td>{u.email || '—'}</td>
+
+                                                    <td>
+                                                        <span className={`badge ${badgeClass}`}>
+                                                            {roleName}
+                                                        </span>
+                                                    </td>
+
+                                                    <td>
+                                                        <div className="d-flex justify-content-center gap-2">
+                                                            <button
+                                                                className="btn btn-sm btn-outline-primary"
+                                                                onClick={() => navigate(`/administrador/usuario/${u.id_usuario}`)}
+                                                                title="Ver detalles"
+                                                            >
+                                                                <i className="bi bi-eye"></i>
+                                                            </button>
+                                                            <button
+                                                                className="btn btn-sm btn-outline-warning"
+                                                                onClick={() => navigate(`/administrador/usuario/editar/${u.id_usuario}`)}
+                                                                title="Editar"
+                                                            >
+                                                                <i className="bi bi-pencil"></i>
+                                                            </button>
+                                                            <button
+                                                                className="btn btn-sm btn-outline-danger"
+                                                                onClick={() => setSelectedUser(u)}
+                                                                title="Eliminar"
+                                                            >
+                                                                <i className="bi bi-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
                             </div>

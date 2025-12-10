@@ -164,11 +164,13 @@ class DocumentoSubidoSerializer(serializers.ModelSerializer):
         fields = [
             "id_doc_subido",
             "usuario",
+            "curso",
             "tipo_documento",
             "tipo_documento_nombre",
             "url_archivo",
             "estado_revision",
             "observaciones_rechazo",
+            "fecha_subida",    
         ]
-        read_only_fields = ["estado_revision", "observaciones_rechazo"]
+        read_only_fields = ["estado_revision", "observaciones_rechazo", "fecha_subida"]
 

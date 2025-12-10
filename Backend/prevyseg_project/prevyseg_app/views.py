@@ -1,5 +1,5 @@
-from django.shortcuts import render
-from rest_framework import generics, permissions, status, viewsets, filters
+from django.shortcuts import get_object_or_404, render
+from rest_framework import generics, permissions, status, viewsets, filters, parsers
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import RegistroSerializer, LoginSerializer, UserSerializer, RolSerializer, CursoSerializer, DocumentoSubidoSerializer 
@@ -59,7 +59,7 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             return Usuario.objects.all()
 
         return Usuario.objects.filter(id_usuario=user.id_usuario)
-
+            
 
 class LoginView(APIView):
     """
@@ -178,4 +178,31 @@ class RechazarDocumentoView(APIView):
         doc.save()
 
         return Response({"message": "Documento rechazado"})
+    
+class DocumentosPendientesView(generics.ListAPIView):
+    
+    serializer_class = DocumentoSubidoSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+    def get_queryset(self):
+        return (
+            DocumentoSubido.objects
+            .filter(estado_revision="EN_REVISION")
+            .order_by("-fecha_subida")
+        )
+    
+class SubirDocumentoCursoView(generics.CreateAPIView):
+    serializer_class = DocumentoSubidoSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [parsers.MultiPartParser, parsers.FormParser]
+    def perform_create(self, serializer):
+        curso_id = self.kwargs.get("curso_id")
+        curso = get_object_or_404(Curso, pk=curso_id)
+
+        #Se validara que el usuario este inscrito en el curso(modificable llegase a ser redundante se borra y no afecta funcionamiento)
+        serializer.save(
+            usuario=self.request.user,
+            curso=curso,
+            estado_revision="EN_REVISION",  # explícito aunque ya sea default
+        )
 
