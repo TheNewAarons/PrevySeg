@@ -11,6 +11,7 @@ const LoginForm = () => {
         rut: '',
         password: '',
     });
+    const [showPassword, setShowPassword] = useState(false  )
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -21,7 +22,9 @@ const LoginForm = () => {
         });
         if (error) setError(null);
     };
-
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    };
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -139,17 +142,41 @@ const LoginForm = () => {
 
                     <div className="mb-3">
                         <label htmlFor="password" className="form-label">Contraseña</label>
-                        <input
-                            type="password"
-                            className="form-control"
-                            id="password"
-                            name="password"
-                            placeholder="••••••••"
-                            value={formData.password}
-                            onChange={handleChange}
-                            required
-                            disabled={loading}
-                        />
+                        <div className="password-input-container" style={{ position: 'relative' }}>
+                            <input
+                                type={showPassword ? "text" : "password"} // 🔑 Cambia tipo según estado
+                                className="form-control"
+                                id="password"
+                                name="password"
+                                placeholder="••••••••"
+                                value={formData.password}
+                                onChange={handleChange}
+                                required
+                                disabled={loading}
+                                style={{ paddingRight: '40px' }} // 🔑 Espacio para el ícono
+                            />
+                            {/* 🔑 Botón para mostrar/ocultar contraseña */}
+                            <button
+                                type="button"
+                                className="btn btn-outline-secondary"
+                                onClick={togglePasswordVisibility}
+                                disabled={loading}
+                                style={{
+                                    position: 'absolute',
+                                    right: '5px',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    border: 'none',
+                                    background: 'transparent',
+                                    padding: '5px 10px',
+                                    cursor: 'pointer'
+                                }}
+                                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                            >
+                                <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
+                            </button>
+                        </div>
+
                     </div>
 
                     <div className="d-flex justify-content-between align-items-center mb-3">
