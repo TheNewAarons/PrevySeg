@@ -3,11 +3,11 @@ import BotonVolver from "../../../components/common/ButtonBack";
 import documentoService from "../../../services/documentoService.jsx";
 
 const AprobarPapeles = () => {
-    const [usuarioDetalle, setUsuarioDetalle] = useState({});
-    const [documentos, setDocumentos] = useState([]);
-    const [rechazoAbierto, setRechazoAbierto] = useState({});
-    const [detallesAbiertos, setDetallesAbiertos] = useState({});
-    const [observaciones, setObservaciones] = useState({});
+    const [usuarioDetalle, setUsuarioDetalle] = useState({}); //guardamos informacion del usuario en cada documento
+    const [documentos, setDocumentos] = useState([]); //listamos los documentos en revision
+    const [rechazoAbierto, setRechazoAbierto] = useState({});//controlamos que documentos tienen la opcion de rechazo abierto
+    const [detallesAbiertos, setDetallesAbiertos] = useState({});//controlamos los documentos que tienen los detalles expandidos
+    const [observaciones, setObservaciones] = useState({});//guardamos el texto de observacion para cada documento(en caso de ser rechazado)
 
     useEffect(() => {
         const fetchDocs = async () => {
@@ -23,24 +23,24 @@ const AprobarPapeles = () => {
 
         fetchDocs();
     }, []);
-
+    //controlamos el boton ver detalles en caso de que se haya abirto, se cierra y biseversa 
     const handleVerDetalle = async (doc) => {
         const idDoc = doc.id_doc_subido;
         const idUsuario = doc.usuario;
 
-        // Toggle panel de detalles
+        
         setDetallesAbiertos((prev) => ({
         ...prev,
         [idDoc]: !prev[idDoc],
         }));
 
-        // Al abrir detalle, cerramos panel de rechazo
+        
         setRechazoAbierto((prev) => ({
         ...prev,
         [idDoc]: false,
         }));
 
-        // Si ya tenemos datos del usuario, no pedir de nuevo
+        //Si ya tenemos datos del usuario, no pedir de nuevo
         if (usuarioDetalle[idDoc]) return;
 
         try {
@@ -58,11 +58,11 @@ const AprobarPapeles = () => {
         try {
         await documentoService.aprobarDocumento(idDoc);
 
-        // Actualiza estado local
+        //Actualiza estado local
         setDocumentos((prevDocs) =>
             prevDocs.map((doc) =>
             doc.id_doc_subido === idDoc
-                ? { ...doc, estado_revision: "APROBADO" } // dejarlo igual que en backend
+                ? { ...doc, estado_revision: "APROBADO" } //dejarlo igual que en backend
                 : doc
             )
         );
@@ -77,13 +77,13 @@ const AprobarPapeles = () => {
     const handleRechazar = (doc) => {
         const idDoc = doc.id_doc_subido;
 
-        // Abrir/cerrar panel de rechazo
+        //Abrir/cerrar panel de rechazo
         setRechazoAbierto((prev) => ({
         ...prev,
         [idDoc]: !prev[idDoc],
         }));
 
-        // Asegurar que los detalles estén abiertos
+        //Asegurar que los detalles estén abiertos
         setDetallesAbiertos((prev) => ({
         ...prev,
         [idDoc]: true,

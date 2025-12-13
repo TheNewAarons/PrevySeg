@@ -3,29 +3,34 @@ import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import '../styles/EmpresaDashboard.css';
+import { useAuth } from '../../../services/authContext';
 
 const EmpresaDashboard = () => {
     const navigate = useNavigate();
+    const { user, logout } = useAuth(); //
+    
     const [userName, setUserName] = useState('Empresa Demo');
     const [userInitial, setUserInitial] = useState('E');
 
+    // 🔑 Verificar que hay usuario
     useEffect(() => {
-        // Cargar nombre de usuario desde localStorage si existe
-        const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-        if (storedUser.nombre) {
-            setUserName(storedUser.nombre);
-            setUserInitial(storedUser.nombre.charAt(0).toUpperCase());
+        if (!user) {
+            console.log('No hay usuario, redirigiendo...');
+            navigate('/login');
+            return;
         }
-    }, []);
 
-    const logout = () => {
-        if (window.confirm('¿Estás seguro de que deseas cerrar sesión?')) {
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
-            localStorage.removeItem('user');
-            sessionStorage.clear();
-            navigate('/login', { replace: true });
+        // Actualizar nombre de usuario
+        if (user.nombre) {
+            setUserName(user.nombre);
+            setUserInitial(user.nombre.charAt(0).toUpperCase());
         }
+    }, [user, navigate]);
+
+    const handleLogout = () => {
+        if (!window.confirm('¿Estás seguro de que deseas cerrar sesión?')) return;
+        console.log('Empresa - Logout clickeado');
+        logout(); // 
     };
 
     const goToModule = (module) => {
@@ -34,6 +39,16 @@ const EmpresaDashboard = () => {
         // navigate(`/empresa/${module}`);
         alert(`Función "${module}" en desarrollo`);
     };
+
+    if (!user) {
+        return (
+            <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+                <div className="spinner-border" role="status">
+                    <span className="visually-hidden">Cargando...</span>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="empresa-dashboard">
@@ -46,7 +61,7 @@ const EmpresaDashboard = () => {
                     <div className="user-profile ms-auto">
                         <div className="user-avatar">{userInitial}</div>
                         <p className="user-name">{userName}</p>
-                        <button className="btn-logout" onClick={logout}>
+                        <button className="btn-logout" onClick={handleLogout}>
                             <i className="bi bi-box-arrow-right"></i> Cerrar Sesión
                         </button>
                     </div>
@@ -127,6 +142,18 @@ const EmpresaDashboard = () => {
                         <p>Visualiza y administra la lista completa de trabajadores registrados en tu empresa</p>
                         <button className="btn-module" onClick={() => goToModule('trabajadores')}>
                             Ver Lista <i className="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+
+                    {/* Volver al Home */}
+                    <div className="module-card">
+                        <div className="module-icon">
+                            <i className="bi bi-house-fill"></i>
+                        </div>
+                        <h3>Volver al Inicio</h3>
+                        <p>Regresar a la página principal de PrevySeg</p>
+                        <button className="btn-module" onClick={() => navigate('/')}>
+                            Ir al Home <i className="bi bi-arrow-right"></i>
                         </button>
                     </div>
                 </div>

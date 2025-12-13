@@ -1,6 +1,6 @@
 // services/courseService.jsx
 import authService from "./authService";
-
+import { getAuthHeaders } from "../utils/apiHelpers";
 const API_URL = "http://127.0.0.1:8000/api/cursos/";
 
 /**
@@ -8,8 +8,7 @@ const API_URL = "http://127.0.0.1:8000/api/cursos/";
  */
 const getCourses = async (params = {}) => {
     try {
-        const user = authService.getCurrentUser();
-        const token = user.token;
+        const headers = getAuthHeaders(); 
 
         // Construir querystring dinámico
         const queryString = new URLSearchParams(params).toString();
@@ -17,10 +16,7 @@ const getCourses = async (params = {}) => {
 
         const response = await fetch(url, {
             method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            }
+            headers: headers
         });
 
         const data = await response.json();
@@ -34,6 +30,9 @@ const getCourses = async (params = {}) => {
         return data;
 
     } catch (error) {
+        if (error.message === 'NO_TOKEN') {
+            console.error('❌ No hay sesión activa');
+        }
         console.error("Error al obtener cursos:", error);
         throw error;
     }
@@ -44,15 +43,11 @@ const getCourses = async (params = {}) => {
  */
 const getCourseById = async (id) => {
     try {
-        const user = authService.getCurrentUser();
-        const token = user.token;
+        const headers = getAuthHeaders(); 
 
         const response = await fetch(`${API_URL}${id}/`, {
             method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            }
+            headers: headers
         });
 
         const data = await response.json();
@@ -66,6 +61,9 @@ const getCourseById = async (id) => {
         return data;
 
     } catch (error) {
+        if (error.message === 'NO_TOKEN') {
+            console.error('No hay sesión activa');
+        }
         console.error("Error al obtener curso:", error);
         throw error;
     }
@@ -76,15 +74,11 @@ const getCourseById = async (id) => {
  */
 const createCourse = async (courseData) => {
     try {
-        const user = authService.getCurrentUser();
-        const token = user.token;
+        const headers = getAuthHeaders();
 
         const response = await fetch(API_URL, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            },
+            headers: headers,
             body: JSON.stringify(courseData)
         });
 
@@ -100,6 +94,9 @@ const createCourse = async (courseData) => {
         return data;
 
     } catch (error) {
+        if (error.message === 'NO_TOKEN') {
+            console.error('❌ No hay sesión activa');
+        }
         console.error("Error al crear curso:", error);
         throw error;
     }
@@ -110,15 +107,11 @@ const createCourse = async (courseData) => {
  */
 const updateCourse = async (id, courseData) => {
     try {
-        const user = authService.getCurrentUser();
-        const token = user.token;
+        const headers = getAuthHeaders(); 
 
         const response = await fetch(`${API_URL}${id}/`, {
             method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            },
+            headers: headers,
             body: JSON.stringify(courseData)
         });
 
@@ -134,6 +127,9 @@ const updateCourse = async (id, courseData) => {
         return data;
 
     } catch (error) {
+        if (error.message === 'NO_TOKEN') {
+            console.error('❌ No hay sesión activa');
+        }
         console.error("Error al actualizar curso:", error);
         throw error;
     }
@@ -144,15 +140,11 @@ const updateCourse = async (id, courseData) => {
  */
 const deleteCourse = async (id) => {
     try {
-        const user = authService.getCurrentUser();
-        const token = user.token;
+        const headers = getAuthHeaders(); 
 
         const response = await fetch(`${API_URL}${id}/`, {
             method: "DELETE",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            }
+            headers: headers
         });
 
         if (!response.ok) {
@@ -165,6 +157,9 @@ const deleteCourse = async (id) => {
         return true;
 
     } catch (error) {
+        if (error.message === 'NO_TOKEN') {
+            console.error('No hay sesión activa');
+        }
         console.error("Error al eliminar curso:", error);
         throw error;
     }
@@ -175,15 +170,11 @@ const deleteCourse = async (id) => {
  */
 const enrollCourse = async (courseId) => {
     try {
-        const user = authService.getCurrentUser();
-        const token = user.token;
+        const headers = getAuthHeaders(); 
 
         const response = await fetch(`${API_URL}${courseId}/inscribir/`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            }
+            headers: headers
         });
 
         const data = await response.json();
@@ -196,6 +187,9 @@ const enrollCourse = async (courseId) => {
 
         return data;
     } catch (error) {
+        if (error.message === 'NO_TOKEN') {
+            console.error('No hay sesión activa');
+        }
         console.error("Error al inscribir curso:", error);
         throw error;
     }
@@ -211,4 +205,3 @@ const courseService = {
 };
 
 export default courseService;
-
