@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -7,6 +7,9 @@ import '../../admin/styles/AdminDashboard.css';
 
 const CrearCurso = () => {
     const navigate = useNavigate();
+    const [tiposDocs, setTiposDocs] = useState([]);
+    const [selectedDocIds, setSelectedDocIds] = useState([]);
+    const [loading, setLoading] = useState(false);  
     const [formData, setFormData] = useState({
         nombre: '',
         descripcion: '',
@@ -16,7 +19,6 @@ const CrearCurso = () => {
         tipo_certificado: '',
         fecha_inicio: '',
         cupos_disponibles: '',
-        documentos_requeridos: '',
         modalidad: 'Presencial',
         area: 'seguridad',
         estado: 'por_empezar',
@@ -26,6 +28,19 @@ const CrearCurso = () => {
     });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    useEffect(() => {
+        const loadTiposDocs = async () => {
+            try {
+                const data = await courseService.getTiposDocumentos();
+                setTiposDocs(Array.isArray(data) ? data : []);
+            } catch (err) {
+                console.error("Error cargando tipos de documentos:", err);
+                setTiposDocs([]);
+            }
+            };
+
+        loadTiposDocs();
+    }, []);
 
     const handleChange = (e) => {
         setFormData({
@@ -33,27 +48,75 @@ const CrearCurso = () => {
             [e.target.name]: e.target.value
         });
     };
+    const toggleDoc = (id) => {
+    setSelectedDocIds((prev) =>
+        prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+        );
+    };
+    const validate = () => {
+        //reglas mínimas ajustables en base a lo que se requiera
+        if (!formData.nombre.trim()) return "El nombre del curso es obligatorio.";
+        if (!formData.descripcion.trim()) return "La descripción es obligatoria.";
+        if (!formData.fecha_inicio) return "La fecha de inicio es obligatoria.";
 
+        if (formData.hora_inicio && formData.hora_fin) {
+        if (formData.hora_fin <= formData.hora_inicio) {
+            return "La hora de fin debe ser mayor que la hora de inicio.";
+        }
+        }
+
+        
+        if (selectedDocIds.length === 0) {
+        return "Debes seleccionar al menos un documento requerido.";
+        }
+
+        return null;
+    };
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
-        setSuccess('');
 
-        try {
-            await courseService.createCourse(formData);
-            setSuccess('Curso creado exitosamente.');
-            setTimeout(() => {
-                navigate('/administrador/cursos');
-            }, 1500);
+        const error = validate();
+        if (error) {
+            alert(error);
+            return; 
+        }
+
+        setLoading(true);
+            try {
+            const payload = {
+                ...formData,
+                horas: formData.horas ? Number(formData.horas) : null,
+                valor: formData.valor ? Number(formData.valor) : null,
+                cupos_disponibles: formData.cupos_disponibles
+                ? Number(formData.cupos_disponibles)
+                : null,
+                documentos_requeridos_ids: selectedDocIds,
+            };      
+            await courseService.createCourse(payload);
+            alert("Curso creado correctamente ✅");
+            //limpieza
+            setFormData({
+                nombre: "",
+                descripcion: "",
+                horas: "",
+                profesor: "",
+                valor: "",
+                tipo_certificado: "",
+                fecha_inicio: "",
+                cupos_disponibles: "",
+                modalidad: "Presencial",
+                area: "seguridad",
+                dias_semana: "",
+                hora_inicio: "",
+                hora_fin: "",
+                estado: "por_empezar",
+            });
+            setSelectedDocIds([]);
         } catch (err) {
-            console.error('Error al crear curso:', err);
-            if (err.status === 401) {
-                setError('No estás autenticado. Por favor inicia sesión.');
-            } else if (err.data) {
-                setError(JSON.stringify(err.data));
-            } else {
-                setError(`Error al crear curso: ${err.message}`);
-            }
+            console.error("Error creando curso:", err);
+            alert(err?.message || "Error al crear el curso.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -157,8 +220,37 @@ const CrearCurso = () => {
 
                                 <div className="mb-3">
                                     <label className="form-label">Documentos Requeridos</label>
-                                    <textarea className="form-control" name="documentos_requeridos" rows="2" value={formData.documentos_requeridos} onChange={handleChange}></textarea>
-                                </div>
+
+                                    {tiposDocs.length === 0 ? (
+                                        <div className="text-muted">
+                                        No hay tipos de documentos disponibles (o no cargaron).
+                                        </div>
+                                    ) : (
+                                        <div className="border rounded p-3">
+                                        {tiposDocs.map((doc) => (
+                                            <div className="form-check" key={doc.id_tipo_doc}>
+                                            <input
+                                                className="form-check-input"
+                                                type="checkbox"
+                                                id={`tipo-doc-${doc.id_tipo_doc}`}
+                                                checked={selectedDocIds.includes(doc.id_tipo_doc)}
+                                                onChange={() => toggleDoc(doc.id_tipo_doc)}
+                                            />
+                                            <label
+                                                className="form-check-label"
+                                                htmlFor={`tipo-doc-${doc.id_tipo_doc}`}
+                                            >
+                                                {doc.nombre}
+                                            </label>
+                                            </div>
+                                        ))}
+                                        </div>
+                                    )}
+
+                                    <small className="text-muted">
+                                        Selecciona los documentos obligatorios para este curso. El cliente solo podrá subir estos.
+                                    </small>
+                                    </div>
 
                                 <hr className="my-4" />
                                 <h5 className="mb-3">Horario del Curso</h5>
@@ -203,7 +295,7 @@ const CrearCurso = () => {
 
                                 <div className="d-flex justify-content-between">
                                     <button type="button" className="btn btn-secondary" onClick={() => navigate('/administrador/dashboard')}>Cancelar</button>
-                                    <button type="submit" className="btn btn-primary">Crear Curso</button>
+                                    <button type="submit" className="btn btn-primary" disabled={loading}>{loading ? "Creando..." : "Crear Curso"}</button>
                                 </div>
                             </form>
                         </div>

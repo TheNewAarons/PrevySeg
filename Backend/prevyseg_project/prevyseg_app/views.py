@@ -1,9 +1,13 @@
+import os
 from django.shortcuts import get_object_or_404, render
+from django.utils import timezone
 from rest_framework import generics, permissions, status, viewsets, filters, parsers
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import RegistroSerializer, LoginSerializer, UserSerializer, RolSerializer, CursoSerializer, DocumentoSubidoSerializer 
-from .models import Usuario, Rol, Curso, DocumentoSubido
+from .serializers import (
+    RegistroSerializer, LoginSerializer, UserSerializer, RolSerializer, CursoSerializer, DocumentoSubidoSerializer, 
+    CursoDetailSerializer, InscripcionCursoSerializer, DocumentoSubidoDetailSerializer, TipoDeDocumentoSerializers  )
+from .models import InscripcionCurso, Usuario, Rol, Curso, DocumentoSubido, TipoDocumento
 from rest_framework.views import APIView
 from django.db import IntegrityError
 from .permissions import IsSelforAdmin
@@ -89,7 +93,7 @@ class LoginView(APIView):
 
 
 
-
+#Views de Curso
 class CursoViewSet(viewsets.ModelViewSet):
     """
     ViewSet para CRUD completo de cursos.
@@ -127,8 +131,424 @@ class CursoViewSet(viewsets.ModelViewSet):
         
         return queryset
 
+#Views para Inscripcion
+
+class CursosDisponiblesView(generics.ListAPIView):
+    serializer_class = CursoDetailSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = Curso.objects.filter(
+            estado='por_empezar',
+            fecha_inicio__gte=timezone.now().date(),
+            cupos_disponibles__gt=0,
+        ).prefetch_related('documentos_requeridos')
+        #excluiremos cursos donde el usuario ya esta inscrito
+        user = self.request.user
+        cursos_inscritos = InscripcionCurso.objects.filter(
+            usuario = user
+        ).values_list('curso_id', flat=True)
+        queryset = queryset.exclude(id__in = cursos_inscritos)
+        area = self.request.query_params.get('area')
+        modalidad = self.request.query_params.get('modalidad')
+        if area :
+            queryset = queryset.filter(area = area)
+        if modalidad:
+            queryset = queryset.filter(modalidad = modalidad)
+        return queryset
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
+class CursoInscripcionDetailView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, curso_id):
+        try:
+            curso = Curso.objects.get(id= curso_id)
+        except Curso.DoesNotExist:
+            return Response(
+                {'error' : 'Curso no encontrado'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        user = request.user
+
+        try:
+            inscripcion = InscripcionCurso.objects.get(usuario = user, curso = curso)
+            ya_inscrito = True
+            estado_inscripcion = inscripcion.estado
+        except InscripcionCurso.DoesNotExist:
+            ya_inscrito = False
+            estado_inscripcion = None
+        #verificacion de que el curso este disponible
+        disponible = (
+            curso.estado == 'por_empezar' and
+            curso.cupos_disponibles > 0 and
+            curso.fecha_inicio >= timezone.now().date()
+        )
+        #obtenemos documentos requeridos
+        documentos_requeridos = curso.documentos_requeridos.all()
+
+        #obtenemos documentos subidos por el usuario
+        documentos_subidos = DocumentoSubido.objects.filter(
+            usuario = user,
+            curso = curso
+        )
+
+        #prepararemos la informacion para el documento
+        documentos_info = []
+
+        for doc_requeridos in documentos_requeridos:
+            doc_subidos = documentos_subidos.filter(tipo_documento =doc_requeridos).first()
+            documentos_info.append({
+                'id_tipo_doc': doc_requeridos.id_tipo_doc,
+                'nombre': doc_requeridos.nombre,
+                'subido': doc_subidos is not None,
+                'estado': doc_subidos.estado_revision if doc_subidos else 'NO_SUBIDO',
+                'observaciones': doc_subidos.observaciones_rechazo if doc_subidos else None,
+                'fecha_subida': doc_subidos.fecha_subida if doc_subidos else None,
+                'documento_id': doc_subidos.id_doc_subido if doc_subidos else None,
+                'url_archivo': request.build_absolute_uri(doc_subidos.url_archivo.url) if doc_subidos and doc_subidos.url_archivo else None
+            })
+        
+        #contaremos el estado del documento
+        total_documentos = len(documentos_requeridos)
+        documentos_aprobados = len([d for d in documentos_info if d['estado'] == 'APROBADO'])
+        documentos_pendientes = len([d for d in documentos_info if d['estado'] in ['EN_REVISION', 'NO_SUBIDO']])
+        documentos_rechazados = len([d for d in documentos_info if d['estado'] == 'RECHAZADO'])
+        
+        #verificar si puede inscribirse (todos los documentos aprobados)
+        puede_inscribirse = (
+            disponible and 
+            not ya_inscrito and 
+            total_documentos > 0 and 
+            documentos_aprobados == total_documentos
+        )       
+        
+        #serializar curso
+        curso_serializer = CursoDetailSerializer(curso, context={'request': request})
+        
+        return Response({
+            'curso': curso_serializer.data,
+            'disponible': disponible,
+            'ya_inscrito': ya_inscrito,
+            'estado_inscripcion': estado_inscripcion,
+            'documentos': documentos_info,
+            'puede_inscribirse': puede_inscribirse,
+            'resumen': {
+                'total_documentos': total_documentos,
+                'documentos_subidos': total_documentos - len([d for d in documentos_info if not d['subido']]),
+                'documentos_aprobados': documentos_aprobados,
+                'documentos_pendientes': documentos_pendientes,
+                'documentos_rechazados': documentos_rechazados,
+                'documentos_faltantes': [d for d in documentos_info if not d['subido']],
+                'documentos_rechazados_lista': [d for d in documentos_info if d['estado'] == 'RECHAZADO']
+            }
+        })
+
+class InscribirseCursoView(APIView):
+    """
+    Finalizar inscripción al curso (solo si todos los documentos están aprobados)
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def post(self, request, curso_id):
+        try:
+            curso = Curso.objects.get(id=curso_id)
+        except Curso.DoesNotExist:
+            return Response(
+                {"error": "Curso no encontrado"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        user = request.user
+        
+        #verificamos si ya está inscrito
+        if InscripcionCurso.objects.filter(usuario=user, curso=curso).exists():
+            return Response(
+                {"error": "Ya estás inscrito en este curso"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        #verificamos cupos
+        if curso.cupos_disponibles <= 0:
+            return Response(
+                {"error": "No hay cupos disponibles"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        #verificamos que el curso esté disponible
+        if curso.estado != 'por_empezar':
+            return Response(
+                {"error": "El curso no está disponible para inscripción"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Verificar que todos los documentos estén aprobados
+        documentos_requeridos = curso.documentos_requeridos.all()
+        documentos_faltantes = []
+        documentos_no_aprobados = []
+        
+        for doc_requerido in documentos_requeridos:
+            try:
+                documento = DocumentoSubido.objects.get(
+                    usuario=user,
+                    curso=curso,
+                    tipo_documento=doc_requerido
+                )
+                if documento.estado_revision != 'APROBADO':
+                    documentos_no_aprobados.append({
+                        'documento': doc_requerido.nombre,
+                        'estado': documento.estado_revision
+                    })
+            except DocumentoSubido.DoesNotExist:
+                documentos_faltantes.append(doc_requerido.nombre)
+        
+        if documentos_faltantes:
+            return Response({
+                "error": "Faltan documentos por subir",
+                "documentos_faltantes": documentos_faltantes
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        if documentos_no_aprobados:
+            return Response({
+                "error": "Hay documentos pendientes de aprobación",
+                "documentos_pendientes": documentos_no_aprobados
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            #creamos la inscripción
+            inscripcion = InscripcionCurso.objects.create(
+                usuario=user,
+                curso=curso,
+                estado='iNSCRITO'
+            )
+            
+            #reducimos cupos disponibles
+            curso.cupos_disponibles -= 1
+            curso.save()
+            
+            return Response({
+                "success": True,
+                "message": "¡Inscripción completada exitosamente!",
+                "inscripcion_id": inscripcion.id,
+                "curso": {
+                    "id": curso.id,
+                    "nombre": curso.nombre,
+                    "fecha_inicio": curso.fecha_inicio,
+                    "modalidad": curso.modalidad,
+                    "horas": curso.horas
+                },
+                "fecha_inscripcion": inscripcion.fecha_inscripcion,
+                "cupos_restantes": curso.cupos_disponibles,
+                "nota": "Recordatorio: El proceso de pago se implementará en la siguiente fase del proyecto."
+            }, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            return Response(
+                {"error": f"Error al completar inscripción: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+#Inscripcion para la visualizacion del admin al ver detalles de usuario #RF-10
+class InscripcionesUsuarioAdminView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    def get(self, request, usuario_id):
+        inscripciones = InscripcionCurso.objects.filter(
+            usuario_id=usuario_id
+        ).select_related('curso')
+
+        data = []
+        for ins in inscripciones:
+            documentos = DocumentoSubido.objects.filter(
+                usuario_id=usuario_id,
+                curso=ins.curso
+            )
+            data.append({
+                "inscripcion_id": ins.id,
+                "curso_id": ins.curso.id,
+                "curso_nombre": ins.curso.nombre,
+                "curso_modalidad": ins.curso.modalidad,
+                "curso_horas": ins.curso.horas,
+                "estado_inscripcion": ins.estado,
+                "fecha_inscripcion": ins.fecha_inscripcion,
+                "documentos": [
+                    {
+                        "nombre": d.tipo_documento.nombre,
+                        "estado": d.estado_revision,
+                        "fecha_subida": d.fecha_subida
+                    }
+                    for d in documentos
+                ]
+            })
+
+        return Response({
+            "success": True,
+            "usuario_id": usuario_id,
+            "total": len(data),
+            "inscripciones": data
+        })
+class VerificarInscripcionView(APIView):
+    """
+    Verificar si el usuario puede inscribirse a un curso
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request, curso_id):
+        try:
+            curso = Curso.objects.get(id=curso_id)
+        except Curso.DoesNotExist:
+            return Response(
+                {"error": "Curso no encontrado"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        user = request.user
+        
+        #verificamos si ya está inscrito
+        if InscripcionCurso.objects.filter(usuario=user, curso=curso).exists():
+            return Response({
+                "puede_inscribirse": False,
+                "mensaje": "Ya estás inscrito en este curso",
+                "estado": "YA_INSCRITO",
+                "detalle": "Ya tienes una inscripción activa para este curso"
+            })
+        
+        #verificamos disponibilidad del curso
+        if curso.estado != 'por_empezar':
+            return Response({
+                "puede_inscribirse": False,
+                "mensaje": "Este curso no está disponible para inscripción",
+                "estado": "CURSO_NO_DISPONIBLE",
+                "detalle": f"El curso está en estado: {curso.get_estado_display()}"
+            })
+        
+        if curso.cupos_disponibles <= 0:
+            return Response({
+                "puede_inscribirse": False,
+                "mensaje": "No hay cupos disponibles",
+                "estado": "SIN_CUPOS",
+                "detalle": "Todos los cupos para este curso han sido ocupados"
+            })
+        
+        if curso.fecha_inicio < timezone.now().date():
+            return Response({
+                "puede_inscribirse": False,
+                "mensaje": "El curso ya ha comenzado",
+                "estado": "CURSO_INICIADO",
+                "detalle": f"El curso comenzó el {curso.fecha_inicio.strftime('%d/%m/%Y')}"
+            })
+        
+        #verificamos documentos
+        documentos_requeridos = curso.documentos_requeridos.all()
+        documentos_subidos = DocumentoSubido.objects.filter(
+            usuario=user,
+            curso=curso
+        )
+        
+        #prepararamos información de documentos
+        documentos_info = []
+        documentos_pendientes = []
+        
+        for doc_requerido in documentos_requeridos:
+            doc_subido = documentos_subidos.filter(tipo_documento=doc_requerido).first()
+            estado = doc_subido.estado_revision if doc_subido else 'NO_SUBIDO'
+            
+            doc_info = {
+                'tipo': doc_requerido.nombre,
+                'estado': estado,
+                'subido': doc_subido is not None
+            }
+            
+            documentos_info.append(doc_info)
+            
+            if estado != 'APROBADO':
+                documentos_pendientes.append(doc_info)
+        
+        #verificamos si todos están aprobados
+        todos_aprobados = all(doc['estado'] == 'APROBADO' for doc in documentos_info)
+        
+        if todos_aprobados:
+            return Response({
+                "puede_inscribirse": True,
+                "mensaje": "¡Puede proceder con la inscripción!",
+                "estado": "LISTO_PARA_INSCRIPCION",
+                "detalle": "Todos los documentos han sido aprobados",
+                "documentos": documentos_info,
+                "resumen": {
+                    "total": len(documentos_info),
+                    "aprobados": len([d for d in documentos_info if d['estado'] == 'APROBADO']),
+                    "pendientes": 0
+                }
+            })
+        else:
+            return Response({
+                "puede_inscribirse": False,
+                "mensaje": "Faltan documentos por aprobar",
+                "estado": "DOCUMENTOS_PENDIENTES",
+                "detalle": f"{len(documentos_pendientes)} de {len(documentos_info)} documentos pendientes",
+                "documentos": documentos_info,
+                "documentos_pendientes": documentos_pendientes,
+                "resumen": {
+                    "total": len(documentos_info),
+                    "aprobados": len([d for d in documentos_info if d['estado'] == 'APROBADO']),
+                    "pendientes": len(documentos_pendientes),
+                    "pendientes_lista": [d['tipo'] for d in documentos_pendientes]
+                }
+            })
 
 
+class MisInscripcionesView(generics.ListAPIView):
+    """
+    Lista las inscripciones del usuario actual
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request):
+        user = request.user
+        
+        #obtenemos todas las inscripciones del usuario
+        inscripciones = InscripcionCurso.objects.filter(
+            usuario=user
+        ).select_related('curso').order_by('-fecha_inscripcion')
+        
+        #preparamos la respuesta
+        inscripciones_data = []
+        for inscripcion in inscripciones:
+            # Obtener documentos del curso
+            documentos = DocumentoSubido.objects.filter(
+                usuario=user,
+                curso=inscripcion.curso
+            )
+            
+            inscripciones_data.append({
+                'inscripcion_id': inscripcion.id,
+                'curso_id': inscripcion.curso.id,
+                'curso_nombre': inscripcion.curso.nombre,
+                'curso_fecha_inicio': inscripcion.curso.fecha_inicio,
+                'curso_modalidad': inscripcion.curso.modalidad,
+                'curso_horas': inscripcion.curso.horas,
+                'estado_inscripcion': inscripcion.estado,
+                'fecha_inscripcion': inscripcion.fecha_inscripcion,
+                'documentos': [
+                    {
+                        'nombre': doc.tipo_documento.nombre,
+                        'estado': doc.estado_revision,
+                        'fecha_subida': doc.fecha_subida
+                    }
+                    for doc in documentos
+                ]
+            })
+        
+        return Response({
+            'success': True,
+            'total_inscripciones': len(inscripciones_data),
+            'inscripciones': inscripciones_data
+        })
+
+#Views de Documentos
 class DocumentosUsuarioView(generics.ListAPIView):
     serializer_class = DocumentoSubidoSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -136,11 +556,11 @@ class DocumentosUsuarioView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
 
-        # Si es admin → ve todos los documentos
+        #si es admin ve todos los documentos
         if user.is_staff or user.is_superuser:
             return DocumentoSubido.objects.all()
 
-        # Si es cliente → solo los suyos
+        #si es cliente solo los suyos
         return DocumentoSubido.objects.filter(usuario=user)
 
 class AprobarDocumentoView(APIView):
@@ -191,18 +611,185 @@ class DocumentosPendientesView(generics.ListAPIView):
             .order_by("-fecha_subida")
         )
     
-class SubirDocumentoCursoView(generics.CreateAPIView):
-    serializer_class = DocumentoSubidoSerializer
+class SubirDocumentoCursoView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     parser_classes = [parsers.MultiPartParser, parsers.FormParser]
-    def perform_create(self, serializer):
-        curso_id = self.kwargs.get("curso_id")
-        curso = get_object_or_404(Curso, pk=curso_id)
+    def post(self, request, curso_id):
+        try:
+            curso = Curso.objects.get(id = curso_id)
+        except Curso.DoesNotExist:
+            return Response(
+                {'error' : 'Curso no encontrado'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        user = request.user
+        tipo_doc_id = request.data.get('tipo_documento')
+        archivo = request.FILES.get('archivo')
+        
+        #validaciones básicas
+        if not archivo:
+            return Response(
+                {"error": "No se ha proporcionado ningún archivo"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if not tipo_doc_id:
+            return Response(
+                {"error": "Debe especificar el tipo de documento"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            tipo_documento = TipoDocumento.objects.get(id_tipo_doc=tipo_doc_id)
+        except TipoDocumento.DoesNotExist:
+            return Response(
+                {"error": "Tipo de documento no encontrado"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        #validamos tipo de archivo
+        allowed_extensions = ['.pdf', '.jpg', '.jpeg', '.png']
+        file_extension = os.path.splitext(archivo.name)[1].lower()
+        
+        if file_extension not in allowed_extensions:
+            return Response(
+                {"error": f"Formato no permitido. Formatos aceptados: PDF, JPG, JPEG, PNG"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        #validamos tamaño (5MB máximo)
+        if archivo.size > 5 * 1024 * 1024:
+            return Response(
+                {"error": "El archivo es demasiado grande. Tamaño máximo: 5MB"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        #determinamos el contexto (inscripción o general)
+        contexto = request.data.get('contexto', 'general')  
+        
+        #se aplican validaciones específicas para inscripción
+        if contexto == 'inscripcion':
+            #verificamos que el documento sea requerido para este curso
+            if not curso.documentos_requeridos.filter(id_tipo_doc=tipo_doc_id).exists():
+                return Response({
+                    "error": f"Documento no requerido",
+                    "detalle": f"'{tipo_documento.nombre}' no es requerido para '{curso.nombre}'",
+                    "documentos_requeridos": [
+                        {"id": doc.id_tipo_doc, "nombre": doc.nombre}
+                        for doc in curso.documentos_requeridos.all()
+                    ]
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            #verificamos que no esté ya inscrito
+            if InscripcionCurso.objects.filter(usuario=user, curso=curso).exists():
+                return Response(
+                    {"error": "Ya estás inscrito en este curso"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            #verificamos que el curso esté disponible
+            if curso.cupos_disponibles <= 0:
+                return Response(
+                    {"error": "No hay cupos disponibles para este curso"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            if curso.estado != 'por_empezar':
+                return Response(
+                    {"error": f"El curso no está disponible. Estado actual: {curso.get_estado_display()}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        try:
+            #crear o actualizar documento
+            documento, created = DocumentoSubido.objects.update_or_create(
+                usuario=user,
+                curso=curso,
+                tipo_documento=tipo_documento,
+                defaults={
+                    'url_archivo': archivo,
+                    'estado_revision': 'EN_REVISION',
+                    'observaciones_rechazo': None 
+                }
+            )
+            
+            #preparamos la respuesta base
+            respuesta = {
+                "success": True,
+                "message": f"Documento '{tipo_documento.nombre}' subido correctamente",
+                "contexto": contexto,
+                "documento": {
+                    "id": documento.id_doc_subido,
+                    "tipo_documento": tipo_documento.nombre,
+                    "estado": documento.estado_revision,
+                    "fecha_subida": documento.fecha_subida,
+                    "es_nuevo": created
+                }
+            }
+            
+            #informacion adicional para inscripción
+            if contexto == 'inscripcion':
+                #calculamos el progreso de documentos
+                documentos_requeridos = curso.documentos_requeridos.all()
+                documentos_subidos = DocumentoSubido.objects.filter(
+                    usuario=user,
+                    curso=curso
+                )
+                
+                total_requeridos = documentos_requeridos.count()
+                documentos_info = []
+                
+                for doc_req in documentos_requeridos:
+                    doc_sub = documentos_subidos.filter(tipo_documento=doc_req).first()
+                    documentos_info.append({
+                        "id": doc_req.id_tipo_doc,
+                        "nombre": doc_req.nombre,
+                        "subido": doc_sub is not None,
+                        "estado": doc_sub.estado_revision if doc_sub else "NO_SUBIDO",
+                        "documento_id": doc_sub.id_doc_subido if doc_sub else None
+                    })
+                
+                subidos = len([d for d in documentos_info if d['subido']])
+                aprobados = len([d for d in documentos_info if d['estado'] == 'APROBADO'])
+                
+                respuesta["progreso_inscripcion"] = {
+                    "total_requeridos": total_requeridos,
+                    "documentos_subidos": subidos,
+                    "documentos_aprobados": aprobados,
+                    "porcentaje_completado": round((subidos / total_requeridos * 100), 2) if total_requeridos > 0 else 0,
+                    "documentos_faltantes": total_requeridos - subidos,
+                    "puede_inscribirse": aprobados == total_requeridos,
+                    "detalle_documentos": documentos_info
+                }
+            
+            return Response(respuesta, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response(
+                {"error": f"Error al subir documento: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
-        #Se validara que el usuario este inscrito en el curso(modificable llegase a ser redundante se borra y no afecta funcionamiento)
-        serializer.save(
-            usuario=self.request.user,
-            curso=curso,
-            estado_revision="EN_REVISION",  # explícito aunque ya sea default
-        )
+class DocumentosCursoView(generics.ListAPIView):
+    """
+    Lista documentos subidos para un curso específico
+    """
+    serializer_class = DocumentoSubidoSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        user = self.request.user
+        curso_id = self.kwargs.get('curso_id')
+        
+        if user.is_staff or user.is_superuser or user.id_rol.nombre_rol == 'Administrador':
+            return DocumentoSubido.objects.filter(curso_id=curso_id)
+        return DocumentoSubido.objects.filter(usuario=user, curso_id=curso_id)
 
+
+class TipoDocumentoListView(generics.ListAPIView):
+    """
+    Lista todos los tipos de documentos disponibles
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = TipoDeDocumentoSerializers
+    queryset = TipoDocumento.objects.all()

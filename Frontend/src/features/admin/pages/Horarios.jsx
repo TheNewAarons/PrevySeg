@@ -22,7 +22,7 @@ const Horarios = () => {
     }, []);
 
     useEffect(() => {
-        applyFilters();
+        applyFilters(); 
     }, [filterDay, searchTerm, courses]);
 
     const fetchCourses = async () => {
@@ -35,6 +35,12 @@ const Horarios = () => {
             console.error('Error al cargar cursos:', err);
             if (err.status === 401 || err.message.includes("token_not_valid")) {
                 alert("Tu sesión ha expirado. Por favor inicia sesión nuevamente.");
+                authService.logout();
+                navigate('/login');
+                return;
+            }
+            if (err?.status === 401 || String(err?.message || '').includes('token_not_valid')) {
+                alert('Tu sesión ha expirado. Por favor inicia sesión nuevamente.');
                 authService.logout();
                 navigate('/login');
                 return;
@@ -124,7 +130,7 @@ const Horarios = () => {
                             <div className="col-md-4 text-end">
                                 <button
                                     className="btn btn-primary"
-                                    onClick={() => navigate('/administrador/agregar-curso')}
+                                    onClick={() => navigate('/administrador/cursos/crear')}
                                 >
                                     <i className="bi bi-plus-circle me-2"></i>Crear Curso
                                 </button>

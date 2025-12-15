@@ -12,7 +12,7 @@ const CreateUserForm = ({ onUserCreated }) => {
         lugar_trabajo: '',
         id_rol: ''
     });
-    // añadimos estado para los roles
+    //añadimos estado para los roles
     const [roles, setRoles] = useState([])
     const [rolesLoading, setRolesLoanding] = useState(true)
     const [rolesError, setRolesError] = useState(null)
@@ -69,12 +69,12 @@ const CreateUserForm = ({ onUserCreated }) => {
             const userData = JSON.parse(userStorage);
             let token = userData.token;
 
-            // Creamos una copia y si está vacío, mandamos null.
+            //Creamos una copia y si está vacío, mandamos null.
             const dataToSend = { ...formData };
             if (!dataToSend.fecha_nacimiento) dataToSend.fecha_nacimiento = null;
             if (!dataToSend.lugar_trabajo) dataToSend.lugar_trabajo = null;
 
-            console.log("Enviando datos:", dataToSend); // Para depurar en consola
+            console.log("Enviando datos:", dataToSend);
 
             const response = await fetch('http://localhost:8000/api/usuarios/', {
                 method: "POST",
@@ -82,10 +82,10 @@ const CreateUserForm = ({ onUserCreated }) => {
                     "Authorization": `Bearer ${token}`,
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify(dataToSend) // Enviamos los datos limpios
+                body: JSON.stringify(dataToSend) 
             });
 
-            // Si el token expiró (401), redirigir al login
+            //Si el token expiró (401), redirigir al login
             if (response.status === 401) {
                 alert("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.");
                 localStorage.removeItem('user');
@@ -94,7 +94,7 @@ const CreateUserForm = ({ onUserCreated }) => {
             }
 
             if (!response.ok) {
-                // Leemos la respuesta del servidor (que dice POR QUÉ falló)
+                //Leemos la respuesta del servidor (que dice POR QUÉ falló)
                 const errorData = await response.json();
                 console.log("Error del servidor:", errorData);
 

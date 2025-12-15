@@ -1,6 +1,6 @@
 // services/documentoService.jsx
 import authService from "./authService";
-
+import { getAuthHeaders } from "../utils/apiHelpers";
 const API_URL = "http://127.0.0.1:8000/api/documentos/";
 const USER_API_URL = "http://127.0.0.1:8000/api/usuarios/";
 const CURSOS_API_URL = "http://127.0.0.1:8000/api/cursos/"
@@ -114,37 +114,30 @@ const getDocumentosPendientes = async () => {
 };
 
 const subirDocumentoCurso = async (cursoId, tipoDocumentoId, file) => {
-    try {
-        const user = authService.getCurrentUser();
-        if (!user) throw new Error("Usuario no autenticado");
+    const headers = getAuthHeaders();
+    const { "Content-Type": _, ...safeHeaders } = headers;
 
-        const token = user.token;
+    const formData = new FormData();
+    formData.append("tipo_documento", tipoDocumentoId);
+    formData.append("archivo", file); // ✅ CLAVE
 
-        const formData = new FormData();
-        formData.append("tipo_documento", tipoDocumentoId);
-        formData.append("url_archivo", file);
-
-        const response = await fetch(`${CURSOS_API_URL}${cursoId}/documentos/subir/`, {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${token}` // NO pongas Content-Type, lo maneja el navegador
-            },
-            body: formData,
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            const error = new Error(data.detail || "Error al subir documento");
-            error.status = response.status;
-            throw error;
+    const response = await fetch(
+        `http://127.0.0.1:8000/api/cursos/${cursoId}/documentos/subir/`,
+        {
+        method: "POST",
+        headers: safeHeaders,
+        body: formData,
         }
+    );
 
-        return data;
-    } catch (error) {
-        console.error("Error subiendo documento del curso:", error);
-        throw error;
+    const data = await response.json();
+
+    if (!response.ok) {
+        console.error("Error backend:", data);
+        throw new Error(data.error || "Error al subir documento");
     }
+
+    return data;
 };
 
 const aprobarDocumento = async (id) => {
@@ -204,6 +197,18 @@ const rechazarDocumento = async (id, observacion) => {
         throw error;
     }
 };
+const getDocumentosCurso = async (cursoId) => {
+    const headers = getAuthHeaders();
+    const { "Content-Type": _, ...safeHeaders } = headers;
+    const response = await fetch(`${CURSOS_API_URL}${cursoId}/documentos/`, {
+        method: "GET",
+        headers,
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.detail || "Error obteniendo documentos del curso");
+    return data;
+    };
+
 
 
 const documentoService = {
@@ -212,7 +217,8 @@ const documentoService = {
     aprobarDocumento,
     rechazarDocumento,
     getDocumentosPendientes,
-    subirDocumentoCurso
+    subirDocumentoCurso,
+    getDocumentosCurso,
 };
 
 export default documentoService;
