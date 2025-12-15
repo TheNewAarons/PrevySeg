@@ -6,14 +6,16 @@ import '../styles/AdminDashboard.css';
 import { useAuth } from '../../../services/authContext';
 import authService from '../../../services/authService';
 import courseService from '../../../services/courseService';
+import documentoService from '../../../services/documentoService';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
-    const { user, logout: authLogout } = useAuth(); 
-    
+    const { user, logout: authLogout } = useAuth();
+
     const [userName, setUserName] = useState('Administrador');
     const [courseCount, setCourseCount] = useState(0);
     const [inProgressCount, setInProgressCount] = useState(0);
+    const [pendingDocsCount, setPendingDocsCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -41,18 +43,22 @@ const AdminDashboard = () => {
         try {
             setLoading(true);
             setError(null);
-            
+
             const courses = await courseService.getCourses();
             setCourseCount(courses?.length || 0);
-            
+
             // Contar cursos en curso
             const inProgress = courses?.filter(c => c.estado === 'en_curso').length || 0;
             setInProgressCount(inProgress);
-            
+
+            // Contar documentos pendientes
+            const pendingDocs = await documentoService.getDocumentosPendientes();
+            setPendingDocsCount(pendingDocs?.length || 0);
+
         } catch (err) {
             console.error('Error al cargar cursos:', err);
             setError(err.message);
-            
+
             // Si el error es de sesión expirada, hacer logout
             if (err.message.includes('Sesión expirada') || err.message.includes('No hay sesión')) {
                 authLogout();
@@ -157,8 +163,8 @@ const AdminDashboard = () => {
                                 <div className="stat-value">{courseCount}</div>
                                 <div className="stat-label">Cursos Disponibles</div>
                             </div>
-                            <div className="stat-card">
-                                <div className="stat-value">23</div>
+                            <div className="stat-card" onClick={() => navegarModulo('aprobar-papeles')} style={{ cursor: 'pointer' }}>
+                                <div className="stat-value">{pendingDocsCount}</div>
                                 <div className="stat-label">Pendientes Aprobación</div>
                             </div>
                             <div className="stat-card" onClick={() => navigate('/administrador/cursos/en-curso')} style={{ cursor: 'pointer' }}>
