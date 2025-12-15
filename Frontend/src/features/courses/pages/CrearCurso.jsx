@@ -9,7 +9,7 @@ const CrearCurso = () => {
     const navigate = useNavigate();
     const [tiposDocs, setTiposDocs] = useState([]);
     const [selectedDocIds, setSelectedDocIds] = useState([]);
-    const [loading, setLoading] = useState(false);  
+    const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         nombre: '',
         descripcion: '',
@@ -37,7 +37,7 @@ const CrearCurso = () => {
                 console.error("Error cargando tipos de documentos:", err);
                 setTiposDocs([]);
             }
-            };
+        };
 
         loadTiposDocs();
     }, []);
@@ -49,8 +49,8 @@ const CrearCurso = () => {
         });
     };
     const toggleDoc = (id) => {
-    setSelectedDocIds((prev) =>
-        prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+        setSelectedDocIds((prev) =>
+            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
         );
     };
     const validate = () => {
@@ -60,14 +60,14 @@ const CrearCurso = () => {
         if (!formData.fecha_inicio) return "La fecha de inicio es obligatoria.";
 
         if (formData.hora_inicio && formData.hora_fin) {
-        if (formData.hora_fin <= formData.hora_inicio) {
-            return "La hora de fin debe ser mayor que la hora de inicio.";
-        }
+            if (formData.hora_fin <= formData.hora_inicio) {
+                return "La hora de fin debe ser mayor que la hora de inicio.";
+            }
         }
 
-        
+
         if (selectedDocIds.length === 0) {
-        return "Debes seleccionar al menos un documento requerido.";
+            return "Debes seleccionar al menos un documento requerido.";
         }
 
         return null;
@@ -77,23 +77,25 @@ const CrearCurso = () => {
 
         const error = validate();
         if (error) {
-            alert(error);
-            return; 
+            setError(error);
+            return;
         }
+        setError('');
+        setSuccess('');
 
         setLoading(true);
-            try {
+        try {
             const payload = {
                 ...formData,
                 horas: formData.horas ? Number(formData.horas) : null,
                 valor: formData.valor ? Number(formData.valor) : null,
                 cupos_disponibles: formData.cupos_disponibles
-                ? Number(formData.cupos_disponibles)
-                : null,
+                    ? Number(formData.cupos_disponibles)
+                    : null,
                 documentos_requeridos_ids: selectedDocIds,
-            };      
+            };
             await courseService.createCourse(payload);
-            alert("Curso creado correctamente ✅");
+            setSuccess("Curso creado correctamente ✅");
             //limpieza
             setFormData({
                 nombre: "",
@@ -114,7 +116,7 @@ const CrearCurso = () => {
             setSelectedDocIds([]);
         } catch (err) {
             console.error("Error creando curso:", err);
-            alert(err?.message || "Error al crear el curso.");
+            setError(err?.message || "Error al crear el curso.");
         } finally {
             setLoading(false);
         }
@@ -223,34 +225,34 @@ const CrearCurso = () => {
 
                                     {tiposDocs.length === 0 ? (
                                         <div className="text-muted">
-                                        No hay tipos de documentos disponibles (o no cargaron).
+                                            No hay tipos de documentos disponibles (o no cargaron).
                                         </div>
                                     ) : (
                                         <div className="border rounded p-3">
-                                        {tiposDocs.map((doc) => (
-                                            <div className="form-check" key={doc.id_tipo_doc}>
-                                            <input
-                                                className="form-check-input"
-                                                type="checkbox"
-                                                id={`tipo-doc-${doc.id_tipo_doc}`}
-                                                checked={selectedDocIds.includes(doc.id_tipo_doc)}
-                                                onChange={() => toggleDoc(doc.id_tipo_doc)}
-                                            />
-                                            <label
-                                                className="form-check-label"
-                                                htmlFor={`tipo-doc-${doc.id_tipo_doc}`}
-                                            >
-                                                {doc.nombre}
-                                            </label>
-                                            </div>
-                                        ))}
+                                            {tiposDocs.map((doc) => (
+                                                <div className="form-check" key={doc.id_tipo_doc}>
+                                                    <input
+                                                        className="form-check-input"
+                                                        type="checkbox"
+                                                        id={`tipo-doc-${doc.id_tipo_doc}`}
+                                                        checked={selectedDocIds.includes(doc.id_tipo_doc)}
+                                                        onChange={() => toggleDoc(doc.id_tipo_doc)}
+                                                    />
+                                                    <label
+                                                        className="form-check-label"
+                                                        htmlFor={`tipo-doc-${doc.id_tipo_doc}`}
+                                                    >
+                                                        {doc.nombre}
+                                                    </label>
+                                                </div>
+                                            ))}
                                         </div>
                                     )}
 
                                     <small className="text-muted">
                                         Selecciona los documentos obligatorios para este curso. El cliente solo podrá subir estos.
                                     </small>
-                                    </div>
+                                </div>
 
                                 <hr className="my-4" />
                                 <h5 className="mb-3">Horario del Curso</h5>
