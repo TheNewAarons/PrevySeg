@@ -27,7 +27,9 @@ const register = async (userData) => {
             return data;
         } else {
             // Manejo de errores de validación (ej. RUT ya existe, contraseña débil)
-            throw new Error(data.message || data.detail || 'Error en el registro');
+            // Manejo de errores de validación
+            const errorMessage = data.message || data.detail || JSON.stringify(data);
+            throw new Error(errorMessage);
         }
     } catch (error) {
         console.error('Error durante el registro:', error);

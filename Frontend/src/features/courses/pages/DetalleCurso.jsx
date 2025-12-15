@@ -66,9 +66,9 @@ const DetalleCurso = () => {
     const formatMoneyCLP = (value) => {
         if (value === null || value === undefined) return '—';
         try {
-            return new Intl.NumberFormat('es-CL').format(Number(value));
+        return new Intl.NumberFormat('es-CL').format(Number(value));
         } catch {
-            return String(value);
+        return String(value);
         }
     };
 
@@ -255,31 +255,18 @@ const DetalleCurso = () => {
                                     <h5 className="mb-0"><i className="bi bi-clock me-2"></i>Horario</h5>
                                 </div>
                                 <div className="card-body">
-                                    {course.horarios && course.horarios.length > 0 ? (
-                                        <div className="list-group list-group-flush">
-                                            {course.horarios.map((horario, idx) => (
-                                                <div key={idx} className="list-group-item px-0 d-flex justify-content-between align-items-center">
-                                                    <span className="fw-bold">{horario.dia_semana}</span>
-                                                    <span>{formatTime(horario.hora_inicio)} - {formatTime(horario.hora_fin)}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <div className="mb-3">
-                                                <strong>Días de la Semana:</strong>
-                                                <p className="mt-1">{course.dias_semana || '—'}</p>
-                                            </div>
-                                            <div className="mb-3">
-                                                <strong>Hora de Inicio:</strong>
-                                                <p className="mt-1">{formatTime(course.hora_inicio)}</p>
-                                            </div>
-                                            <div className="mb-3">
-                                                <strong>Hora de Fin:</strong>
-                                                <p className="mt-1">{formatTime(course.hora_fin)}</p>
-                                            </div>
-                                        </>
-                                    )}
+                                    <div className="mb-3">
+                                        <strong>Días de la Semana:</strong>
+                                        <p className="mt-1">{course.dias_semana || '—'}</p>
+                                    </div>
+                                    <div className="mb-3">
+                                        <strong>Hora de Inicio:</strong>
+                                        <p className="mt-1">{formatTime(course.hora_inicio)}</p>
+                                    </div>
+                                    <div className="mb-3">
+                                        <strong>Hora de Fin:</strong>
+                                        <p className="mt-1">{formatTime(course.hora_fin)}</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -294,16 +281,16 @@ const DetalleCurso = () => {
                                     <div className="mb-3">
                                         <strong>Documentos Requeridos:</strong>
                                         {requiredDocs.length === 0 ? (
-                                            <p className="text-muted mb-0">No se configuraron documentos requeridos para este curso.</p>
-                                        ) : (
-                                            <div className="d-flex flex-wrap gap-2">
-                                                {requiredDocs.map((doc) => (
-                                                    <span key={doc.id_tipo_doc} className="badge bg-dark">
-                                                        {doc.nombre}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        )}
+                                        <p className="text-muted mb-0">No se configuraron documentos requeridos para este curso.</p>
+                                    ) : (
+                                        <div className="d-flex flex-wrap gap-2">
+                                        {requiredDocs.map((doc) => (
+                                            <span key={doc.id_tipo_doc} className="badge bg-dark">
+                                            {doc.nombre}
+                                            </span>
+                                        ))}
+                                        </div>
+                                    )}
                                     </div>
                                 </div>
                             </div>

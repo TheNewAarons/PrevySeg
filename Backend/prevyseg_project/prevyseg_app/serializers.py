@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import InscripcionCurso, Rol, Usuario, Curso, DocumentoSubido, TipoDocumento, HorarioCurso
+from .models import InscripcionCurso, Rol, Usuario, Curso, DocumentoSubido, TipoDocumento
 from django.contrib.auth import authenticate
 from django.utils import timezone
 import re
@@ -155,11 +155,6 @@ class TipoDeDocumentoSerializers(serializers.ModelSerializer):
         model = TipoDocumento
         fields = ['id_tipo_doc', 'nombre']
 
-class HorarioCursoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = HorarioCurso
-        fields = ['dia_semana', 'hora_inicio', 'hora_fin']
-
 class CursoSerializer(serializers.ModelSerializer):
     documentos_requeridos = TipoDeDocumentoSerializers(many=True, read_only=True)
     documentos_requeridos_ids = serializers.PrimaryKeyRelatedField(
@@ -170,8 +165,6 @@ class CursoSerializer(serializers.ModelSerializer):
         required = False    
 
     )
-    horarios = HorarioCursoSerializer(many=True, required=False)
-
     class Meta:
         model = Curso
         fields = '__all__'
@@ -185,37 +178,19 @@ class CursoSerializer(serializers.ModelSerializer):
                 })
         return data
 
-    def create(self, validated_data):
-        documentos_ids = validated_data.pop('documentos_requeridos', []) 
-        horarios_data = validated_data.pop('horarios', [])
-
-        curso = Curso.objects.create(**validated_data) #crea el curso primero
-        
-        # Asignar documentos
-        if documentos_ids:
-             curso.documentos_requeridos.set(documentos_ids)
-
-        # Crear horarios
-        for horario in horarios_data:
-            HorarioCurso.objects.create(curso=curso, **horario)
-
-        return curso
-
 class CursoDetailSerializer(serializers.ModelSerializer):
     #Serializer para detalle del curso con documentos requeridos
     documentos_requeridos = TipoDeDocumentoSerializers(many=True, read_only=True)
     ya_inscrito = serializers.SerializerMethodField()
     documentos_subidos = serializers.SerializerMethodField()
     
-    horarios = HorarioCursoSerializer(many=True, read_only=True)
-
     class Meta:
         model = Curso
         fields = [
             'id', 'nombre', 'descripcion', 'horas', 'profesor', 'valor',
             'tipo_certificado', 'fecha_inicio', 'cupos_disponibles',
             'modalidad', 'area', 'dias_semana', 'hora_inicio', 'hora_fin',
-            'estado', 'documentos_requeridos', 'ya_inscrito', 'documentos_subidos', 'horarios'
+            'estado', 'documentos_requeridos', 'ya_inscrito', 'documentos_subidos'
         ]
     
     def get_ya_inscrito(self, obj):

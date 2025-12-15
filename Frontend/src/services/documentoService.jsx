@@ -1,14 +1,26 @@
 // services/documentoService.jsx
 import authService from "./authService";
-import { authenticatedFetch } from "../utils/apiHelpers";
+import { getAuthHeaders } from "../utils/apiHelpers";
 const API_URL = "http://127.0.0.1:8000/api/documentos/";
 const USER_API_URL = "http://127.0.0.1:8000/api/usuarios/";
 const CURSOS_API_URL = "http://127.0.0.1:8000/api/cursos/"
 
 const getDocumentos = async () => {
     try {
-        const response = await authenticatedFetch(API_URL, {
-            method: "GET"
+        const user = authService.getCurrentUser();
+
+        if (!user) {
+            throw new Error("Usuario no autenticado");
+        }
+
+        const token = user.token;
+
+        const response = await fetch(API_URL, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            }
         });
 
         const data = await response.json();
@@ -29,8 +41,20 @@ const getDocumentos = async () => {
 
 const getUsuarioById = async (id) => {
     try {
-        const response = await authenticatedFetch(`${USER_API_URL}${id}/`, {
-            method: "GET"
+        const user = authService.getCurrentUser();
+
+        if (!user) {
+            throw new Error("Usuario no autenticado");
+        }
+
+        const token = user.token;
+
+        const response = await fetch(`${USER_API_URL}${id}/`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            }
         });
 
         const data = await response.json();
@@ -50,25 +74,36 @@ const getUsuarioById = async (id) => {
 };
 const getDocumentosPendientes = async () => {
     try {
-        const response = await authenticatedFetch(`${API_URL}pendientes/`, {
-            method: "GET"
+        const user = authService.getCurrentUser();
+        console.log("user desde authService en getDocumentosPendientes:", user);
+
+        if (!user) throw new Error("Usuario no autenticado");
+
+        const token = user.token;
+        console.log("Token usado en getDocumentosPendientes:", token);
+
+        const response = await fetch(`${API_URL}pendientes/`, {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
         });
 
         const data = await response.json();
         console.log("Respuesta backend documentos/pendientes:", data);
 
         if (!response.ok) {
-            // Si el problema es de token inválido, podemos limpiar sesión
-            if (data.code === "token_not_valid") {
-                console.warn("Token inválido, limpiando sesión...");
-                authService.logout?.(); // por si tienes logout
-            }
+        // Si el problema es de token inválido, podemos limpiar sesión
+        if (data.code === "token_not_valid") {
+            console.warn("Token inválido, limpiando sesión...");
+            authService.logout?.(); // por si tienes logout
+        }
 
-            const error = new Error(
-                data.detail || "Error al obtener documentos pendientes"
-            );
-            error.status = response.status;
-            throw error;
+        const error = new Error(
+            data.detail || "Error al obtener documentos pendientes"
+        );
+        error.status = response.status;
+        throw error;
         }
 
         return data;
@@ -79,11 +114,19 @@ const getDocumentosPendientes = async () => {
 };
 
 const subirDocumentoCurso = async (cursoId, tipoDocumentoId, file) => {
-    const response = await authenticatedFetch(
+    const headers = getAuthHeaders();
+    const { "Content-Type": _, ...safeHeaders } = headers;
+
+    const formData = new FormData();
+    formData.append("tipo_documento", tipoDocumentoId);
+    formData.append("archivo", file); // ✅ CLAVE
+
+    const response = await fetch(
         `http://127.0.0.1:8000/api/cursos/${cursoId}/documentos/subir/`,
         {
-            method: "POST",
-            body: formData,
+        method: "POST",
+        headers: safeHeaders,
+        body: formData,
         }
     );
 
@@ -99,8 +142,17 @@ const subirDocumentoCurso = async (cursoId, tipoDocumentoId, file) => {
 
 const aprobarDocumento = async (id) => {
     try {
-        const response = await authenticatedFetch(`${API_URL}${id}/aprobar/`, {
-            method: "POST"
+        const user = authService.getCurrentUser();
+        if (!user) throw new Error("Usuario no autenticado");
+
+        const token = user.token;
+
+        const response = await fetch(`${API_URL}${id}/aprobar/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            }
         });
 
         if (!response.ok) {
@@ -118,9 +170,18 @@ const aprobarDocumento = async (id) => {
 };
 const rechazarDocumento = async (id, observacion) => {
     try {
-        const response = await authenticatedFetch(`${API_URL}${id}/rechazar/`, {
+        const user = authService.getCurrentUser();
+        if (!user) throw new Error("Usuario no autenticado");
+
+        const token = user.token;
+
+        const response = await fetch(`${API_URL}${id}/rechazar/`, {
             method: "POST",
-            body: JSON.stringify({ observacion })
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ observacion })  // enviamos observación
         });
 
         if (!response.ok) {
@@ -137,13 +198,16 @@ const rechazarDocumento = async (id, observacion) => {
     }
 };
 const getDocumentosCurso = async (cursoId) => {
-    const response = await authenticatedFetch(`${CURSOS_API_URL}${cursoId}/documentos/`, {
+    const headers = getAuthHeaders();
+    const { "Content-Type": _, ...safeHeaders } = headers;
+    const response = await fetch(`${CURSOS_API_URL}${cursoId}/documentos/`, {
         method: "GET",
+        headers,
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.detail || "Error obteniendo documentos del curso");
     return data;
-};
+    };
 
 
 

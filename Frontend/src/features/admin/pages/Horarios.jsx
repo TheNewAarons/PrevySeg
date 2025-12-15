@@ -22,7 +22,7 @@ const Horarios = () => {
     }, []);
 
     useEffect(() => {
-        applyFilters();
+        applyFilters(); 
     }, [filterDay, searchTerm, courses]);
 
     const fetchCourses = async () => {
@@ -56,12 +56,9 @@ const Horarios = () => {
 
         // Filtrar por día de la semana
         if (filterDay) {
-            filtered = filtered.filter(course => {
-                if (course.horarios && course.horarios.length > 0) {
-                    return course.horarios.some(h => h.dia_semana === filterDay);
-                }
-                return course.dias_semana && course.dias_semana.toLowerCase().includes(filterDay.toLowerCase());
-            });
+            filtered = filtered.filter(course =>
+                course.dias_semana && course.dias_semana.toLowerCase().includes(filterDay.toLowerCase())
+            );
         }
 
         // Filtrar por búsqueda
@@ -171,7 +168,8 @@ const Horarios = () => {
                                             <tr>
                                                 <th>Curso</th>
                                                 <th>Profesor</th>
-                                                <th>Días y Horarios</th>
+                                                <th>Días</th>
+                                                <th>Horario</th>
                                                 <th>Modalidad</th>
                                                 <th>Fecha Inicio</th>
                                             </tr>
@@ -189,38 +187,32 @@ const Horarios = () => {
                                                     </td>
                                                     <td>{course.profesor || '—'}</td>
                                                     <td>
-                                                        {course.horarios && course.horarios.length > 0 ? (
-                                                            <div className="d-flex flex-column gap-1">
-                                                                {course.horarios.map((horario, idx) => (
-                                                                    <div key={idx} className="small">
-                                                                        <span className="badge bg-light text-dark border me-2">
-                                                                            {horario.dia_semana}
-                                                                        </span>
-                                                                        <span>
-                                                                            {formatTime(horario.hora_inicio)} - {formatTime(horario.hora_fin)}
-                                                                        </span>
-                                                                    </div>
+                                                        {course.dias_semana ? (
+                                                            <div className="d-flex flex-wrap gap-1">
+                                                                {course.dias_semana.split(',').map((dia, idx) => (
+                                                                    <span key={idx} className="badge bg-info text-dark">
+                                                                        {dia.trim()}
+                                                                    </span>
                                                                 ))}
-                                                            </div>
-                                                        ) : (course.dias_semana ? (
-                                                            <div>
-                                                                <div className="mb-1">
-                                                                    <span className="text-muted small">Días: </span>
-                                                                    {course.dias_semana}
-                                                                </div>
-                                                                <div>
-                                                                    <span className="text-muted small">Hora: </span>
-                                                                    {formatTime(course.hora_inicio)} - {formatTime(course.hora_fin)}
-                                                                </div>
                                                             </div>
                                                         ) : (
                                                             <span className="text-muted">Sin asignar</span>
-                                                        ))}
+                                                        )}
+                                                    </td>
+                                                    <td>
+                                                        {course.hora_inicio && course.hora_fin ? (
+                                                            <span>
+                                                                <i className="bi bi-clock me-1"></i>
+                                                                {formatTime(course.hora_inicio)} - {formatTime(course.hora_fin)}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-muted">Sin asignar</span>
+                                                        )}
                                                     </td>
                                                     <td>
                                                         <span className={`badge ${course.modalidad === 'Online' ? 'bg-primary' :
-                                                            course.modalidad === 'Presencial' ? 'bg-success' :
-                                                                'bg-warning text-dark'
+                                                                course.modalidad === 'Presencial' ? 'bg-success' :
+                                                                    'bg-warning text-dark'
                                                             }`}>
                                                             {course.modalidad}
                                                         </span>

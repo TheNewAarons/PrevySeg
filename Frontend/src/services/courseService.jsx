@@ -1,6 +1,6 @@
 // services/courseService.jsx
 import authService from "./authService";
-import { authenticatedFetch } from "../utils/apiHelpers";
+import { getAuthHeaders } from "../utils/apiHelpers";
 
 
 const API_URL = "http://127.0.0.1:8000/api/cursos/";
@@ -10,12 +10,15 @@ const API_URL = "http://127.0.0.1:8000/api/cursos/";
  */
 const getCourses = async (params = {}) => {
     try {
+        const headers = getAuthHeaders(); 
+
         // Construir querystring dinámico
         const queryString = new URLSearchParams(params).toString();
         const url = queryString ? `${API_URL}?${queryString}` : API_URL;
 
-        const response = await authenticatedFetch(url, {
-            method: "GET"
+        const response = await fetch(url, {
+            method: "GET",
+            headers: headers
         });
 
         const data = await response.json();
@@ -42,8 +45,11 @@ const getCourses = async (params = {}) => {
  */
 const getCourseById = async (id) => {
     try {
-        const response = await authenticatedFetch(`${API_URL}${id}/`, {
-            method: "GET"
+        const headers = getAuthHeaders(); 
+
+        const response = await fetch(`${API_URL}${id}/`, {
+            method: "GET",
+            headers: headers
         });
 
         const data = await response.json();
@@ -70,8 +76,11 @@ const getCourseById = async (id) => {
  */
 const createCourse = async (courseData) => {
     try {
-        const response = await authenticatedFetch(API_URL, {
+        const headers = getAuthHeaders();
+
+        const response = await fetch(API_URL, {
             method: "POST",
+            headers: headers,
             body: JSON.stringify(courseData)
         });
 
@@ -100,8 +109,11 @@ const createCourse = async (courseData) => {
  */
 const updateCourse = async (id, courseData) => {
     try {
-        const response = await authenticatedFetch(`${API_URL}${id}/`, {
+        const headers = getAuthHeaders(); 
+
+        const response = await fetch(`${API_URL}${id}/`, {
             method: "PUT",
+            headers: headers,
             body: JSON.stringify(courseData)
         });
 
@@ -130,8 +142,11 @@ const updateCourse = async (id, courseData) => {
  */
 const deleteCourse = async (id) => {
     try {
-        const response = await authenticatedFetch(`${API_URL}${id}/`, {
-            method: "DELETE"
+        const headers = getAuthHeaders(); 
+
+        const response = await fetch(`${API_URL}${id}/`, {
+            method: "DELETE",
+            headers: headers
         });
 
         if (!response.ok) {
@@ -154,8 +169,10 @@ const deleteCourse = async (id) => {
 
 
 const getTiposDocumentos = async () => {
-    const response = await authenticatedFetch(`${API_URL}tipos-documento/`, {
+    const headers = getAuthHeaders();
+    const response = await fetch(`${API_URL}tipos-documento/`, {
         method: "GET",
+        headers,
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.detail || "Error al obtener tipos de documentos");
@@ -163,8 +180,11 @@ const getTiposDocumentos = async () => {
 };
 
 const getInscripcionDetalle = async (cursoId) => {
-    const response = await authenticatedFetch(`${API_URL}${cursoId}/inscripcion-detalle/`, {
+    const headers = getAuthHeaders();
+
+    const response = await fetch(`${API_URL}${cursoId}/inscripcion-detalle/`, {
         method: "GET",
+        headers,
     });
 
     const contentType = response.headers.get("content-type") || "";
@@ -183,8 +203,10 @@ const getInscripcionDetalle = async (cursoId) => {
 };
 
 const verificarInscripcion = async (cursoId) => {
-    const response = await authenticatedFetch(`${API_URL}${cursoId}/verificar-inscripcion/`, {
+    const headers = getAuthHeaders();
+    const response = await fetch(`${API_URL}${cursoId}/verificar-inscripcion/`, {
         method: "GET",
+        headers,
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.detail || "Error al verificar inscripción");
@@ -192,8 +214,11 @@ const verificarInscripcion = async (cursoId) => {
 };
 
 const finalizarInscripcion = async (cursoId) => {
-    const response = await authenticatedFetch(`${API_URL}${cursoId}/finalizar-inscripcion/`, {
+    const headers = getAuthHeaders();
+
+    const response = await fetch(`${API_URL}${cursoId}/finalizar-inscripcion/`, {
         method: "POST",
+        headers,
     });
 
     const contentType = response.headers.get("content-type") || "";
@@ -212,12 +237,13 @@ const finalizarInscripcion = async (cursoId) => {
 };
 //para obtener cursos disponibles (borrar si es necesario) se usara para probar funcionalidades
 const getCursosDisponibles = async (params = {}) => {
+    const headers = getAuthHeaders();
     const queryString = new URLSearchParams(params).toString();
     const url = queryString
         ? `${API_URL}cursos-disponibles/?${queryString}`
         : `${API_URL}cursos-disponibles/`;
 
-    const response = await authenticatedFetch(url, { method: "GET" });
+    const response = await fetch(url, { method: "GET", headers });
 
     const contentType = response.headers.get("content-type") || "";
     const data = contentType.includes("application/json")
@@ -229,8 +255,11 @@ const getCursosDisponibles = async (params = {}) => {
 };
 //Inscripciones
 const getMisInscripciones = async () => {
-    const res = await authenticatedFetch(`${API_URL}mis-inscripciones/`, {
+    const headers = getAuthHeaders(); // ya incluye Authorization bien
+
+    const res = await fetch(`${API_URL}mis-inscripciones/`, {
         method: "GET",
+        headers,
     });
 
     const contentType = res.headers.get("content-type") || "";
@@ -249,8 +278,11 @@ const getMisInscripciones = async () => {
 };
 //Inscripcion para visualizacion de Admin
 const getInscripcionesUsuario = async (usuarioId) => {
-    const response = await authenticatedFetch(
-        `${API_URL}usuarios/${usuarioId}/inscripciones/`
+    const headers = getAuthHeaders();
+
+    const response = await fetch(
+        `${API_URL}usuarios/${usuarioId}/inscripciones/`,
+        { headers }
     );
 
     const contentType = response.headers.get("content-type") || "";

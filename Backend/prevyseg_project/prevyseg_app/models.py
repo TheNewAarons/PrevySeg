@@ -145,26 +145,6 @@ class Curso(models.Model):
     def __str__(self):
         return self.nombre
 
-class HorarioCurso(models.Model):
-    DIAS_SEMANA = [
-        ('Lunes', 'Lunes'),
-        ('Martes', 'Martes'),
-        ('Miércoles', 'Miércoles'),
-        ('Jueves', 'Jueves'),
-        ('Viernes', 'Viernes'),
-        ('Sábado', 'Sábado'),
-    ]
-    curso = models.ForeignKey(Curso, related_name='horarios', on_delete=models.CASCADE)
-    dia_semana = models.CharField(max_length=20, choices=DIAS_SEMANA)
-    hora_inicio = models.TimeField()
-    hora_fin = models.TimeField()
-
-    class Meta:
-        unique_together = ('curso', 'dia_semana')
-
-    def __str__(self):
-        return f"{self.curso.nombre} - {self.dia_semana} ({self.hora_inicio} - {self.hora_fin})"
-
 
 class DocumentoSubido(models.Model):
     ESTADOS = [
