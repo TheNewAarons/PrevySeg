@@ -1,9 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import BotonVolver from "../../../components/common/ButtonBack";
-import courseService from "../../../services/courseService.jsx"; // <-- usa tu service
-import { getAuthHeaders } from "../../../utils/apiHelpers";      // <-- para headers
-
+import courseService from "../../../services/courseService.jsx";
+import { getAuthHeaders } from "../../../utils/apiHelpers";      
 const UserDetailPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -31,15 +30,15 @@ const UserDetailPage = () => {
             return;
             }
 
-            // 1) Perfil usuario (mantengo tu flujo y URL)
+            
             const resUser = await fetch(`http://localhost:8000/api/usuarios/${id}/`, {
             method: "GET",
             headers: {
-                ...getAuthHeaders(), // usa tu helper (incluye Bearer)
+                ...getAuthHeaders(), 
             },
             });
 
-            // Manejo de errores como tú lo tenías
+            
             if (!resUser.ok) {
             if (resUser.status === 401) {
                 alert("Sesión caducada. Inicia sesión nuevamente.");
@@ -56,8 +55,7 @@ const UserDetailPage = () => {
             const userData = await resUser.json();
             if (mounted) setUsuario(userData);
 
-            // 2) Inscripciones del usuario (ADMIN) - nuevo endpoint
-            //    IMPORTANTE: evita el error HTML->JSON porque courseService ya valida content-type
+            
             const insData = await courseService.getInscripcionesUsuario(id);
 
             if (mounted) {
@@ -75,16 +73,14 @@ const UserDetailPage = () => {
         return () => { mounted = false; };
     }, [id, navigate]);
 
-    // ---- UI helpers (mantener orden Curso 1 / Curso 2) ----
+
     const cursosSlots = useMemo(() => {
         const c1 = inscripciones?.[0] || null;
         const c2 = inscripciones?.[1] || null;
         return [c1, c2];
     }, [inscripciones]);
 
-    // Documentos "por firmar" (placeholder realista):
-    // Aquí puedes mapear otra API cuando la tengas.
-    // Por ahora: si el usuario tiene documentos RECHAZADOS/EN_REVISION, los mostramos como pendientes.
+
     const documentosPendientes = useMemo(() => {
         const docs = [];
         for (const ins of inscripciones || []) {
@@ -101,11 +97,7 @@ const UserDetailPage = () => {
         return docs;
     }, [inscripciones]);
 
-    // Empresas (si aún no existe relación en modelo, mostramos mensaje)
     const empresas = useMemo(() => {
-        // Ajusta esto cuando tengas campo real (ej: usuario.empresa, usuario.empresas, etc.)
-        // Ejemplo si fuera usuario.empresa_nombre:
-        // return usuario?.empresa_nombre ? [usuario.empresa_nombre] : [];
         return [];
     }, [usuario]);
 

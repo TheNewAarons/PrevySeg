@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import BotonVolver from "../../../components/common/ButtonBack";
 import documentoService from "../../../services/documentoService.jsx";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../services/authContext.jsx";
+
 
 const AprobarPapeles = () => {
     const [usuarioDetalle, setUsuarioDetalle] = useState({}); //guardamos informacion del usuario en cada documento
@@ -8,21 +11,41 @@ const AprobarPapeles = () => {
     const [rechazoAbierto, setRechazoAbierto] = useState({});//controlamos que documentos tienen la opcion de rechazo abierto
     const [detallesAbiertos, setDetallesAbiertos] = useState({});//controlamos los documentos que tienen los detalles expandidos
     const [observaciones, setObservaciones] = useState({});//guardamos el texto de observacion para cada documento(en caso de ser rechazado)
+    const navigate = useNavigate()
+    const {user, logout} = useAuth()
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
 
     useEffect(() => {
-        const fetchDocs = async () => {
-        try {
-            // 🔹 AHORA usamos solo los pendientes (EN_REVISION)
-            const data = await documentoService.getDocumentosPendientes();
-            setDocumentos(data);
-            console.log("Documentos pendientes:", data);
-        } catch (error) {
-            console.error("Error cargando documentos pendientes:", error);
+        if(!user){
+            console.log('no hay usuarios, se redirigue al inicio de sesion')
+            navigate('/login')
         }
-        };
+    }, [user, navigate])
 
-        fetchDocs();
-    }, []);
+    const fetchDocumentos = async () => {
+        if (!user) return
+
+        try{
+            setLoading(true)
+            setError(null)
+            const data = await documentoService.getDocumentosPendientes()
+            setDocumentos(data)
+            console.log('Documentos pendientes:', data)
+        } catch (error){
+            console.error("Error cargando documentos pendientes:", error);
+            setError(error.message);
+            
+            if (error.message === 'NO_TOKEN' || error.status === 401) {
+                logout();
+            }
+        } finally {
+            setLoading(false)
+        }
+    }
+    useEffect(() => {
+        fetchDocumentos();
+    }, [user, logout]);
     //controlamos el boton ver detalles en caso de que se haya abirto, se cierra y biseversa 
     const handleVerDetalle = async (doc) => {
         const idDoc = doc.id_doc_subido;
@@ -44,33 +67,36 @@ const AprobarPapeles = () => {
         if (usuarioDetalle[idDoc]) return;
 
         try {
-        const data = await documentoService.getUsuarioById(idUsuario);
-        setUsuarioDetalle((prev) => ({
-            ...prev,
-            [idDoc]: data,
-        }));
+            const data = await documentoService.getUsuarioById(idUsuario);
+            setUsuarioDetalle((prev) => ({
+                ...prev,
+                [idDoc]: data,
+            }));
         } catch (error) {
-        console.error("Error obteniendo usuario:", error);
+            console.error("Error obteniendo usuario:", error);
         }
     };
 
     const handleAprobar = async (idDoc) => {
+        if (!user) return
+
         try {
-        await documentoService.aprobarDocumento(idDoc);
+            await documentoService.aprobarDocumento(idDoc);
 
-        //Actualiza estado local
-        setDocumentos((prevDocs) =>
-            prevDocs.map((doc) =>
-            doc.id_doc_subido === idDoc
-                ? { ...doc, estado_revision: "APROBADO" } //dejarlo igual que en backend
-                : doc
-            )
-        );
+            //Actualiza estado local
+            setDocumentos((prevDocs) =>
+                prevDocs.map((doc) =>
+                doc.id_doc_subido === idDoc
+                    ? { ...doc, estado_revision: "APROBADO" } //dejarlo igual que en backend
+                    : doc
+                )
+            );
 
-        alert("Documento aprobado correctamente");
+            alert("Documento aprobado correctamente");
+            await fetchDocumentos()
         } catch (error) {
-        console.error(error);
-        alert("Error al aprobar documento");
+            console.error(error);
+            alert("Error al aprobar documento");
         }
     };
 
@@ -98,22 +124,23 @@ const AprobarPapeles = () => {
         }
 
         try {
-        await documentoService.rechazarDocumento(idDoc, observacion);
+            await documentoService.rechazarDocumento(idDoc, observacion);
 
-        // Actualizamos estado local
-        setDocumentos((prevDocs) =>
-            prevDocs.map((doc) =>
-            doc.id_doc_subido === idDoc
-                ? { ...doc, estado_revision: "RECHAZADO" }
-                : doc
-            )
-        );
+            //Actualizamos estado local
+            setDocumentos((prevDocs) =>
+                prevDocs.map((doc) =>
+                doc.id_doc_subido === idDoc
+                    ? { ...doc, estado_revision: "RECHAZADO" }
+                    : doc
+                )
+            );
 
-        alert("Documento rechazado correctamente");
+            alert("Documento rechazado correctamente");
+            await fetchDocumentos()
         } catch (error) {
-        console.error(error);
-        alert("Error al rechazar documento");
-        }
+            console.error(error);
+            alert("Error al rechazar documento");
+            }
     };
 
     const formatearEstado = (estado) => {

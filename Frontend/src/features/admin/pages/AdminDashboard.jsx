@@ -6,11 +6,12 @@ import '../styles/AdminDashboard.css';
 import { useAuth } from '../../../services/authContext';
 import authService from '../../../services/authService';
 import courseService from '../../../services/courseService';
-
+import documentoService from '../../../services/documentoService';
 const AdminDashboard = () => {
     const navigate = useNavigate();
     const { user, logout: authLogout } = useAuth(); 
-    
+    const [documentCount, setDocumentCount] = useState(0);
+    const [enRevisionCount, setEnRevisionCount] = useState(0)
     const [userName, setUserName] = useState('Administrador');
     const [courseCount, setCourseCount] = useState(0);
     const [inProgressCount, setInProgressCount] = useState(0);
@@ -35,6 +36,7 @@ const AdminDashboard = () => {
 
         // Cargar estadísticas de cursos
         fetchCourseStats();
+        fetchDocumentsStats()
     }, [user, navigate]);
 
     const fetchCourseStats = async () => {
@@ -62,10 +64,32 @@ const AdminDashboard = () => {
         }
     };
 
-    const handleLogout = () => {  // 🔑 Cambiar nombre aquí
+    const fetchDocumentsStats = async () => {
+        try{
+            setLoading(true)
+            setError(null)
+
+            const documents = await documentoService.getDocumentos()
+            setDocumentCount(documents?.length || 0)
+
+            const enRevision = documents?.filter(d => d.estado_revision == 'EN_REVISION').length || 0 
+            setEnRevisionCount(enRevision)
+            
+
+        } catch (error){
+            console.error('Error al cargar documentos:', error)
+            setError(error.message)
+            if (error.message.includes('Sesión expirada') || error.message.includes('No hay sesión')) {
+                authLogout();
+            }
+        } finally{
+            setLoading(false)
+        }
+    }
+    const handleLogout = () => {  
         if (window.confirm('¿Estás seguro de que deseas cerrar sesión?')) {
             authService.logout();
-            authLogout(); // 🔑 Llamar a la función del contexto
+            authLogout(); 
             navigate('/login', { replace: true });
         }
     };
@@ -105,7 +129,7 @@ const AdminDashboard = () => {
         <div className="administrador-dashboard">
             <nav className="navbar navbar-expand-lg navbar-light">
                 <div className="container-fluid px-4">
-                    <a className="navbar-brand" href="/">
+                    <a className="navbar-brand" href="/administrador/dashboard">
                         <img src="/images/logos/logo.png" alt="PrevySeg Logo" />
                     </a>
 
@@ -117,7 +141,7 @@ const AdminDashboard = () => {
                             </div>
                             <img src="/placeholder.svg?height=40&width=40" alt="Perfil" className="user-avatar" />
                         </div>
-                        {/* 🔑 Cambiar onClick a handleLogout */}
+                        {/* Cambiar onClick a handleLogout */}
                         <button className="btn btn-logout" onClick={handleLogout}>
                             <i className="bi bi-box-arrow-right me-1"></i>
                             <span className="d-none d-sm-inline">Cerrar Sesión</span>
@@ -157,8 +181,8 @@ const AdminDashboard = () => {
                                 <div className="stat-value">{courseCount}</div>
                                 <div className="stat-label">Cursos Disponibles</div>
                             </div>
-                            <div className="stat-card">
-                                <div className="stat-value">23</div>
+                            <div className="stat-card" onClick={() => navegarModulo('aprobar-papeles')} style={{ cursor : 'pointer' }}>
+                                <div className="stat-value">{enRevisionCount}</div>
                                 <div className="stat-label">Pendientes Aprobación</div>
                             </div>
                             <div className="stat-card" onClick={() => navigate('/administrador/cursos/en-curso')} style={{ cursor: 'pointer' }}>

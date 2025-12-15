@@ -78,7 +78,7 @@ const ClienteDashboard = () => {
     <div className="cliente-dashboard">
       <nav className="navbar navbar-expand-lg sticky-top">
         <div className="container-fluid">
-          <a className="navbar-brand" href="/">
+          <a className="navbar-brand" href="/cliente/dashboard">
             <img src="/images/logos/logo.png" alt="PrevySeg Logo" style={{ height: 44 }} />
           </a>
           <div className="user-profile ms-auto">
