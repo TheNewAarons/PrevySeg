@@ -74,7 +74,7 @@ const CreateUserForm = ({ onUserCreated }) => {
             if (!dataToSend.fecha_nacimiento) dataToSend.fecha_nacimiento = null;
             if (!dataToSend.lugar_trabajo) dataToSend.lugar_trabajo = null;
 
-            console.log("Enviando datos:", dataToSend); // Para depurar en consola
+            console.log("Enviando datos:", dataToSend);
 
             const response = await fetch('http://localhost:8000/api/usuarios/', {
                 method: "POST",
@@ -82,7 +82,7 @@ const CreateUserForm = ({ onUserCreated }) => {
                     "Authorization": `Bearer ${token}`,
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify(dataToSend) //Enviamos los datos limpios
+                body: JSON.stringify(dataToSend) 
             });
 
             //Si el token expiró (401), redirigir al login

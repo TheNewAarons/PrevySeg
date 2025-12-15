@@ -77,7 +77,12 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     class Meta:
         verbose_name_plural = "Usuarios"
 
+class TipoDocumento(models.Model):
+    id_tipo_doc = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=100, unique=True)
 
+    def __str__(self):
+        return self.nombre
 
 class Curso(models.Model):
     MODALIDAD_CHOICES = [
@@ -101,7 +106,7 @@ class Curso(models.Model):
     tipo_certificado = models.CharField(max_length=100)
     fecha_inicio = models.DateField()
     cupos_disponibles = models.PositiveIntegerField()
-    documentos_requeridos = models.TextField(blank=True, null=True)
+    documentos_requeridos = models.ManyToManyField(TipoDocumento, related_name ='cursos',blank=True, help_text = "Documentos requeridos para inscribirse ")
     created_at = models.DateTimeField(auto_now_add=True)
     modalidad = models.CharField(
         max_length=20,
@@ -141,13 +146,6 @@ class Curso(models.Model):
         return self.nombre
 
 
-class TipoDocumento(models.Model):
-    id_tipo_doc = models.AutoField(primary_key=True)
-    nombre = models.CharField(max_length=100, unique=True)
-
-    def __str__(self):
-        return self.nombre
-
 class DocumentoSubido(models.Model):
     ESTADOS = [
         ('APROBADO', 'Aprobado'),
@@ -169,7 +167,7 @@ class DocumentoSubido(models.Model):
 # Complemento a RF-10
 class InscripcionCurso(models.Model):
     ESTADOS = [
-        ('iNSCRITO', 'Inscrito'),
+        ('INSCRITO', 'Inscrito'),
         ('EN_CURSO', 'En curso'),
         ('FINALIZADO', 'FINALIZADO'),
     ]

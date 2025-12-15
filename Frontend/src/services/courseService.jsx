@@ -1,6 +1,8 @@
 // services/courseService.jsx
 import authService from "./authService";
 import { getAuthHeaders } from "../utils/apiHelpers";
+
+
 const API_URL = "http://127.0.0.1:8000/api/cursos/";
 
 /**
@@ -165,34 +167,134 @@ const deleteCourse = async (id) => {
     }
 };
 
-/**
- * Inscribe a un usuario en un curso.
- */
-const enrollCourse = async (courseId) => {
-    try {
-        const headers = getAuthHeaders(); 
 
-        const response = await fetch(`${API_URL}${courseId}/inscribir/`, {
-            method: "POST",
-            headers: headers
-        });
+const getTiposDocumentos = async () => {
+    const headers = getAuthHeaders();
+    const response = await fetch(`${API_URL}tipos-documento/`, {
+        method: "GET",
+        headers,
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.detail || "Error al obtener tipos de documentos");
+    return data; // [{id_tipo_doc, nombre}]
+};
 
-        const data = await response.json();
+const getInscripcionDetalle = async (cursoId) => {
+    const headers = getAuthHeaders();
 
-        if (!response.ok) {
-            const error = new Error(data.detail || "Error al inscribir curso");
-            error.status = response.status;
-            throw error;
-        }
+    const response = await fetch(`${API_URL}${cursoId}/inscripcion-detalle/`, {
+        method: "GET",
+        headers,
+    });
 
-        return data;
-    } catch (error) {
-        if (error.message === 'NO_TOKEN') {
-            console.error('No hay sesión activa');
-        }
-        console.error("Error al inscribir curso:", error);
+    const contentType = response.headers.get("content-type") || "";
+    const data = contentType.includes("application/json")
+        ? await response.json()
+        : { detail: await response.text() };
+
+    if (!response.ok) {
+        const error = new Error(data.error || data.detail || "Error al obtener detalle inscripción");
+        error.status = response.status;
+        error.data = data;
         throw error;
     }
+
+    return data;
+};
+
+const verificarInscripcion = async (cursoId) => {
+    const headers = getAuthHeaders();
+    const response = await fetch(`${API_URL}${cursoId}/verificar-inscripcion/`, {
+        method: "GET",
+        headers,
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.detail || "Error al verificar inscripción");
+    return data;
+};
+
+const finalizarInscripcion = async (cursoId) => {
+    const headers = getAuthHeaders();
+
+    const response = await fetch(`${API_URL}${cursoId}/finalizar-inscripcion/`, {
+        method: "POST",
+        headers,
+    });
+
+    const contentType = response.headers.get("content-type") || "";
+    const data = contentType.includes("application/json")
+        ? await response.json()
+        : { detail: await response.text() };
+
+    if (!response.ok) {
+        const error = new Error(data.error || data.detail || "Error al finalizar inscripción");
+        error.status = response.status;
+        error.data = data;
+        throw error;
+    }
+
+    return data;
+};
+//para obtener cursos disponibles (borrar si es necesario) se usara para probar funcionalidades
+const getCursosDisponibles = async (params = {}) => {
+    const headers = getAuthHeaders();
+    const queryString = new URLSearchParams(params).toString();
+    const url = queryString
+        ? `${API_URL}cursos-disponibles/?${queryString}`
+        : `${API_URL}cursos-disponibles/`;
+
+    const response = await fetch(url, { method: "GET", headers });
+
+    const contentType = response.headers.get("content-type") || "";
+    const data = contentType.includes("application/json")
+        ? await response.json()
+        : { detail: await response.text() };
+
+    if (!response.ok) throw new Error(data.detail || "Error al obtener cursos disponibles");
+    return data; // viene con ya_inscrito (si lo dejas), documentos_subidos, etc.
+};
+//Inscripciones
+const getMisInscripciones = async () => {
+    const headers = getAuthHeaders(); // ya incluye Authorization bien
+
+    const res = await fetch(`${API_URL}mis-inscripciones/`, {
+        method: "GET",
+        headers,
+    });
+
+    const contentType = res.headers.get("content-type") || "";
+    const data = contentType.includes("application/json")
+        ? await res.json()
+        : { detail: await res.text() };
+
+    if (!res.ok) {
+        const error = new Error(data.detail || data.error || "Error al obtener mis inscripciones");
+        error.status = res.status;
+        error.data = data;
+        throw error;
+    }
+
+    return data;
+};
+//Inscripcion para visualizacion de Admin
+const getInscripcionesUsuario = async (usuarioId) => {
+    const headers = getAuthHeaders();
+
+    const response = await fetch(
+        `${API_URL}usuarios/${usuarioId}/inscripciones/`,
+        { headers }
+    );
+
+    const contentType = response.headers.get("content-type") || "";
+    const data = contentType.includes("application/json")
+        ? await response.json()
+        : { detail: await response.text() };
+
+    if (!response.ok) {
+        throw new Error(data.detail || "Error al obtener inscripciones del usuario");
+    }
+
+    return data;
 };
 
 const courseService = {
@@ -201,7 +303,13 @@ const courseService = {
     createCourse,
     updateCourse,
     deleteCourse,
-    enrollCourse,
+    finalizarInscripcion,
+    verificarInscripcion,
+    getInscripcionDetalle,
+    getTiposDocumentos,
+    getCursosDisponibles,
+    getMisInscripciones,
+    getInscripcionesUsuario,
 };
 
 export default courseService;

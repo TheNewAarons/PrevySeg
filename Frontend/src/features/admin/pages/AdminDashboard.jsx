@@ -9,7 +9,7 @@ import courseService from '../../../services/courseService';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
-    const { user, logout: authLogout } = useAuth(); // 🔑 Renombrar aquí para evitar conflicto
+    const { user, logout: authLogout } = useAuth(); 
     
     const [userName, setUserName] = useState('Administrador');
     const [courseCount, setCourseCount] = useState(0);

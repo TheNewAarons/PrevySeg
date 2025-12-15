@@ -1,5 +1,5 @@
 import './styles/index.css' // Importa los estilos globales
-import { BrowserRouter as Router, Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import RegistroForm from './features/auth/components/RegistroForm'
 import LoginForm from './features/auth/components/LoginForm'
 import ListUsers from './features/admin/pages/ListUser'
@@ -18,7 +18,10 @@ import AprobarPapeles from './features/admin/pages/AprobarPapeles'
 import Horarios from './features/admin/pages/Horarios'
 import Reportes from './features/admin/pages/Reportes'
 import DetalleDocumento from './features/client/pages/DetalleDocumento.jsx' 
-import Home from './pages/home.jsx'
+import Home from './pages/Home.jsx'
+import InscripcionCurso from './features/courses/pages/DetalleInscripcion.jsx'
+import FinalizarInscripcionCurso from './features/courses/pages/FinalizarInscripcion.jsx'
+import MisInscripciones from './features/client/pages/MisInscripciones.jsx'
 import { AuthProvider } from './services/authContext.jsx'
 import { PublicRoute, RoleRoute} from './services/protectedRouted.jsx'
 
@@ -57,6 +60,25 @@ function App() {
                             <DetalleDocumento />
                         </RoleRoute>
                     } />
+
+                    <Route path='/cliente/cursos/:id/inscripcion' element={
+                        <RoleRoute allowedRole='Cliente'>
+                            <InscripcionCurso/>
+                        </RoleRoute>
+                    }
+                    />
+                    <Route path='/cliente/cursos/:id/finalizar' element={
+                        <RoleRoute allowedRole='Cliente'>
+                            <FinalizarInscripcionCurso/>
+                        </RoleRoute>
+                    }
+                    />
+                    <Route path='/cliente/cursos/mis-inscripciones' element={
+                        <RoleRoute allowedRole='Cliente'>
+                            <MisInscripciones/>
+                        </RoleRoute>
+                    }
+                    />
 
                     {/* ========== RUTAS SOLO ADMINISTRADOR ========== */}
                     <Route path='/administrador/dashboard' element={

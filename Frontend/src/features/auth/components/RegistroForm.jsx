@@ -62,10 +62,45 @@ const RegistroForm = () => {
             console.error('Error al registrar:', err);
         }
     };
+    const handleGoHome = () => {
+        navigate('/', {replace : true})
+    }
 
     return (
         <div className="register-container">
             <div className="register-card">
+                <button 
+                    onClick={handleGoHome}
+                    className="btn-back-home"
+                    disabled={loading}
+                    style={{
+                        position: 'absolute',
+                        top: '15px',
+                        left: '15px',
+                        background: 'none',
+                        border: 'none',
+                        color: '#666',
+                        cursor: 'pointer',
+                        padding: '8px 12px',
+                        borderRadius: '5px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        fontSize: '0.9rem',
+                        transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#f5f5f5';
+                        e.currentTarget.style.color = '#333';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                        e.currentTarget.style.color = '#666';
+                    }}
+                >
+                    <i className="bi bi-arrow-left" style={{ fontSize: '0.9rem' }}></i>
+                    Volver al Inicio
+                </button>
                 <div className="logo-container">
                     <div className="logo-icon" aria-hidden>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">

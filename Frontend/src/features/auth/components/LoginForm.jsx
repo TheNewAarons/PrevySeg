@@ -57,7 +57,7 @@ const LoginForm = () => {
 
             console.log('Navegando a:', dashboardPath); 
 
-            // ⚠️ IMPORTANTE: No usar setLoading(false) antes de navigate
+            //IMPORTANTE: No usar setLoading(false) antes de navigate
             // porque puede causar problemas de renderizado
             
             // Redirige al dashboard correspondiente
@@ -144,7 +144,7 @@ const LoginForm = () => {
                         <label htmlFor="password" className="form-label">Contraseña</label>
                         <div className="password-input-container" style={{ position: 'relative' }}>
                             <input
-                                type={showPassword ? "text" : "password"} // 🔑 Cambia tipo según estado
+                                type={showPassword ? "text" : "password"} //Cambia tipo según estado
                                 className="form-control"
                                 id="password"
                                 name="password"
@@ -153,7 +153,7 @@ const LoginForm = () => {
                                 onChange={handleChange}
                                 required
                                 disabled={loading}
-                                style={{ paddingRight: '40px' }} // 🔑 Espacio para el ícono
+                                style={{ paddingRight: '40px' }} //Espacio para el ícono
                             />
                             {/* 🔑 Botón para mostrar/ocultar contraseña */}
                             <button
