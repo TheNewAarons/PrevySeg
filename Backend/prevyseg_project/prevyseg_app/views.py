@@ -46,7 +46,8 @@ class RegistroView(generics.CreateAPIView):
             
         except Exception as e:
             # Captura errores de validación de serializador o base de datos
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            errors = serializer.errors if serializer.errors else {'error': str(e)}
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 #Visualizacion del crud restante al registro(POST) 
