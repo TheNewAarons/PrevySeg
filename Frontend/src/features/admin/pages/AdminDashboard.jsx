@@ -197,7 +197,7 @@ const AdminDashboard = () => {
                         </div>
 
                         <div className="stats-row">
-                            <div className="stat-card">
+                            <div className="stat-card" onClick={() => navegarModulo('list-users')} style={{ cursor: 'pointer' }}>
                                 <div className="stat-value">{clientCount}</div>
                                 <div className="stat-label">Clientes Activos</div>
                             </div>
