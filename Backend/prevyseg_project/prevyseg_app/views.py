@@ -61,7 +61,12 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.id_rol.nombre_rol == 'Administrador':
-            return Usuario.objects.all()
+            # Filtro opcional por nombre de rol
+            rol_nombre = self.request.query_params.get('rol_nombre')
+            queryset = Usuario.objects.all()
+            if rol_nombre:
+                queryset = queryset.filter(id_rol__nombre_rol=rol_nombre)
+            return queryset
 
         return Usuario.objects.filter(id_usuario=user.id_usuario)
             

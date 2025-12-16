@@ -22,7 +22,7 @@ const Horarios = () => {
     }, []);
 
     useEffect(() => {
-        applyFilters(); 
+        applyFilters();
     }, [filterDay, searchTerm, courses]);
 
     const fetchCourses = async () => {
@@ -57,7 +57,7 @@ const Horarios = () => {
         // Filtrar por día de la semana
         if (filterDay) {
             filtered = filtered.filter(course =>
-                course.dias_semana && course.dias_semana.toLowerCase().includes(filterDay.toLowerCase())
+                course.horarios && course.horarios.some(h => h.dia_semana.toLowerCase() === filterDay.toLowerCase())
             );
         }
 
@@ -187,12 +187,12 @@ const Horarios = () => {
                                                     </td>
                                                     <td>{course.profesor || '—'}</td>
                                                     <td>
-                                                        {course.dias_semana ? (
-                                                            <div className="d-flex flex-wrap gap-1">
-                                                                {course.dias_semana.split(',').map((dia, idx) => (
-                                                                    <span key={idx} className="badge bg-info text-dark">
-                                                                        {dia.trim()}
-                                                                    </span>
+                                                        {course.horarios && course.horarios.length > 0 ? (
+                                                            <div className="d-flex flex-column gap-1">
+                                                                {course.horarios.map((h, idx) => (
+                                                                    <small key={idx} className="text-muted">
+                                                                        <strong>{h.dia_semana}:</strong>
+                                                                    </small>
                                                                 ))}
                                                             </div>
                                                         ) : (
@@ -200,19 +200,23 @@ const Horarios = () => {
                                                         )}
                                                     </td>
                                                     <td>
-                                                        {course.hora_inicio && course.hora_fin ? (
-                                                            <span>
-                                                                <i className="bi bi-clock me-1"></i>
-                                                                {formatTime(course.hora_inicio)} - {formatTime(course.hora_fin)}
-                                                            </span>
+                                                        {course.horarios && course.horarios.length > 0 ? (
+                                                            <div className="d-flex flex-column gap-1">
+                                                                {course.horarios.map((h, idx) => (
+                                                                    <small key={idx}>
+                                                                        <i className="bi bi-clock me-1"></i>
+                                                                        {formatTime(h.hora_inicio)} - {formatTime(h.hora_fin)}
+                                                                    </small>
+                                                                ))}
+                                                            </div>
                                                         ) : (
                                                             <span className="text-muted">Sin asignar</span>
                                                         )}
                                                     </td>
                                                     <td>
                                                         <span className={`badge ${course.modalidad === 'Online' ? 'bg-primary' :
-                                                                course.modalidad === 'Presencial' ? 'bg-success' :
-                                                                    'bg-warning text-dark'
+                                                            course.modalidad === 'Presencial' ? 'bg-success' :
+                                                                'bg-warning text-dark'
                                                             }`}>
                                                             {course.modalidad}
                                                         </span>
