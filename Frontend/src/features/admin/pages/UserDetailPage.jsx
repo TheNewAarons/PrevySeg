@@ -89,7 +89,7 @@ const UserDetailPage = () => {
         const docs = [];
         for (const ins of inscripciones || []) {
             for (const d of ins.documentos || []) {
-                if (d.estado === "RECHAZADO" || d.estado === "EN_REVISION") {
+                if (d.estado === "RECHAZADO" || d.estado === "EN_REVISION" || d.estado === "PENDIENTE") {
                     docs.push({
                         curso: ins.curso_nombre,
                         nombre: d.nombre,

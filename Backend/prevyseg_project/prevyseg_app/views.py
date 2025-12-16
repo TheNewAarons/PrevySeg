@@ -383,10 +383,32 @@ class InscripcionesUsuarioAdminView(APIView):
 
         data = []
         for ins in inscripciones:
-            documentos = DocumentoSubido.objects.filter(
+            # Obtener documentos requeridos y subidos
+            docs_requeridos = ins.curso.documentos_requeridos.all()
+            docs_subidos = DocumentoSubido.objects.filter(
                 usuario_id=usuario_id,
                 curso=ins.curso
             )
+            
+            # Crear mapa de subidos para búsqueda rápida
+            mapa_subidos = {d.tipo_documento.id_tipo_doc: d for d in docs_subidos}
+            
+            lista_docs = []
+            for doc_req in docs_requeridos:
+                d_sub = mapa_subidos.get(doc_req.id_tipo_doc)
+                if d_sub:
+                    lista_docs.append({
+                        "nombre": doc_req.nombre,
+                        "estado": d_sub.estado_revision,
+                        "fecha_subida": d_sub.fecha_subida
+                    })
+                else:
+                    lista_docs.append({
+                        "nombre": doc_req.nombre,
+                        "estado": "PENDIENTE",
+                        "fecha_subida": None
+                    })
+            
             data.append({
                 "inscripcion_id": ins.id,
                 "curso_id": ins.curso.id,
@@ -395,14 +417,55 @@ class InscripcionesUsuarioAdminView(APIView):
                 "curso_horas": ins.curso.horas,
                 "estado_inscripcion": ins.estado,
                 "fecha_inscripcion": ins.fecha_inscripcion,
-                "documentos": [
-                    {
-                        "nombre": d.tipo_documento.nombre,
-                        "estado": d.estado_revision,
-                        "fecha_subida": d.fecha_subida
-                    }
-                    for d in documentos
-                ]
+                "documentos": lista_docs
+            })
+
+        # --- Lógica para Cursos en Postulación (Sin Inscripción oficial aún) ---
+        inscritos_ids = [ins.curso.id for ins in inscripciones]
+        
+        # Buscar documentos subidos para cursos donde NO hay inscripción
+        docs_postulacion = DocumentoSubido.objects.filter(
+            usuario_id=usuario_id
+        ).exclude(
+            curso_id__in=inscritos_ids
+        ).select_related('curso', 'tipo_documento')
+
+        # Agrupar por curso
+        from collections import defaultdict
+        cursos_postulando = defaultdict(list)
+        for doc in docs_postulacion:
+            cursos_postulando[doc.curso].append(doc)
+
+        for curso, docs_subidos in cursos_postulando.items():
+            # Obtener requisitos
+            docs_requeridos = curso.documentos_requeridos.all()
+            mapa_subidos = {d.tipo_documento.id_tipo_doc: d for d in docs_subidos}
+            
+            lista_docs = []
+            for doc_req in docs_requeridos:
+                d_sub = mapa_subidos.get(doc_req.id_tipo_doc)
+                if d_sub:
+                    lista_docs.append({
+                        "nombre": doc_req.nombre,
+                        "estado": d_sub.estado_revision,
+                        "fecha_subida": d_sub.fecha_subida
+                    })
+                else:
+                    lista_docs.append({
+                        "nombre": doc_req.nombre,
+                        "estado": "PENDIENTE",
+                        "fecha_subida": None
+                    })
+
+            data.append({
+                "inscripcion_id": None, # No hay ID de inscripción
+                "curso_id": curso.id,
+                "curso_nombre": curso.nombre,
+                "curso_modalidad": curso.modalidad,
+                "curso_horas": curso.horas,
+                "estado_inscripcion": "POSTULANDO", # Estado virtual
+                "fecha_inscripcion": None, # Aún no inscrito
+                "documentos": lista_docs
             })
 
         return Response({

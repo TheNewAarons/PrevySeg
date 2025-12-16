@@ -225,17 +225,13 @@ class CursoSerializer(serializers.ModelSerializer):
         # No, Curso model doesn't have horarios field, so super().create will fail if horarios is in validated_data.
         # So popping horarios is correct.
         
-        # Handling M2M for documents_requeridos:
-        # data from documents_requeridos_ids with source='documentos_requeridos' usually ends up in validated_data['documentos_requeridos'].
-        documentos = validated_data.pop('documentos_requeridos', [])
-        
         # Create course
         # curso = Curso.objects.create(**validated_data) 
         # (Issues might arise if other M2M exist, but here it's just docs)
         
         # Set documents
         course_docs_field = getattr(curso, 'documentos_requeridos')
-        course_docs_field.set(documentos)
+        course_docs_field.set(documentos_ids)
 
         # Create horarios
         for horario_data in horarios_data:
