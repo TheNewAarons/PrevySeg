@@ -5,6 +5,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import courseService from '../../../services/courseService';
 import authService from '../../../services/authService';
 import '../../admin/styles/AdminDashboard.css';
+import Navbar from '../../../components/layout/Navbar';
 
 const DetalleCurso = () => {
     const navigate = useNavigate();
@@ -85,13 +86,7 @@ const DetalleCurso = () => {
     if (loading) {
         return (
             <div className="administrador-dashboard">
-                <nav className="navbar navbar-expand-lg navbar-light">
-                    <div className="container-fluid px-4">
-                        <a className="navbar-brand" href="/">
-                            <img src="/images/logos/logo.png" alt="PrevySeg Logo" />
-                        </a>
-                    </div>
-                </nav>
+                <Navbar />
                 <div className="main-container">
                     <div className="text-center py-5">
                         <div className="spinner-border text-primary" role="status">
@@ -107,18 +102,7 @@ const DetalleCurso = () => {
     if (error) {
         return (
             <div className="administrador-dashboard">
-                <nav className="navbar navbar-expand-lg navbar-light">
-                    <div className="container-fluid px-4">
-                        <a className="navbar-brand" href="/">
-                            <img src="/images/logos/logo.png" alt="PrevySeg Logo" />
-                        </a>
-                        <div className="d-flex align-items-center gap-3 ms-auto">
-                            <button className="btn btn-secondary" onClick={() => navigate('/administrador/cursos')}>
-                                <i className="bi bi-arrow-left me-2"></i>Volver a Lista
-                            </button>
-                        </div>
-                    </div>
-                </nav>
+                <Navbar />
                 <div className="main-container">
                     <div className="container mt-4">
                         <div className="alert alert-danger">
@@ -131,160 +115,150 @@ const DetalleCurso = () => {
         );
     }
 
+
     return (
         <div className="administrador-dashboard">
-            <nav className="navbar navbar-expand-lg navbar-light">
-                <div className="container-fluid px-4">
-                    <a className="navbar-brand" href="/">
-                        <img src="/images/logos/logo.png" alt="PrevySeg Logo" />
-                    </a>
-                    <div className="d-flex align-items-center gap-3 ms-auto">
+            <Navbar />
+
+            <div className="main-container">
+                <div className="container px-4">
+                    <div className="d-flex justify-content-end mb-4">
                         <button className="btn btn-secondary" onClick={() => navigate('/administrador/cursos')}>
                             <i className="bi bi-arrow-left me-2"></i>Volver a Lista
                         </button>
                     </div>
-                </div>
-            </nav>
-
-            <div className="main-container">
-                <div className="container mt-4">
-                    <div className="d-flex justify-content-between align-items-center mb-4">
-                        <h1 className="page-title">{course.nombre}</h1>
-                        <div className="btn-group">
-                            <button
-                                className="btn btn-warning"
-                                onClick={() => navigate(`/administrador/cursos/${id}/editar`)}
-                            >
-                                <i className="bi bi-pencil me-2"></i>Editar
-                            </button>
-                            <button
-                                className="btn btn-danger"
-                                onClick={handleDelete}
-                            >
-                                <i className="bi bi-trash me-2"></i>Eliminar
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="row">
-                        {/* Información General */}
-                        <div className="col-md-6 mb-4">
-                            <div className="card shadow-sm h-100">
-                                <div className="card-header bg-primary text-white">
-                                    <h5 className="mb-0"><i className="bi bi-info-circle me-2"></i>Información General</h5>
-                                </div>
-                                <div className="card-body">
+                    <div className="row g-4 mb-5">
+                        {/* Header Section */}
+                        <div className="col-12">
+                            <div className="card border-0 shadow-sm overflow-hidden">
+                                <div className="card-body p-4 p-md-5 bg-white text-center">
                                     <div className="mb-3">
-                                        <strong>Descripción:</strong>
-                                        <p className="mt-1">{course.descripcion || '—'}</p>
+                                        <div className="d-inline-flex align-items-center justify-content-center p-3 bg-primary bg-opacity-10 text-primary rounded-circle mb-3">
+                                            <i className="bi bi-journal-bookmark-fill fs-1"></i>
+                                        </div>
                                     </div>
-                                    <div className="mb-3">
-                                        <strong>Área:</strong>
-                                        <p className="mt-1">
-                                            <span className="badge bg-info text-dark">{course.area || 'General'}</span>
-                                        </p>
+                                    <h1 className="fw-bold mb-2 text-dark">{course.nombre}</h1>
+                                    <div className="d-flex flex-wrap justify-content-center gap-2 mb-4">
+                                        <span className={`badge ${course.estado === 'en_curso' ? 'bg-success' : 'bg-secondary'}`}>
+                                            {course.estado === 'por_empezar' ? 'Por Empezar' : course.estado === 'en_curso' ? 'En Curso' : 'Finalizado'}
+                                        </span>
+                                        <span className="badge bg-light text-dark border">
+                                            <i className="bi bi-grid-fill me-1"></i>{course.area}
+                                        </span>
+                                        <span className="badge bg-light text-dark border">
+                                            <i className="bi bi-laptop me-1"></i>{course.modalidad}
+                                        </span>
                                     </div>
-                                    <div className="mb-3">
-                                        <strong>Modalidad:</strong>
-                                        <p className="mt-1">{course.modalidad || '—'}</p>
-                                    </div>
-                                    <div className="mb-3">
-                                        <strong>Estado:</strong>
-                                        <p className="mt-1">
-                                            {renderEstado(course.estado)}
-                                        </p>
-                                    </div>
-                                    <div className="mb-3">
-                                        <strong>Profesor:</strong>
-                                        <p className="mt-1">{course.profesor || '—'}</p>
+                                    <div className="d-flex justify-content-center gap-2">
+                                        <button className="btn btn-outline-primary btn-sm px-4" onClick={() => navigate(`/administrador/cursos/${id}/editar`)}>
+                                            <i className="bi bi-pencil me-2"></i>Editar
+                                        </button>
+                                        <button className="btn btn-outline-danger btn-sm px-4" onClick={handleDelete}>
+                                            <i className="bi bi-trash me-2"></i>Eliminar
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Detalles Académicos */}
-                        <div className="col-md-6 mb-4">
-                            <div className="card shadow-sm h-100">
-                                <div className="card-header bg-success text-white">
-                                    <h5 className="mb-0"><i className="bi bi-book me-2"></i>Detalles Académicos</h5>
+                        {/* Content Grid */}
+                        <div className="col-lg-8">
+                            <div className="card border-0 shadow-sm h-100">
+                                <div className="card-header bg-white border-bottom-0 pt-4 px-4">
+                                    <h5 className="fw-bold mb-0"><i className="bi bi-info-circle text-primary me-2"></i>Información del Curso</h5>
                                 </div>
-                                <div className="card-body">
-                                    <div className="mb-3">
-                                        <strong>Horas Totales:</strong>
-                                        <p className="mt-1">{course.horas ?? '—'} horas</p>
-                                    </div>
-                                    <div className="mb-3">
-                                        <strong>Tipo de Certificado:</strong>
-                                        <p className="mt-1">
-                                            <i className="bi bi-award me-1"></i>
-                                            {course.tipo_certificado || 'Certificado'}
-                                        </p>
-                                    </div>
-                                    <div className="mb-3">
-                                        <strong>Valor:</strong>
-                                        <p className="mt-1">
-                                            <strong className="text-success">${formatMoneyCLP(course.valor)}</strong>
-                                        </p>
-                                    </div>
-                                    <div className="mb-3">
-                                        <strong>Cupos Disponibles:</strong>
-                                        <p className="mt-1">
-                                            <span className={`badge ${course.cupos_disponibles > 0 ? 'bg-success' : 'bg-danger'}`}>
-                                                {course.cupos_disponibles ?? 0} cupos
-                                            </span>
-                                        </p>
-                                    </div>
-                                    <div className="mb-3">
-                                        <strong>Fecha de Inicio:</strong>
-                                        <p className="mt-1">{course.fecha_inicio || '—'}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                                <div className="card-body p-4">
+                                    <p className="text-secondary mb-4">{course.descripcion}</p>
 
-                        {/* Horario */}
-                        <div className="col-md-6 mb-4">
-                            <div className="card shadow-sm h-100">
-                                <div className="card-header bg-warning text-dark">
-                                    <h5 className="mb-0"><i className="bi bi-clock me-2"></i>Horario</h5>
-                                </div>
-                                <div className="card-body">
-                                    {course.horarios && course.horarios.length > 0 ? (
-                                        <ul className="list-group list-group-flush">
-                                            {course.horarios.map((h, index) => (
-                                                <li key={index} className="list-group-item d-flex justify-content-between align-items-center px-0">
-                                                    <strong>{h.dia_semana}</strong>
-                                                    <span>{formatTime(h.hora_inicio)} - {formatTime(h.hora_fin)}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    ) : (
-                                        <p className="text-muted">No hay horarios definidos.</p>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Requisitos */}
-                        <div className="col-md-6 mb-4">
-                            <div className="card shadow-sm h-100">
-                                <div className="card-header bg-info text-dark">
-                                    <h5 className="mb-0"><i className="bi bi-file-text me-2"></i>Requisitos</h5>
-                                </div>
-                                <div className="card-body">
-                                    <div className="mb-3">
-                                        <strong>Documentos Requeridos:</strong>
-                                        {requiredDocs.length === 0 ? (
-                                            <p className="text-muted mb-0">No se configuraron documentos requeridos para este curso.</p>
-                                        ) : (
-                                            <div className="d-flex flex-wrap gap-2">
-                                                {requiredDocs.map((doc) => (
-                                                    <span key={doc.id_tipo_doc} className="badge bg-dark">
-                                                        {doc.nombre}
-                                                    </span>
-                                                ))}
+                                    <h6 className="fw-bold text-dark border-bottom pb-2 mb-3">Detalles Académicos</h6>
+                                    <div className="row g-3">
+                                        <div className="col-sm-6">
+                                            <div className="p-3 bg-light rounded text-center h-100">
+                                                <small className="text-muted d-block mb-1">Total Horas</small>
+                                                <h5 className="fw-bold text-dark mb-0">{course.horas} hrs</h5>
                                             </div>
-                                        )}
+                                        </div>
+                                        <div className="col-sm-6">
+                                            <div className="p-3 bg-light rounded text-center h-100">
+                                                <small className="text-muted d-block mb-1">Valor</small>
+                                                <h5 className="fw-bold text-success mb-0">${formatMoneyCLP(course.valor)}</h5>
+                                            </div>
+                                        </div>
+                                        <div className="col-sm-6">
+                                            <div className="p-3 bg-light rounded text-center h-100">
+                                                <small className="text-muted d-block mb-1">Vacantes</small>
+                                                <strong className={course.cupos_disponibles > 0 ? "text-success" : "text-danger"}>
+                                                    {course.cupos_disponibles} cupos
+                                                </strong>
+                                            </div>
+                                        </div>
+                                        <div className="col-sm-6">
+                                            <div className="p-3 bg-light rounded text-center h-100">
+                                                <small className="text-muted d-block mb-1">Inicio</small>
+                                                <strong className="text-dark">{course.fecha_inicio}</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-4">
+                                        <h6 className="fw-bold text-dark border-bottom pb-2 mb-3">Profesor</h6>
+                                        <div className="d-flex align-items-center gap-3">
+                                            <div className="bg-secondary bg-opacity-10 p-2 rounded-circle">
+                                                <i className="bi bi-person-video3 fs-4 text-secondary"></i>
+                                            </div>
+                                            <div>
+                                                <div className="fw-bold">{course.profesor}</div>
+                                                <small className="text-muted">Instructor Principal</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Sidebar: Horarios & Requirements */}
+                        <div className="col-lg-4">
+                            <div className="row g-4">
+                                <div className="col-12">
+                                    <div className="card border-0 shadow-sm">
+                                        <div className="card-header bg-white border-bottom-0 pt-4 px-4">
+                                            <h5 className="fw-bold mb-0"><i className="bi bi-clock text-warning me-2"></i>Horarios</h5>
+                                        </div>
+                                        <div className="card-body p-4">
+                                            {course.horarios && course.horarios.length > 0 ? (
+                                                <div className="d-flex flex-col gap-3">
+                                                    {course.horarios.map((h, i) => (
+                                                        <div key={i} className="d-flex justify-content-between align-items-center border-bottom pb-2">
+                                                            <span className="fw-medium text-dark">{h.dia_semana}</span>
+                                                            <span className="badge bg-light text-dark border">{formatTime(h.hora_inicio)} - {formatTime(h.hora_fin)}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <p className="text-muted small mb-0">No se han definido horarios.</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="col-12">
+                                    <div className="card border-0 shadow-sm">
+                                        <div className="card-header bg-white border-bottom-0 pt-4 px-4">
+                                            <h5 className="fw-bold mb-0"><i className="bi bi-file-earmark-check text-success me-2"></i>Requisitos</h5>
+                                        </div>
+                                        <div className="card-body p-4">
+                                            {requiredDocs.length > 0 ? (
+                                                <ul className="list-group list-group-flush small">
+                                                    {requiredDocs.map((doc, idx) => (
+                                                        <li key={idx} className="list-group-item px-0 d-flex align-items-start gap-2 bg-transparent text-secondary">
+                                                            <i className="bi bi-check-circle-fill text-success mt-1"></i>
+                                                            {doc.nombre}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            ) : (
+                                                <p className="text-muted small mb-0">Sin documentos requeridos.</p>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
