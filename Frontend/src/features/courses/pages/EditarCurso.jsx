@@ -10,6 +10,12 @@ const EditarCurso = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const [loading, setLoading] = useState(true);
+
+    // Estados para catálogos
+    const [tiposDocs, setTiposDocs] = useState([]);
+    const [selectedDocIds, setSelectedDocIds] = useState([]);
+
+    // Estado del formulario
     const [formData, setFormData] = useState({
         nombre: '',
         descripcion: '',
@@ -19,56 +25,99 @@ const EditarCurso = () => {
         tipo_certificado: '',
         fecha_inicio: '',
         cupos_disponibles: '',
-        documentos_requeridos: '',
         modalidad: 'Presencial',
         area: 'seguridad',
-        estado: 'por_empezar',
-        dias_semana: '',
-        hora_inicio: '',
-        hora_fin: ''
+        estado: 'por_empezar'
     });
+
+    // Estado para manejar los horarios por dia (estructura igual a CrearCurso)
+    const [horarios, setHorarios] = useState([
+        { dia: 'Lunes', inicio: '', fin: '', activo: false },
+        { dia: 'Martes', inicio: '', fin: '', activo: false },
+        { dia: 'Miercoles', inicio: '', fin: '', activo: false },
+        { dia: 'Jueves', inicio: '', fin: '', activo: false },
+        { dia: 'Viernes', inicio: '', fin: '', activo: false },
+        { dia: 'Sabado', inicio: '', fin: '', activo: false },
+        { dia: 'Domingo', inicio: '', fin: '', activo: false },
+    ]);
+
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
+    // Cargar tipos de documentos y datos del curso iniciales
     useEffect(() => {
-        fetchCourse();
-    }, [id]);
+        const loadData = async () => {
+            try {
+                // 1. Cargar tipos de documentos
+                const docsData = await courseService.getTiposDocumentos();
+                setTiposDocs(Array.isArray(docsData) ? docsData : []);
 
-    const fetchCourse = async () => {
-        try {
-            setLoading(true);
-            const data = await courseService.getCourseById(id);
-            setFormData({
-                nombre: data.nombre || '',
-                descripcion: data.descripcion || '',
-                horas: data.horas || '',
-                profesor: data.profesor || '',
-                valor: data.valor || '',
-                tipo_certificado: data.tipo_certificado || '',
-                fecha_inicio: data.fecha_inicio || '',
-                cupos_disponibles: data.cupos_disponibles || '',
-                documentos_requeridos: data.documentos_requeridos || '',
-                modalidad: data.modalidad || 'Presencial',
-                area: data.area || 'seguridad',
-                estado: data.estado || 'por_empezar',
-                dias_semana: data.dias_semana || '',
-                hora_inicio: data.hora_inicio || '',
-                hora_fin: data.hora_fin || ''
-            });
-            setError('');
-        } catch (err) {
-            console.error('Error al cargar curso:', err);
-            if (err.status === 401 || err.message.includes("token_not_valid")) {
-                alert("Tu sesión ha expirado. Por favor inicia sesión nuevamente.");
-                authService.logout();
-                navigate('/login');
-                return;
+                // 2. Cargar datos del curso
+                const courseData = await courseService.getCourseById(id);
+
+                // Mapear campos simples
+                setFormData({
+                    nombre: courseData.nombre || '',
+                    descripcion: courseData.descripcion || '',
+                    horas: courseData.horas || '',
+                    profesor: courseData.profesor || '',
+                    valor: courseData.valor || '',
+                    tipo_certificado: courseData.tipo_certificado || '',
+                    fecha_inicio: courseData.fecha_inicio || '',
+                    cupos_disponibles: courseData.cupos_disponibles || '',
+                    modalidad: courseData.modalidad || 'Presencial',
+                    area: courseData.area || 'seguridad',
+                    estado: courseData.estado || 'por_empezar'
+                });
+
+                // Mapear Documentos Requeridos
+                // El backend devuelve una lista de objetos en courseData.documentos_requeridos
+                if (Array.isArray(courseData.documentos_requeridos)) {
+                    setSelectedDocIds(courseData.documentos_requeridos.map(d => d.id_tipo_doc));
+                }
+
+                // Mapear Horarios
+                // courseData.horarios viene como [{dia_semana: 'Lunes', hora_inicio: '08:00:00', ...}]
+                if (Array.isArray(courseData.horarios)) {
+                    const mappedHorarios = [
+                        { dia: 'Lunes', inicio: '', fin: '', activo: false },
+                        { dia: 'Martes', inicio: '', fin: '', activo: false },
+                        { dia: 'Miercoles', inicio: '', fin: '', activo: false },
+                        { dia: 'Jueves', inicio: '', fin: '', activo: false },
+                        { dia: 'Viernes', inicio: '', fin: '', activo: false },
+                        { dia: 'Sabado', inicio: '', fin: '', activo: false },
+                        { dia: 'Domingo', inicio: '', fin: '', activo: false },
+                    ];
+
+                    courseData.horarios.forEach(h => {
+                        const dayIndex = mappedHorarios.findIndex(mh => mh.dia === h.dia_semana);
+                        if (dayIndex !== -1) {
+                            mappedHorarios[dayIndex].activo = true;
+                            // Cortar los segundos '08:00:00' -> '08:00'
+                            mappedHorarios[dayIndex].inicio = String(h.hora_inicio).substring(0, 5);
+                            mappedHorarios[dayIndex].fin = String(h.hora_fin).substring(0, 5);
+                        }
+                    });
+                    setHorarios(mappedHorarios);
+                }
+
+                setError('');
+            } catch (err) {
+                console.error('Error al cargar datos:', err);
+                if (err.status === 401 || String(err.message).includes("token_not_valid")) {
+                    alert("Tu sesión ha expirado. Por favor inicia sesión nuevamente.");
+                    authService.logout();
+                    navigate('/login');
+                } else {
+                    setError('Error al cargar el curso. Por favor intenta nuevamente.');
+                }
+            } finally {
+                setLoading(false);
             }
-            setError('Error al cargar el curso. Por favor intenta nuevamente.');
-        } finally {
-            setLoading(false);
-        }
-    };
+        };
+
+        loadData();
+    }, [id, navigate]);
 
     const handleChange = (e) => {
         setFormData({
@@ -77,13 +126,79 @@ const EditarCurso = () => {
         });
     };
 
+    const toggleDoc = (id) => {
+        setSelectedDocIds((prev) =>
+            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+        );
+    };
+
+    const handleScheduleChange = (index, field, value) => {
+        const newHorarios = [...horarios];
+        newHorarios[index][field] = value;
+        setHorarios(newHorarios);
+    };
+
+    const toggleDay = (index) => {
+        const newHorarios = [...horarios];
+        newHorarios[index].activo = !newHorarios[index].activo;
+        setHorarios(newHorarios);
+    };
+
+    const validate = () => {
+        if (!formData.nombre.trim()) return "El nombre del curso es obligatorio.";
+        if (!formData.descripcion.trim()) return "La descripción es obligatoria.";
+        if (!formData.fecha_inicio) return "La fecha de inicio es obligatoria.";
+        if (selectedDocIds.length === 0) {
+            return "Debes seleccionar al menos un documento requerido.";
+        }
+
+        const activeSchedules = horarios.filter(h => h.activo);
+        if (activeSchedules.length === 0) {
+            return "Debes seleccionar al menos un día de horario.";
+        }
+
+        for (let s of activeSchedules) {
+            if (!s.inicio || !s.fin) {
+                return `El horario del día ${s.dia} está incompleto.`;
+            }
+            if (s.fin <= s.inicio) {
+                return `En ${s.dia}, la hora de fin debe ser mayor que la de inicio.`;
+            }
+        }
+        return null;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         setSuccess('');
 
+        const validationError = validate();
+        if (validationError) {
+            setError(validationError);
+            window.scrollTo(0, 0); // Scroll to top to see error
+            return;
+        }
+
+        setLoading(true);
+
         try {
-            await courseService.updateCourse(id, formData);
+            const payload = {
+                ...formData,
+                horas: formData.horas ? Number(formData.horas) : null,
+                valor: formData.valor ? Number(formData.valor) : null,
+                cupos_disponibles: formData.cupos_disponibles
+                    ? Number(formData.cupos_disponibles)
+                    : null,
+                documentos_requeridos_ids: selectedDocIds,
+                horarios: horarios.filter(h => h.activo).map(h => ({
+                    dia_semana: h.dia,
+                    hora_inicio: h.inicio,
+                    hora_fin: h.fin
+                }))
+            };
+
+            await courseService.updateCourse(id, payload);
             setSuccess('Curso actualizado exitosamente.');
             setTimeout(() => {
                 navigate('/administrador/cursos');
@@ -97,6 +212,8 @@ const EditarCurso = () => {
             } else {
                 setError(`Error al actualizar curso: ${err.message}`);
             }
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -115,7 +232,7 @@ const EditarCurso = () => {
                         <div className="spinner-border text-primary" role="status">
                             <span className="visually-hidden">Cargando...</span>
                         </div>
-                        <p className="mt-3">Cargando curso...</p>
+                        <p className="mt-3">Cargando datos del curso...</p>
                     </div>
                 </div>
             </div>
@@ -220,55 +337,93 @@ const EditarCurso = () => {
                                     </div>
                                 </div>
 
+                                {/* Selección de Documentos */}
                                 <div className="mb-3">
                                     <label className="form-label">Documentos Requeridos</label>
-                                    <textarea className="form-control" name="documentos_requeridos" rows="2" value={formData.documentos_requeridos} onChange={handleChange}></textarea>
+                                    {tiposDocs.length === 0 ? (
+                                        <div className="text-muted">
+                                            No hay tipos de documentos disponibles.
+                                        </div>
+                                    ) : (
+                                        <div className="border rounded p-3" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                                            {tiposDocs.map((doc) => (
+                                                <div className="form-check" key={doc.id_tipo_doc}>
+                                                    <input
+                                                        className="form-check-input"
+                                                        type="checkbox"
+                                                        id={`tipo-doc-${doc.id_tipo_doc}`}
+                                                        checked={selectedDocIds.includes(doc.id_tipo_doc)}
+                                                        onChange={() => toggleDoc(doc.id_tipo_doc)}
+                                                    />
+                                                    <label
+                                                        className="form-check-label"
+                                                        htmlFor={`tipo-doc-${doc.id_tipo_doc}`}
+                                                    >
+                                                        {doc.nombre}
+                                                    </label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    <small className="text-muted">
+                                        Selecciona los documentos que el alumno debe subir obligatoriamente.
+                                    </small>
                                 </div>
 
                                 <hr className="my-4" />
                                 <h5 className="mb-3">Horario del Curso</h5>
 
-                                <div className="row">
-                                    <div className="col-md-12 mb-3">
-                                        <label className="form-label">Días de la Semana</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="dias_semana"
-                                            value={formData.dias_semana}
-                                            onChange={handleChange}
-                                            placeholder="Ej: Lunes,Miércoles,Viernes"
-                                        />
-                                        <small className="text-muted">Separa los días con comas</small>
-                                    </div>
-                                </div>
-
-                                <div className="row">
-                                    <div className="col-md-6 mb-3">
-                                        <label className="form-label">Hora de Inicio</label>
-                                        <input
-                                            type="time"
-                                            className="form-control"
-                                            name="hora_inicio"
-                                            value={formData.hora_inicio}
-                                            onChange={handleChange}
-                                        />
-                                    </div>
-                                    <div className="col-md-6 mb-3">
-                                        <label className="form-label">Hora de Fin</label>
-                                        <input
-                                            type="time"
-                                            className="form-control"
-                                            name="hora_fin"
-                                            value={formData.hora_fin}
-                                            onChange={handleChange}
-                                        />
-                                    </div>
+                                <div className="table-responsive">
+                                    <table className="table">
+                                        <thead>
+                                            <tr>
+                                                <th style={{ width: '50px' }}>Activo</th>
+                                                <th>Día</th>
+                                                <th>Hora Inicio</th>
+                                                <th>Hora Fin</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {horarios.map((h, index) => (
+                                                <tr key={h.dia}>
+                                                    <td>
+                                                        <div className="form-check d-flex justify-content-center">
+                                                            <input
+                                                                className="form-check-input"
+                                                                type="checkbox"
+                                                                checked={h.activo}
+                                                                onChange={() => toggleDay(index)}
+                                                            />
+                                                        </div>
+                                                    </td>
+                                                    <td>{h.dia}</td>
+                                                    <td>
+                                                        <input
+                                                            type="time"
+                                                            className="form-control"
+                                                            value={h.inicio}
+                                                            onChange={(e) => handleScheduleChange(index, 'inicio', e.target.value)}
+                                                            disabled={!h.activo}
+                                                        />
+                                                    </td>
+                                                    <td>
+                                                        <input
+                                                            type="time"
+                                                            className="form-control"
+                                                            value={h.fin}
+                                                            onChange={(e) => handleScheduleChange(index, 'fin', e.target.value)}
+                                                            disabled={!h.activo}
+                                                        />
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
                                 </div>
 
                                 <div className="d-flex justify-content-between">
                                     <button type="button" className="btn btn-secondary" onClick={() => navigate('/administrador/cursos')}>Cancelar</button>
-                                    <button type="submit" className="btn btn-warning">Actualizar Curso</button>
+                                    <button type="submit" className="btn btn-warning" disabled={loading}>{loading ? "Guardando..." : "Actualizar Curso"}</button>
                                 </div>
                             </form>
                         </div>

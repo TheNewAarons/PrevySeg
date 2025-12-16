@@ -146,7 +146,7 @@ class CursosDisponiblesView(generics.ListAPIView):
     def get_queryset(self):
         queryset = Curso.objects.filter(
             estado='por_empezar',
-            fecha_inicio__gte=timezone.now().date(),
+            # fecha_inicio__gte=timezone.now().date(),
             cupos_disponibles__gt=0,
         ).prefetch_related('documentos_requeridos')
         #excluiremos cursos donde el usuario ya esta inscrito
@@ -191,8 +191,8 @@ class CursoInscripcionDetailView(APIView):
         #verificacion de que el curso este disponible
         disponible = (
             curso.estado == 'por_empezar' and
-            curso.cupos_disponibles > 0 and
-            curso.fecha_inicio >= timezone.now().date()
+            curso.cupos_disponibles > 0 
+            # and curso.fecha_inicio >= timezone.now().date()
         )
         #obtenemos documentos requeridos
         documentos_requeridos = curso.documentos_requeridos.all()
@@ -536,6 +536,8 @@ class MisInscripcionesView(generics.ListAPIView):
                 'curso_fecha_inicio': inscripcion.curso.fecha_inicio,
                 'curso_modalidad': inscripcion.curso.modalidad,
                 'curso_horas': inscripcion.curso.horas,
+                'curso_estado': inscripcion.curso.estado, # Para filtro en frontend
+                'curso_horarios': list(inscripcion.curso.horarios.values('dia_semana', 'hora_inicio', 'hora_fin')), # Esquema de horarios
                 'estado_inscripcion': inscripcion.estado,
                 'fecha_inscripcion': inscripcion.fecha_inscripcion,
                 'documentos': [

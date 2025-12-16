@@ -17,6 +17,8 @@ import CursosEnCurso from './features/courses/pages/CursosEnCurso'
 import AprobarPapeles from './features/admin/pages/AprobarPapeles'
 import Horarios from './features/admin/pages/Horarios'
 import DetalleDocumento from './features/client/pages/DetalleDocumento.jsx'
+import BuscarCursos from './features/client/pages/BuscarCursos';
+import HorariosCliente from './features/client/pages/HorariosCliente';
 import Home from './pages/Home.jsx'
 import InscripcionCurso from './features/courses/pages/DetalleInscripcion.jsx'
 import FinalizarInscripcionCurso from './features/courses/pages/FinalizarInscripcion.jsx'
@@ -78,6 +80,18 @@ function App() {
                         </RoleRoute>
                     }
                     />
+
+                    <Route path='/cliente/cursos/buscar' element={
+                        <RoleRoute allowedRole="Cliente">
+                            <BuscarCursos />
+                        </RoleRoute>
+                    } />
+
+                    <Route path='/cliente/horarios' element={
+                        <RoleRoute allowedRole="Cliente">
+                            <HorariosCliente />
+                        </RoleRoute>
+                    } />
 
                     {/* ========== RUTAS SOLO ADMINISTRADOR ========== */}
                     <Route path='/administrador/dashboard' element={
