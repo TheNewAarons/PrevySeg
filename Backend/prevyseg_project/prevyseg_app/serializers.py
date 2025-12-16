@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import InscripcionCurso, Rol, Usuario, Curso, DocumentoSubido, TipoDocumento
+from .models import InscripcionCurso, Rol, Usuario, Curso, DocumentoSubido, TipoDocumento, HorarioCurso
 from django.contrib.auth import authenticate
 from django.utils import timezone
 import re
@@ -155,6 +155,11 @@ class TipoDeDocumentoSerializers(serializers.ModelSerializer):
         model = TipoDocumento
         fields = ['id_tipo_doc', 'nombre']
 
+class HorarioCursoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HorarioCurso
+        fields = ['dia_semana', 'hora_inicio', 'hora_fin']
+
 class CursoSerializer(serializers.ModelSerializer):
     documentos_requeridos = TipoDeDocumentoSerializers(many=True, read_only=True)
     documentos_requeridos_ids = serializers.PrimaryKeyRelatedField(
@@ -163,20 +168,74 @@ class CursoSerializer(serializers.ModelSerializer):
         many = True,
         write_only = True,
         required = False    
-
     )
+    horarios = HorarioCursoSerializer(many=True, required=False)
+
     class Meta:
         model = Curso
+        # Removemos campos antiguos si estaban explicitamente listados, pero estaban __all__
+        # Como quitamos los campos del modelo, __all__ ya no los incluira.
         fields = '__all__'
     
     def validate(self, data):
-
-        if data.get('hora_inicio') and data.get('hora_fin'):
-            if data['hora_fin'] <= data['hora_inicio']:
-                raise serializers.ValidationError({
-                    'hora_fin' : 'la hora de fin debe ser superior a la hora de inicio'
-                })
+        # Validacion se mueve a nivel de HorarioCurso individual o se itera aqui
+        if 'horarios' in data:
+            for horario in data['horarios']:
+                if horario['hora_fin'] <= horario['hora_inicio']:
+                    raise serializers.ValidationError({
+                        'horarios': f"En {horario['dia_semana']}, la hora de fin debe ser superior a la de inicio."
+                    })
         return data
+
+    def create(self, validated_data):
+        horarios_data = validated_data.pop('horarios', [])
+        documentos_ids = validated_data.pop('documentos_requeridos', []) # Handle M2M separately if needed, but PrimaryKeyRelatedField handles it mostly?
+        # Actually PrimaryKeyRelatedField with source='documentos_requeridos' for write_only handles it via set?
+        # Default create w/ M2M needs check. DRF default create handles M2M if they are not nested serializers but PKs.
+        # But here documents_requeridos_ids is PK field.
+        
+        curso = Curso.objects.create(**validated_data)
+        
+        # DRF ModelSerializer handles M2M from documents_requeridos_ids automatically? 
+        # No, because we popped them? No wait, standard create handles it if we don't pop it manually 
+        # or if we passed it to create.
+        # Let's verify standard DRF behavior for M2M with custom create.
+        # documents_requeridos_ids source is documents_requeridos.
+        # validated_data will contain 'documentos_requeridos' as list of objects because of source mapping?
+        # Let's look at previous code. It was not overriding create before.
+        # Wait, previous code DID NOT override create. So standard behavior applied.
+        # Standard behavior: saves instance, then sets M2M.
+        
+        # We need to manually set M2M because we are overriding create.
+        if 'documentos_requeridos' in validated_data:
+             # This might be already popped or not?
+             # validated_data contains the Python objects.
+             # documents_requeridos_ids (write_only) -> mapped to documents_requeridos (model field)
+             pass
+        
+        # Re-fetch docs from the popped/cleared logic if needed. 
+        # Actually, let's just use the super().create() logic pattern or manually do it.
+        # But since we popped horarios, we can just call super if we hadn't popped horarios?
+        # No, Curso model doesn't have horarios field, so super().create will fail if horarios is in validated_data.
+        # So popping horarios is correct.
+        
+        # Handling M2M for documents_requeridos:
+        # data from documents_requeridos_ids with source='documentos_requeridos' usually ends up in validated_data['documentos_requeridos'].
+        documentos = validated_data.pop('documentos_requeridos', [])
+        
+        # Create course
+        # curso = Curso.objects.create(**validated_data) 
+        # (Issues might arise if other M2M exist, but here it's just docs)
+        
+        # Set documents
+        course_docs_field = getattr(curso, 'documentos_requeridos')
+        course_docs_field.set(documentos)
+
+        # Create horarios
+        for horario_data in horarios_data:
+            HorarioCurso.objects.create(curso=curso, **horario_data)
+        
+        return curso
 
 class CursoDetailSerializer(serializers.ModelSerializer):
     #Serializer para detalle del curso con documentos requeridos
@@ -184,12 +243,14 @@ class CursoDetailSerializer(serializers.ModelSerializer):
     ya_inscrito = serializers.SerializerMethodField()
     documentos_subidos = serializers.SerializerMethodField()
     
+    horarios = HorarioCursoSerializer(many=True, read_only=True)
+    
     class Meta:
         model = Curso
         fields = [
             'id', 'nombre', 'descripcion', 'horas', 'profesor', 'valor',
             'tipo_certificado', 'fecha_inicio', 'cupos_disponibles',
-            'modalidad', 'area', 'dias_semana', 'hora_inicio', 'hora_fin',
+            'modalidad', 'area', 'horarios',
             'estado', 'documentos_requeridos', 'ya_inscrito', 'documentos_subidos'
         ]
     

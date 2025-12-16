@@ -120,14 +120,7 @@ class Curso(models.Model):
     )
     
     # Campos de horario
-    dias_semana = models.CharField(
-        max_length=100, 
-        blank=True, 
-        null=True,
-        help_text="Días de la semana separados por comas (ej: Lunes,Miércoles,Viernes)"
-    )
-    hora_inicio = models.TimeField(blank=True, null=True)
-    hora_fin = models.TimeField(blank=True, null=True)
+    # Campos de horario eliminados en favor de modelo HorarioCurso
     
     # Estado del curso
     ESTADO_CHOICES = [
@@ -144,6 +137,26 @@ class Curso(models.Model):
     
     def __str__(self):
         return self.nombre
+
+
+class HorarioCurso(models.Model):
+    DIAS_SEMANA_CHOICES = [
+        ('Lunes', 'Lunes'),
+        ('Martes', 'Martes'),
+        ('Miercoles', 'Miércoles'),
+        ('Jueves', 'Jueves'),
+        ('Viernes', 'Viernes'),
+        ('Sabado', 'Sábado'),
+        ('Domingo', 'Domingo'),
+    ]
+
+    curso = models.ForeignKey(Curso, on_delete=models.CASCADE, related_name='horarios')
+    dia_semana = models.CharField(max_length=20, choices=DIAS_SEMANA_CHOICES)
+    hora_inicio = models.TimeField()
+    hora_fin = models.TimeField()
+
+    def __str__(self):
+        return f"{self.curso.nombre} - {self.dia_semana} ({self.hora_inicio} - {self.hora_fin})"
 
 
 class DocumentoSubido(models.Model):

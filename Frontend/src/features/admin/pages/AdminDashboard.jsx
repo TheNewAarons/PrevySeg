@@ -7,14 +7,19 @@ import { useAuth } from '../../../services/authContext';
 import authService from '../../../services/authService';
 import courseService from '../../../services/courseService';
 import documentoService from '../../../services/documentoService';
+import userService from '../../../services/userService';
+
 const AdminDashboard = () => {
     const navigate = useNavigate();
-    const { user, logout: authLogout } = useAuth(); 
+    const { user, logout: authLogout } = useAuth();
     const [documentCount, setDocumentCount] = useState(0);
     const [enRevisionCount, setEnRevisionCount] = useState(0)
     const [userName, setUserName] = useState('Administrador');
     const [courseCount, setCourseCount] = useState(0);
     const [inProgressCount, setInProgressCount] = useState(0);
+    // Nuevo estado para clientes activos
+    const [clientCount, setClientCount] = useState(0);
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -35,28 +40,30 @@ const AdminDashboard = () => {
         }
 
         // Cargar estadísticas de cursos
+        // Cargar estadísticas
         fetchCourseStats();
-        fetchDocumentsStats()
+        fetchDocumentsStats();
+        fetchUserStats();
     }, [user, navigate]);
 
     const fetchCourseStats = async () => {
         try {
             setLoading(true);
             setError(null);
-            
+
             const courses = await courseService.getCourses();
             setCourseCount(courses?.length || 0);
-            
+
             // Contar cursos en curso
             const inProgress = courses?.filter(c => c.estado === 'en_curso').length || 0;
             setInProgressCount(inProgress);
-            
+
         } catch (err) {
             console.error('Error al cargar cursos:', err);
             setError(err.message);
-            
+
             // Si el error es de sesión expirada, hacer logout
-            if (err.message.includes('Sesión expirada') || err.message.includes('No hay sesión')) {
+            if (err.message.includes('Sesión expirada') || err.message.includes('No hay sesión') || err.message.includes('token not valid') || err.message.includes('Given token not valid')) {
                 authLogout();
             }
         } finally {
@@ -65,31 +72,50 @@ const AdminDashboard = () => {
     };
 
     const fetchDocumentsStats = async () => {
-        try{
+        try {
             setLoading(true)
             setError(null)
 
             const documents = await documentoService.getDocumentos()
             setDocumentCount(documents?.length || 0)
 
-            const enRevision = documents?.filter(d => d.estado_revision == 'EN_REVISION').length || 0 
+            const enRevision = documents?.filter(d => d.estado_revision == 'EN_REVISION').length || 0
             setEnRevisionCount(enRevision)
-            
 
-        } catch (error){
+
+        } catch (error) {
             console.error('Error al cargar documentos:', error)
             setError(error.message)
-            if (error.message.includes('Sesión expirada') || error.message.includes('No hay sesión')) {
+            if (error.message.includes('Sesión expirada') || error.message.includes('No hay sesión') || error.message.includes('token not valid') || error.message.includes('Given token not valid')) {
                 authLogout();
             }
-        } finally{
+        } finally {
             setLoading(false)
         }
     }
-    const handleLogout = () => {  
+
+    const fetchUserStats = async () => {
+        try {
+            // No seteamos loading global aqui para no bloquear otros stats si falla
+            // setError(null); 
+
+            // Pedimos solo usuarios con rol 'Cliente'
+            const clients = await userService.getUsers('Cliente');
+            setClientCount(clients?.length || 0);
+
+        } catch (error) {
+            console.error('Error al cargar clientes:', error);
+            // Manejamos logout si aplica
+            if (error.message.includes('Sesión expirada') || error.message.includes('token_not_valid') || error.message.includes('Given token not valid')) {
+                authLogout();
+            }
+        }
+    };
+
+    const handleLogout = () => {
         if (window.confirm('¿Estás seguro de que deseas cerrar sesión?')) {
             authService.logout();
-            authLogout(); 
+            authLogout();
             navigate('/login', { replace: true });
         }
     };
@@ -108,8 +134,6 @@ const AdminDashboard = () => {
             navigate('/administrador/aprobar-papeles');
         } else if (modulo === 'horarios') {
             navigate('/administrador/horarios');
-        } else if (modulo === 'reportes') {
-            navigate('/administrador/reportes');
         } else {
             alert(`Módulo: ${modulo}\nEsta funcionalidad se implementará próximamente.`);
         }
@@ -173,15 +197,15 @@ const AdminDashboard = () => {
                         </div>
 
                         <div className="stats-row">
-                            <div className="stat-card">
-                                <div className="stat-value">156</div>
+                            <div className="stat-card" onClick={() => navegarModulo('list-users')} style={{ cursor: 'pointer' }}>
+                                <div className="stat-value">{clientCount}</div>
                                 <div className="stat-label">Clientes Activos</div>
                             </div>
                             <div className="stat-card" onClick={() => navegarModulo('cursos')} style={{ cursor: 'pointer' }}>
                                 <div className="stat-value">{courseCount}</div>
                                 <div className="stat-label">Cursos Disponibles</div>
                             </div>
-                            <div className="stat-card" onClick={() => navegarModulo('aprobar-papeles')} style={{ cursor : 'pointer' }}>
+                            <div className="stat-card" onClick={() => navegarModulo('aprobar-papeles')} style={{ cursor: 'pointer' }}>
                                 <div className="stat-value">{enRevisionCount}</div>
                                 <div className="stat-label">Pendientes Aprobación</div>
                             </div>
@@ -258,16 +282,6 @@ const AdminDashboard = () => {
                                 <span className="module-badge">Catálogo</span>
                             </div>
 
-                            <div className="module-card" onClick={() => navegarModulo('reportes')}>
-                                <div className="module-icon">
-                                    <i className="bi bi-graph-up"></i>
-                                </div>
-                                <h3 className="module-title">Reportes</h3>
-                                <p className="module-description">
-                                    Genera reportes estadísticos, visualiza métricas de desempeño y exporta información del sistema.
-                                </p>
-                                <span className="module-badge">Análisis</span>
-                            </div>
                         </div>
                     </>
                 )}

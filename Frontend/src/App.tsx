@@ -16,17 +16,16 @@ import ListaCursos from './features/courses/pages/ListaCursos'
 import CursosEnCurso from './features/courses/pages/CursosEnCurso'
 import AprobarPapeles from './features/admin/pages/AprobarPapeles'
 import Horarios from './features/admin/pages/Horarios'
-import Reportes from './features/admin/pages/Reportes'
-import DetalleDocumento from './features/client/pages/DetalleDocumento.jsx' 
+import DetalleDocumento from './features/client/pages/DetalleDocumento.jsx'
 import Home from './pages/Home.jsx'
 import InscripcionCurso from './features/courses/pages/DetalleInscripcion.jsx'
 import FinalizarInscripcionCurso from './features/courses/pages/FinalizarInscripcion.jsx'
 import MisInscripciones from './features/client/pages/MisInscripciones.jsx'
 import { AuthProvider } from './services/authContext.jsx'
-import { PublicRoute, RoleRoute} from './services/protectedRouted.jsx'
+import { PublicRoute, RoleRoute } from './services/protectedRouted.jsx'
 
 function App() {
-    
+
     return (
         <Router>
             {/* Envolvemos con AuthProvider para tener acceso al contexto */}
@@ -34,14 +33,14 @@ function App() {
                 <Routes>
                     {/* ========== RUTAS PÚBLICAS ========== */}
                     <Route path='/' element={<Home />} />
-                    
+
                     {/* Solo accesibles si NO estás autenticado */}
                     <Route path='/inscripcion' element={
                         <PublicRoute>
                             <RegistroForm />
                         </PublicRoute>
                     } />
-                    
+
                     <Route path='/login' element={
                         <PublicRoute>
                             <LoginForm />
@@ -54,7 +53,7 @@ function App() {
                             <ClienteDashboard />
                         </RoleRoute>
                     } />
-                    
+
                     <Route path='/cliente/detalle-documento' element={
                         <RoleRoute allowedRole="Cliente">
                             <DetalleDocumento />
@@ -63,19 +62,19 @@ function App() {
 
                     <Route path='/cliente/cursos/:id/inscripcion' element={
                         <RoleRoute allowedRole='Cliente'>
-                            <InscripcionCurso/>
+                            <InscripcionCurso />
                         </RoleRoute>
                     }
                     />
                     <Route path='/cliente/cursos/:id/finalizar' element={
                         <RoleRoute allowedRole='Cliente'>
-                            <FinalizarInscripcionCurso/>
+                            <FinalizarInscripcionCurso />
                         </RoleRoute>
                     }
                     />
                     <Route path='/cliente/cursos/mis-inscripciones' element={
                         <RoleRoute allowedRole='Cliente'>
-                            <MisInscripciones/>
+                            <MisInscripciones />
                         </RoleRoute>
                     }
                     />
@@ -86,48 +85,43 @@ function App() {
                             <AdministradorDashboard />
                         </RoleRoute>
                     } />
-                    
+
                     <Route path='/administrador/crear-user' element={
                         <RoleRoute allowedRole="Administrador">
                             <CreateUserPage />
                         </RoleRoute>
                     } />
-                    
+
                     <Route path='/administrador/list-users' element={
                         <RoleRoute allowedRole="Administrador">
                             <ListUsers />
                         </RoleRoute>
                     } />
-                    
+
                     <Route path='/administrador/usuario/:id' element={
                         <RoleRoute allowedRole="Administrador">
                             <UserDetailPage />
                         </RoleRoute>
                     } />
-                    
+
                     <Route path='/administrador/usuario/editar/:id' element={
                         <RoleRoute allowedRole="Administrador">
                             <EditUser />
                         </RoleRoute>
                     } />
-                    
+
                     <Route path='/administrador/aprobar-papeles' element={
                         <RoleRoute allowedRole="Administrador">
                             <AprobarPapeles />
                         </RoleRoute>
                     } />
-                    
+
                     <Route path='/administrador/horarios' element={
                         <RoleRoute allowedRole="Administrador">
                             <Horarios />
                         </RoleRoute>
                     } />
-                    
-                    <Route path='/administrador/reportes' element={
-                        <RoleRoute allowedRole="Administrador">
-                            <Reportes />
-                        </RoleRoute>
-                    } />
+
 
                     {/* ========== RUTAS DE CURSOS (SOLO ADMIN) ========== */}
                     <Route path='/administrador/cursos' element={
@@ -135,25 +129,25 @@ function App() {
                             <ListaCursos />
                         </RoleRoute>
                     } />
-                    
+
                     <Route path='/administrador/cursos/crear' element={
                         <RoleRoute allowedRole="Administrador">
                             <CrearCurso />
                         </RoleRoute>
                     } />
-                    
+
                     <Route path='/administrador/cursos/en-curso' element={
                         <RoleRoute allowedRole="Administrador">
                             <CursosEnCurso />
                         </RoleRoute>
                     } />
-                    
+
                     <Route path='/administrador/cursos/:id' element={
                         <RoleRoute allowedRole="Administrador">
                             <DetalleCurso />
                         </RoleRoute>
                     } />
-                    
+
                     <Route path='/administrador/cursos/:id/editar' element={
                         <RoleRoute allowedRole="Administrador">
                             <EditarCurso />
