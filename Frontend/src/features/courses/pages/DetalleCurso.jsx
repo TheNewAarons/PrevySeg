@@ -30,13 +30,7 @@ const DetalleCurso = () => {
             setError('');
         } catch (err) {
             console.error('Error al cargar curso:', err);
-            if (err.status === 401 || err.message.includes("token_not_valid")) {
-                alert("Tu sesión ha expirado. Por favor inicia sesión nuevamente.");
-                authService.logout();
-                navigate('/login');
-                return;
-            }
-            if (err?.status === 401 || String(err?.message || '').includes("token_not_valid")) {
+            if (err.status === 401 || err.message.includes("token_not_valid") || err.message.includes("Given token not valid")) {
                 handleAuthExpired();
                 return;
             }
@@ -66,9 +60,9 @@ const DetalleCurso = () => {
     const formatMoneyCLP = (value) => {
         if (value === null || value === undefined) return '—';
         try {
-        return new Intl.NumberFormat('es-CL').format(Number(value));
+            return new Intl.NumberFormat('es-CL').format(Number(value));
         } catch {
-        return String(value);
+            return String(value);
         }
     };
 
@@ -255,18 +249,18 @@ const DetalleCurso = () => {
                                     <h5 className="mb-0"><i className="bi bi-clock me-2"></i>Horario</h5>
                                 </div>
                                 <div className="card-body">
-                                    <div className="mb-3">
-                                        <strong>Días de la Semana:</strong>
-                                        <p className="mt-1">{course.dias_semana || '—'}</p>
-                                    </div>
-                                    <div className="mb-3">
-                                        <strong>Hora de Inicio:</strong>
-                                        <p className="mt-1">{formatTime(course.hora_inicio)}</p>
-                                    </div>
-                                    <div className="mb-3">
-                                        <strong>Hora de Fin:</strong>
-                                        <p className="mt-1">{formatTime(course.hora_fin)}</p>
-                                    </div>
+                                    {course.horarios && course.horarios.length > 0 ? (
+                                        <ul className="list-group list-group-flush">
+                                            {course.horarios.map((h, index) => (
+                                                <li key={index} className="list-group-item d-flex justify-content-between align-items-center px-0">
+                                                    <strong>{h.dia_semana}</strong>
+                                                    <span>{formatTime(h.hora_inicio)} - {formatTime(h.hora_fin)}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <p className="text-muted">No hay horarios definidos.</p>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -281,16 +275,16 @@ const DetalleCurso = () => {
                                     <div className="mb-3">
                                         <strong>Documentos Requeridos:</strong>
                                         {requiredDocs.length === 0 ? (
-                                        <p className="text-muted mb-0">No se configuraron documentos requeridos para este curso.</p>
-                                    ) : (
-                                        <div className="d-flex flex-wrap gap-2">
-                                        {requiredDocs.map((doc) => (
-                                            <span key={doc.id_tipo_doc} className="badge bg-dark">
-                                            {doc.nombre}
-                                            </span>
-                                        ))}
-                                        </div>
-                                    )}
+                                            <p className="text-muted mb-0">No se configuraron documentos requeridos para este curso.</p>
+                                        ) : (
+                                            <div className="d-flex flex-wrap gap-2">
+                                                {requiredDocs.map((doc) => (
+                                                    <span key={doc.id_tipo_doc} className="badge bg-dark">
+                                                        {doc.nombre}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>

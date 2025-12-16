@@ -9,7 +9,7 @@ import courseService from '../../../services/courseService';
 import documentoService from '../../../services/documentoService';
 const AdminDashboard = () => {
     const navigate = useNavigate();
-    const { user, logout: authLogout } = useAuth(); 
+    const { user, logout: authLogout } = useAuth();
     const [documentCount, setDocumentCount] = useState(0);
     const [enRevisionCount, setEnRevisionCount] = useState(0)
     const [userName, setUserName] = useState('Administrador');
@@ -43,20 +43,20 @@ const AdminDashboard = () => {
         try {
             setLoading(true);
             setError(null);
-            
+
             const courses = await courseService.getCourses();
             setCourseCount(courses?.length || 0);
-            
+
             // Contar cursos en curso
             const inProgress = courses?.filter(c => c.estado === 'en_curso').length || 0;
             setInProgressCount(inProgress);
-            
+
         } catch (err) {
             console.error('Error al cargar cursos:', err);
             setError(err.message);
-            
+
             // Si el error es de sesión expirada, hacer logout
-            if (err.message.includes('Sesión expirada') || err.message.includes('No hay sesión')) {
+            if (err.message.includes('Sesión expirada') || err.message.includes('No hay sesión') || err.message.includes('token not valid') || err.message.includes('Given token not valid')) {
                 authLogout();
             }
         } finally {
@@ -65,31 +65,31 @@ const AdminDashboard = () => {
     };
 
     const fetchDocumentsStats = async () => {
-        try{
+        try {
             setLoading(true)
             setError(null)
 
             const documents = await documentoService.getDocumentos()
             setDocumentCount(documents?.length || 0)
 
-            const enRevision = documents?.filter(d => d.estado_revision == 'EN_REVISION').length || 0 
+            const enRevision = documents?.filter(d => d.estado_revision == 'EN_REVISION').length || 0
             setEnRevisionCount(enRevision)
-            
 
-        } catch (error){
+
+        } catch (error) {
             console.error('Error al cargar documentos:', error)
             setError(error.message)
-            if (error.message.includes('Sesión expirada') || error.message.includes('No hay sesión')) {
+            if (error.message.includes('Sesión expirada') || error.message.includes('No hay sesión') || error.message.includes('token not valid') || error.message.includes('Given token not valid')) {
                 authLogout();
             }
-        } finally{
+        } finally {
             setLoading(false)
         }
     }
-    const handleLogout = () => {  
+    const handleLogout = () => {
         if (window.confirm('¿Estás seguro de que deseas cerrar sesión?')) {
             authService.logout();
-            authLogout(); 
+            authLogout();
             navigate('/login', { replace: true });
         }
     };
@@ -181,7 +181,7 @@ const AdminDashboard = () => {
                                 <div className="stat-value">{courseCount}</div>
                                 <div className="stat-label">Cursos Disponibles</div>
                             </div>
-                            <div className="stat-card" onClick={() => navegarModulo('aprobar-papeles')} style={{ cursor : 'pointer' }}>
+                            <div className="stat-card" onClick={() => navegarModulo('aprobar-papeles')} style={{ cursor: 'pointer' }}>
                                 <div className="stat-value">{enRevisionCount}</div>
                                 <div className="stat-label">Pendientes Aprobación</div>
                             </div>
