@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import documentoService from "../../../services/documentoService.jsx";
-import BotonVolver from '../../../components/common/ButtonBack';
 
 const DetalleDocumento = () => {
+  const navigate = useNavigate();
   const [documentos, setDocumentos] = useState([]);
 
   useEffect(() => {
@@ -38,7 +39,9 @@ const DetalleDocumento = () => {
 
       {/* Botón volver */}
       <div className="mb-3">
-        <BotonVolver />
+        <button className="btn btn-outline-secondary" onClick={() => navigate(-1)}>
+          <i className="bi bi-arrow-left me-2"></i>Volver
+        </button>
       </div>
 
       <h3 className="fw-bold mb-4 text-center">Detalle de Documentos</h3>
@@ -57,20 +60,20 @@ const DetalleDocumento = () => {
               </p>
 
               <p>
-                  <strong>Documento:</strong>{" "}
-                  {doc.url_archivo ? (
-                      <a
-                          href={doc.url_archivo}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                      >
-                          Abrir documento
-                      </a>
-                  ) : (
-                      "No disponible"
-                  )}
+                <strong>Documento:</strong>{" "}
+                {doc.url_archivo ? (
+                  <a
+                    href={doc.url_archivo}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Abrir documento
+                  </a>
+                ) : (
+                  "No disponible"
+                )}
               </p>
-          </div>
+            </div>
 
             {/* DERECHA: estado */}
             <div className="text-end">

@@ -4,9 +4,6 @@ export const getRoleName = (user) => {
 
 // Devuelve la clase del badge según el rol
 export const getRoleBadgeClass = (roleName) => {
-    const roleLower = roleName.toLowerCase();
-
-    if (roleLower === 'administrador') return 'bg-danger';
-    if (roleLower === 'empresa') return 'bg-warning text-dark';
-    return 'bg-info text-dark'; 
-};  
+    // Color Plomo (Gris) solo en borde
+    return 'bg-white text-secondary border border-secondary';
+};

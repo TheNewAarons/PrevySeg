@@ -5,6 +5,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import '../styles/AdminDashboard.css';
 import courseService from '../../../services/courseService';
 import authService from '../../../services/authService';
+import Navbar from '../../../components/layout/Navbar';
 
 const Horarios = () => {
     const navigate = useNavigate();
@@ -79,23 +80,17 @@ const Horarios = () => {
 
     return (
         <div className="administrador-dashboard">
-            <nav className="navbar navbar-expand-lg navbar-light">
-                <div className="container-fluid px-4">
-                    <a className="navbar-brand" href="/">
-                        <img src="/images/logos/logo.png" alt="PrevySeg Logo" />
-                    </a>
-                    <div className="d-flex align-items-center gap-3 ms-auto">
-                        <button className="btn btn-secondary" onClick={() => navigate('/administrador/dashboard')}>
-                            <i className="bi bi-arrow-left me-2"></i>Volver al Dashboard
-                        </button>
-                    </div>
-                </div>
-            </nav>
+            <Navbar />
 
             <div className="main-container">
-                <div className="page-header">
-                    <h1 className="page-title">Horarios de Cursos</h1>
-                    <p className="page-subtitle">Visualiza y gestiona los horarios de todos los cursos</p>
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h1 className="page-title">Horarios de Cursos</h1>
+                        <p className="page-subtitle">Visualiza y gestiona los horarios de todos los cursos</p>
+                    </div>
+                    <button className="btn btn-outline-secondary" onClick={() => navigate('/administrador/dashboard')}>
+                        <i className="bi bi-arrow-left me-2"></i>Volver al Panel
+                    </button>
                 </div>
 
                 <div className="card shadow-sm mb-4">

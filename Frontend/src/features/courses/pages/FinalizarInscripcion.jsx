@@ -21,27 +21,27 @@ const FinalizarInscripcionCurso = () => {
 
     const finalizar = async () => {
         try {
-        setLoading(true);
-        setError("");
-        const res = await courseService.finalizarInscripcion(id);
-        alert(res?.message || res?.mensaje || "¡Inscripción completada!");
-        navigate("/cliente/dashboard");
+            setLoading(true);
+            setError("");
+            const res = await courseService.finalizarInscripcion(id);
+            alert(res?.message || res?.mensaje || "¡Inscripción completada!");
+            navigate("/cliente/dashboard");
         } catch (err) {
-        console.error(err);
-        if (err?.status === 401 || String(err?.message || "").includes("token_not_valid")) {
-            handleAuthExpired();
-            return;
-        }
+            console.error(err);
+            if (err?.status === 401 || String(err?.message || "").includes("token_not_valid")) {
+                handleAuthExpired();
+                return;
+            }
 
-        // si backend manda estructura con documentos faltantes / pendientes
-        const extra = err?.data?.documentos_faltantes || err?.data?.documentos_pendientes;
-        if (extra) {
-            setError(`${err.message}\n${JSON.stringify(extra, null, 2)}`);
-        } else {
-            setError(err?.message || "No se pudo finalizar la inscripción.");
-        }
+            // si backend manda estructura con documentos faltantes / pendientes
+            const extra = err?.data?.documentos_faltantes || err?.data?.documentos_pendientes;
+            if (extra) {
+                setError(`${err.message}\n${JSON.stringify(extra, null, 2)}`);
+            } else {
+                setError(err?.message || "No se pudo finalizar la inscripción.");
+            }
         } finally {
-        setLoading(false);
+            setLoading(false);
         }
     };
 
@@ -50,26 +50,26 @@ const FinalizarInscripcionCurso = () => {
             <div className="d-flex justify-content-between align-items-center mb-3">
                 <h2 className="mb-0">Finalizar inscripción</h2>
                 <button className="btn btn-outline-secondary" onClick={() => navigate(-1)}>
-                <i className="bi bi-arrow-left me-2"></i>Volver
+                    <i className="bi bi-arrow-left me-2"></i>Volver
                 </button>
             </div>
 
             {error && (
                 <div className="alert alert-danger" style={{ whiteSpace: "pre-wrap" }}>
-                <i className="bi bi-exclamation-triangle me-2"></i>
-                {error}
+                    <i className="bi bi-exclamation-triangle me-2"></i>
+                    {error}
                 </div>
             )}
 
             <div className="card shadow-sm">
                 <div className="card-body">
-                <p className="mb-3">
-                    Este paso intentará crear la inscripción <strong>solo si</strong> todos los documentos están aprobados y hay cupos.
-                </p>
+                    <p className="mb-3">
+                        Este paso intentará crear la inscripción <strong>solo si</strong> todos los documentos están aprobados y hay cupos.
+                    </p>
 
-                <button className="btn btn-success" onClick={finalizar} disabled={loading}>
-                    {loading ? "Finalizando..." : "Confirmar y finalizar"}
-                </button>
+                    <button className="btn btn-success" onClick={finalizar} disabled={loading}>
+                        {loading ? "Finalizando..." : "Confirmar y finalizar"}
+                    </button>
                 </div>
             </div>
         </div>

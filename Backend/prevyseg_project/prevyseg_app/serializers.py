@@ -51,7 +51,13 @@ class UserSerializer(serializers.ModelSerializer):
         rut_limpio = Usuario.objects.normalize_rut(value)
         
         # Verificamos si existe otro usuario con este RUT
-        if Usuario.objects.filter(rut=rut_limpio).exists():
+        queryset = Usuario.objects.filter(rut=rut_limpio)
+        
+        # Si estamos editando (instance existe), excluimos al usuario actual de la busqueda
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+            
+        if queryset.exists():
             raise serializers.ValidationError("Ya existe un usuario con este RUT.")
         return rut_limpio
 
@@ -237,6 +243,31 @@ class CursoSerializer(serializers.ModelSerializer):
         
         return curso
 
+    def update(self, instance, validated_data):
+        horarios_data = validated_data.pop('horarios', None)
+        documentos_ids = validated_data.pop('documentos_requeridos', None)
+        
+        # Actualizar campos simples
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        # Actualizar Documentos Requeridos (M2M)
+        if documentos_ids is not None:
+            # documentos_ids ya es una lista de objetos TipoDocumento gracias a source='documentos_requeridos'
+            instance.documentos_requeridos.set(documentos_ids)
+            
+        # Actualizar Horarios (Borrar y Recrear para simplificar)
+        if horarios_data is not None:
+            # Borrar horarios antiguos
+            instance.horarios.all().delete()
+            # Crear nuevos
+            # Si horarios_data esta vacio, esto efectivamente borra todos los horarios sin crear nuevos, lo cual es correcto.
+            for horario_data in horarios_data:
+                HorarioCurso.objects.create(curso=instance, **horario_data)
+                
+        return instance
+
 class CursoDetailSerializer(serializers.ModelSerializer):
     #Serializer para detalle del curso con documentos requeridos
     documentos_requeridos = TipoDeDocumentoSerializers(many=True, read_only=True)
@@ -287,6 +318,10 @@ class InscripcionCursoSerializer(serializers.ModelSerializer):
     curso_nombre = serializers.CharField(source = 'curso.nombre', read_only = True)
     curso_fecha_inicio = serializers.DateField(source = 'curso.fecha_inicio', read_only = True)
     curso_horas = serializers.IntegerField(source = 'curso.horas', read_only = True)
+    curso_horarios = HorarioCursoSerializer(source='curso.horarios', many=True, read_only=True)
+    curso_profesor = serializers.CharField(source = 'curso.profesor', read_only=True)
+    curso_modalidad = serializers.CharField(source = 'curso.modalidad', read_only=True)
+    curso_estado = serializers.CharField(source = 'curso.estado', read_only=True)
     class Meta:
         model = InscripcionCurso
         fields = '__all__'

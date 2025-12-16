@@ -65,6 +65,24 @@ body {
     transform: translateY(-1px);
 }
 
+/* Custom Button for Approving (Outline Gray -> Filled Green) */
+.btn-approve-custom {
+    background-color: white;
+    border: 1px solid #6c757d;
+    /* Plomo / Gray Border */
+    color: #6c757d;
+    transition: all 0.3s ease;
+}
+
+.btn-approve-custom:hover {
+    background-color: #198754;
+    /* Success / Green Fill */
+    border-color: #198754;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(25, 135, 84, 0.2);
+}
+
 /* Main Content */
 .main-container {
     max-width: 1400px;

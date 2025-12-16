@@ -1,4 +1,4 @@
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const CreateUserForm = ({ onUserCreated }) => {
     const [formData, setFormData] = useState({
@@ -12,48 +12,47 @@ const CreateUserForm = ({ onUserCreated }) => {
         lugar_trabajo: '',
         id_rol: ''
     });
-    //añadimos estado para los roles
-    const [roles, setRoles] = useState([])
-    const [rolesLoading, setRolesLoanding] = useState(true)
-    const [rolesError, setRolesError] = useState(null)
-    useEffect(() => {
-        const fetchRoles = async () =>{
-            try{
-                setRolesLoanding(true)
-                setRolesError(null)
 
-                const userStorage = localStorage.getItem("user")
-                const token = userStorage ? JSON.parse(userStorage).token : null
+    const [roles, setRoles] = useState([]);
+    const [rolesLoading, setRolesLoading] = useState(true);
+    const [rolesError, setRolesError] = useState(null);
+
+    useEffect(() => {
+        const fetchRoles = async () => {
+            try {
+                setRolesLoading(true);
+                setRolesError(null);
+
+                const userStorage = localStorage.getItem("user");
+                const token = userStorage ? JSON.parse(userStorage).token : null;
                 const res = await fetch("http://localhost:8000/api/roles/", {
-                    headers: token
-                    ? {'Authorization' : `Bearer ${token}`} : {}
-                })
-                if (!res.ok){
-                    throw new Error("No se logro cargar los roles")
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                });
+                if (!res.ok) {
+                    throw new Error("No se logro cargar los roles");
                 }
                 const data = await res.json();
-
                 setRoles(data);
 
-                const clienteRol = data.find(r => r.nombre_rol === 'Cliente')
-                if (clienteRol && !formData.id_rol){
-                    setFormData(prev =>({
+                const clienteRol = data.find(r => r.nombre_rol === 'Cliente');
+                if (clienteRol && !formData.id_rol) {
+                    setFormData(prev => ({
                         ...prev,
-                        id_rol : clienteRol.id_rol
-                    }))
+                        id_rol: clienteRol.id_rol
+                    }));
                 }
-            }catch(err){
+            } catch (err) {
                 console.error("Error cargando roles:", err);
                 setRolesError(err.message);
-            }finally{
-                setRolesLoanding(false)
+            } finally {
+                setRolesLoading(false);
             }
         };
-        fetchRoles()
-    }, [])
+        fetchRoles();
+    }, []);
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value })
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     const handleSubmit = async (e) => {
@@ -69,12 +68,9 @@ const CreateUserForm = ({ onUserCreated }) => {
             const userData = JSON.parse(userStorage);
             let token = userData.token;
 
-            //Creamos una copia y si está vacío, mandamos null.
             const dataToSend = { ...formData };
             if (!dataToSend.fecha_nacimiento) dataToSend.fecha_nacimiento = null;
             if (!dataToSend.lugar_trabajo) dataToSend.lugar_trabajo = null;
-
-            console.log("Enviando datos:", dataToSend);
 
             const response = await fetch('http://localhost:8000/api/usuarios/', {
                 method: "POST",
@@ -82,10 +78,9 @@ const CreateUserForm = ({ onUserCreated }) => {
                     "Authorization": `Bearer ${token}`,
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify(dataToSend) 
+                body: JSON.stringify(dataToSend)
             });
 
-            //Si el token expiró (401), redirigir al login
             if (response.status === 401) {
                 alert("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.");
                 localStorage.removeItem('user');
@@ -94,14 +89,10 @@ const CreateUserForm = ({ onUserCreated }) => {
             }
 
             if (!response.ok) {
-                //Leemos la respuesta del servidor (que dice POR QUÉ falló)
                 const errorData = await response.json();
-                console.log("Error del servidor:", errorData);
-
                 const errorMessages = Object.entries(errorData)
                     .map(([key, value]) => `${key}: ${value}`)
                     .join(' | ');
-
                 throw new Error(errorMessages || "Error desconocido al crear usuario");
             }
 
@@ -111,58 +102,140 @@ const CreateUserForm = ({ onUserCreated }) => {
             console.error(error);
             alert(`No se pudo crear: ${error.message}`);
         }
-    }
+    };
 
     return (
-        <div className="form-container" style={{ border: '1px solid #ddd', padding: '20px', marginBottom: '20px' }}>
-            <h3>Registrar Nuevo Usuario</h3>
-            <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '10px', gridTemplateColumns: '1fr 1fr' }}>
+        <form onSubmit={handleSubmit}>
+            <h5 className="mb-4 fw-bold text-secondary">Información Personal</h5>
 
-                <input name="rut" placeholder="RUT (12.345.678-9)" onChange={handleChange} value={formData.rut} required />
-                <input name="nombre" placeholder="Nombre Completo" onChange={handleChange} value={formData.nombre} required />
-                <input name="email" type="email" placeholder="Correo Electrónico" onChange={handleChange} value={formData.email} required />
-                <input name="password" type="password" placeholder="Contraseña" onChange={handleChange} value={formData.password} required />
-
-                <input name="telefono" placeholder="Teléfono" onChange={handleChange} value={formData.telefono} required />
-                <input name="domicilio" placeholder="Domicilio" onChange={handleChange} value={formData.domicilio} required />
-
-
-                <input name="fecha_nacimiento" type="date" onChange={handleChange} value={formData.fecha_nacimiento} />
-                <input name="lugar_trabajo" placeholder="Lugar de Trabajo" onChange={handleChange} value={formData.lugar_trabajo} />
-
-                <div style={{ gridColumn: 'span 2' }}>
-                    <label>Asignar Rol: </label>
-
-                    {rolesLoading && <p>Cargando roles...</p>}
-                    {rolesError && <p style={{ color: 'red' }}>Error: {rolesError}</p>}
-
-                    {!rolesLoading && !rolesError && (
-                        <select
-                            name="id_rol"
-                            value={formData.id_rol}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    id_rol: parseInt(e.target.value, 10)   // aseguramos número, no string
-                                })
-                            }
-                            required
-                        >
-                            <option value="">Seleccione un rol</option>
-                            {roles.map((rol) => (
-                                <option key={rol.id_rol} value={rol.id_rol}>
-                                    {rol.nombre_rol}
-                                </option>
-                            ))}
-                        </select>
-                    )}
+            <div className="row g-3 mb-4">
+                <div className="col-md-6">
+                    <label className="form-label small fw-bold text-muted">RUT</label>
+                    <input
+                        className="form-control bg-light"
+                        name="rut"
+                        placeholder="12.345.678-9"
+                        onChange={handleChange}
+                        value={formData.rut}
+                        required
+                    />
                 </div>
+                <div className="col-md-6">
+                    <label className="form-label small fw-bold text-muted">Nombre Completo</label>
+                    <input
+                        className="form-control bg-light"
+                        name="nombre"
+                        placeholder="Juan Pérez"
+                        onChange={handleChange}
+                        value={formData.nombre}
+                        required
+                    />
+                </div>
+                <div className="col-md-6">
+                    <label className="form-label small fw-bold text-muted">Correo Electrónico</label>
+                    <input
+                        className="form-control bg-light"
+                        type="email"
+                        name="email"
+                        placeholder="juan@ejemplo.com"
+                        onChange={handleChange}
+                        value={formData.email}
+                        required
+                    />
+                </div>
+                <div className="col-md-6">
+                    <label className="form-label small fw-bold text-muted">Contraseña</label>
+                    <input
+                        className="form-control bg-light"
+                        type="password"
+                        name="password"
+                        placeholder="••••••••"
+                        onChange={handleChange}
+                        value={formData.password}
+                        required
+                    />
+                </div>
+                <div className="col-md-6">
+                    <label className="form-label small fw-bold text-muted">Teléfono</label>
+                    <input
+                        className="form-control bg-light"
+                        name="telefono"
+                        placeholder="+56 9 1234 5678"
+                        onChange={handleChange}
+                        value={formData.telefono}
+                        required
+                    />
+                </div>
+                <div className="col-md-6">
+                    <label className="form-label small fw-bold text-muted">Fecha de Nacimiento</label>
+                    <input
+                        className="form-control bg-light"
+                        type="date"
+                        name="fecha_nacimiento"
+                        onChange={handleChange}
+                        value={formData.fecha_nacimiento}
+                    />
+                </div>
+                <div className="col-12">
+                    <label className="form-label small fw-bold text-muted">Domicilio</label>
+                    <input
+                        className="form-control bg-light"
+                        name="domicilio"
+                        placeholder="Av. Siempre Viva 123"
+                        onChange={handleChange}
+                        value={formData.domicilio}
+                        required
+                    />
+                </div>
+                <div className="col-12">
+                    <label className="form-label small fw-bold text-muted">Lugar de Trabajo (Opcional)</label>
+                    <input
+                        className="form-control bg-light"
+                        name="lugar_trabajo"
+                        placeholder="Empresa SPA"
+                        onChange={handleChange}
+                        value={formData.lugar_trabajo}
+                    />
+                </div>
+            </div>
 
-                <button type="submit" style={{ gridColumn: 'span 2', padding: '10px', background: '#007bff', color: 'white', border: 'none' }}>
+            <h5 className="mb-3 fw-bold text-secondary">Rol y Permisos</h5>
+            <div className="mb-4">
+                <label className="form-label small fw-bold text-muted">Rol de Usuario</label>
+                {rolesLoading && <div className="spinner-border spinner-border-sm ms-2" role="status"></div>}
+
+                {rolesError && <div className="text-danger small">{rolesError}</div>}
+
+                {!rolesLoading && !rolesError && (
+                    <select
+                        className="form-select bg-light"
+                        name="id_rol"
+                        value={formData.id_rol}
+                        onChange={(e) =>
+                            setFormData({
+                                ...formData,
+                                id_rol: parseInt(e.target.value, 10)
+                            })
+                        }
+                        required
+                    >
+                        <option value="">Seleccione un rol</option>
+                        {roles.map((rol) => (
+                            <option key={rol.id_rol} value={rol.id_rol}>
+                                {rol.nombre_rol}
+                            </option>
+                        ))}
+                    </select>
+                )}
+            </div>
+
+            <div className="d-flex justify-content-end pt-3 border-top">
+                <button type="submit" className="btn btn-primary px-5 py-2">
+                    <i className="bi bi-person-plus-fill me-2"></i>
                     Crear Usuario
                 </button>
-            </form>
-        </div>
+            </div>
+        </form>
     );
 };
 export default CreateUserForm;

@@ -1,0 +1,108 @@
+/* Calendar Grid Layout */
+.calendar-container {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    /* overflow: hidden; Removed to allow full height */
+    height: auto;
+    /* Allow full height */
+}
+
+.calendar-header {
+    display: grid;
+    grid-template-columns: 80px repeat(7, 1fr);
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.calendar-header-cell {
+    padding: 1rem 0.5rem;
+    text-align: center;
+    font-weight: 600;
+    color: #4b5563;
+    border-right: 1px solid #e5e7eb;
+}
+
+.calendar-header-cell.time-column {
+    border-right: 1px solid #e5e7eb;
+    background-color: #fff;
+}
+
+.calendar-body {
+    display: grid;
+    grid-template-columns: 80px repeat(7, 1fr);
+    overflow-y: auto;
+    flex: 1;
+    position: relative;
+    padding-top: 15px;
+    /* Add space for the first time label */
+}
+
+/* Time labels column */
+.time-labels {
+    border-right: 1px solid #e5e7eb;
+    background-color: #fff;
+}
+
+.time-label {
+    height: 60px;
+    /* 1 hour = 60px */
+    display: flex;
+    align-items: start;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: #9ca3af;
+    position: relative;
+    top: -10px;
+    /* Align text with grid line */
+}
+
+/* Day columns */
+.day-column {
+    position: relative;
+    border-right: 1px solid #e5e7eb;
+    /* Height is set dynamically in JS */
+    background-image: linear-gradient(to bottom, #f3f4f6 1px, transparent 1px);
+    background-size: 100% 60px;
+    /* Horizontal lines every hour */
+}
+
+.day-column:last-child {
+    border-right: none;
+}
+
+/* Event Card */
+.calendar-event {
+    position: absolute;
+    left: 4px;
+    right: 4px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    color: white;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s, z-index 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-event:hover {
+    transform: scale(1.02);
+    z-index: 10;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+.event-title {
+    font-weight: bold;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.event-time {
+    font-size: 0.75rem;
+    opacity: 0.9;
+}
