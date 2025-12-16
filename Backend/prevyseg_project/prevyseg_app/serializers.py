@@ -51,7 +51,13 @@ class UserSerializer(serializers.ModelSerializer):
         rut_limpio = Usuario.objects.normalize_rut(value)
         
         # Verificamos si existe otro usuario con este RUT
-        if Usuario.objects.filter(rut=rut_limpio).exists():
+        queryset = Usuario.objects.filter(rut=rut_limpio)
+        
+        # Si estamos editando (instance existe), excluimos al usuario actual de la busqueda
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+            
+        if queryset.exists():
             raise serializers.ValidationError("Ya existe un usuario con este RUT.")
         return rut_limpio
 

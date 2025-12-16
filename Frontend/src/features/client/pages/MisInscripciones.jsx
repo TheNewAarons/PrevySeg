@@ -3,12 +3,13 @@ import courseService from "../../../services/courseService";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../services/authContext";
 import '../styles/ClienteDashboard.css'; // Updated CSS import
+import Navbar from '../../../components/layout/Navbar';
 
 const MisInscripciones = () => {
     const [inscripciones, setInscripciones] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-    const { user, logout } = useAuth();
+    const { user } = useAuth();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -24,12 +25,6 @@ const MisInscripciones = () => {
         fetchData();
     }, []);
 
-    const handleLogout = () => {
-        if (window.confirm("¿Estás seguro que deseas cerrar sesión?")) {
-            logout();
-        }
-    };
-
     if (loading) {
         return (
             <div className="d-flex justify-content-center align-items-center vh-100">
@@ -42,27 +37,7 @@ const MisInscripciones = () => {
 
     return (
         <div className="cliente-dashboard">
-            <nav className="navbar navbar-expand-lg navbar-light">
-                <div className="container-fluid px-4">
-                    <a className="navbar-brand" href="/cliente/dashboard">
-                        <img src="/images/logos/logo.png" alt="PrevySeg Logo" />
-                    </a>
-
-                    <div className="d-flex align-items-center gap-3 ms-auto">
-                        <div className="user-profile">
-                            <div className="user-info text-end d-none d-md-block">
-                                <p className="user-name">{user?.nombre || "Usuario"}</p>
-                                <p className="user-role">Cliente</p>
-                            </div>
-                            <img src="/placeholder.svg?height=40&width=40" alt="Perfil" className="user-avatar" />
-                        </div>
-                        <button className="btn btn-logout" onClick={handleLogout}>
-                            <i className="bi bi-box-arrow-right me-1"></i>
-                            <span className="d-none d-sm-inline">Cerrar Sesión</span>
-                        </button>
-                    </div>
-                </div>
-            </nav>
+            <Navbar />
 
             <div className="container mt-4">
                 {/* Header Section */}

@@ -4,13 +4,16 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import '../styles/EmpresaDashboard.css';
 import { useAuth } from '../../../services/authContext';
+import userService from '../../../services/userService';
+import documentoService from '../../../services/documentoService';
+import Navbar from '../../../components/layout/Navbar';
 
 const EmpresaDashboard = () => {
     const navigate = useNavigate();
     const { user, logout } = useAuth(); //
-    
-    const [userName, setUserName] = useState('Empresa Demo');
-    const [userInitial, setUserInitial] = useState('E');
+
+    const [workersCount, setWorkersCount] = useState(0);
+    const [docsCount, setDocsCount] = useState(0);
 
     // 🔑 Verificar que hay usuario
     useEffect(() => {
@@ -19,23 +22,41 @@ const EmpresaDashboard = () => {
             navigate('/login');
             return;
         }
-
-        // Actualizar nombre de usuario
-        if (user.nombre) {
-            setUserName(user.nombre);
-            setUserInitial(user.nombre.charAt(0).toUpperCase());
-        }
+        // Cargar contadores
+        loadStats();
     }, [user, navigate]);
 
-    const handleLogout = () => {
-        if (!window.confirm('¿Estás seguro de que deseas cerrar sesión?')) return;
-        console.log('Empresa - Logout clickeado');
-        logout(); // 
+    const loadStats = async () => {
+        try {
+            // Cargar trabajadores para el contador (getUsers por defecto trae mis trabajadores)
+            const workers = await userService.getUsers();
+            const countWorkers = workers.filter(w => w.id_usuario !== user.user_id).length;
+            setWorkersCount(countWorkers);
+
+            // Cargar documentos para contar pendientes
+            const docs = await documentoService.getDocumentos();
+            const countDocs = docs.filter(d => d.estado_revision === 'EN_REVISION').length;
+            setDocsCount(countDocs);
+
+        } catch (error) {
+            console.error("Error cargando estadísticas:", error);
+        }
     };
 
     const goToModule = (module) => {
         console.log('Navegando a módulo:', module);
-        // Aquí puedes implementar la navegación real cuando existan las rutas
+        if (module === 'agregar-trabajador') {
+            navigate('/empresa/agregar-trabajador');
+            return;
+        }
+        if (module === 'trabajadores') {
+            navigate('/empresa/lista-trabajadores');
+            return;
+        }
+        if (module === 'revision-documentos') {
+            navigate('/empresa/revision-documentos');
+            return;
+        }
         // navigate(`/empresa/${module}`);
         alert(`Función "${module}" en desarrollo`);
     };
@@ -52,21 +73,7 @@ const EmpresaDashboard = () => {
 
     return (
         <div className="empresa-dashboard">
-            {/* Navbar */}
-            <nav className="navbar navbar-expand-lg">
-                <div className="container-fluid">
-                    <a className="navbar-brand" href="/">
-                        <img src="/images/logos/logo.png" alt="PrevySeg Logo" />
-                    </a>
-                    <div className="user-profile ms-auto">
-                        <div className="user-avatar">{userInitial}</div>
-                        <p className="user-name">{userName}</p>
-                        <button className="btn-logout" onClick={handleLogout}>
-                            <i className="bi bi-box-arrow-right"></i> Cerrar Sesión
-                        </button>
-                    </div>
-                </div>
-            </nav>
+            <Navbar />
 
             {/* Main Content */}
             <div className="main-container">
@@ -83,21 +90,21 @@ const EmpresaDashboard = () => {
                             <i className="bi bi-people-fill"></i>
                         </div>
                         <div className="stat-content">
-                            <h3>24</h3>
+                            <h3>{workersCount}</h3>
                             <p>Trabajadores Activos</p>
                         </div>
                     </div>
                     <div className="stat-card">
-                        <div className="stat-icon blue">
+                        <div className="stat-icon green">
                             <i className="bi bi-file-earmark-check-fill"></i>
                         </div>
                         <div className="stat-content">
-                            <h3>12</h3>
+                            <h3>{docsCount}</h3>
                             <p>Documentos Pendientes</p>
                         </div>
                     </div>
                     <div className="stat-card">
-                        <div className="stat-icon orange">
+                        <div className="stat-icon green">
                             <i className="bi bi-award-fill"></i>
                         </div>
                         <div className="stat-content">
@@ -145,17 +152,7 @@ const EmpresaDashboard = () => {
                         </button>
                     </div>
 
-                    {/* Volver al Home */}
-                    <div className="module-card">
-                        <div className="module-icon">
-                            <i className="bi bi-house-fill"></i>
-                        </div>
-                        <h3>Volver al Inicio</h3>
-                        <p>Regresar a la página principal de PrevySeg</p>
-                        <button className="btn-module" onClick={() => navigate('/')}>
-                            Ir al Home <i className="bi bi-arrow-right"></i>
-                        </button>
-                    </div>
+
                 </div>
             </div>
         </div>

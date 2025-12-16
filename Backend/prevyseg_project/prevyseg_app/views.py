@@ -1,4 +1,5 @@
 import os
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from rest_framework import generics, permissions, status, viewsets, filters, parsers
@@ -37,6 +38,7 @@ class RegistroView(generics.CreateAPIView):
             return Response({
                 "message": "Registro exitoso. Bienvenido a PrevySeg.",
                 "user_id": user.id_usuario,
+                "nombre": user.nombre, 
                 "rut": user.rut,
                 "email": user.email,
                 "rol": user.id_rol.nombre_rol,
@@ -67,6 +69,18 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             if rol_nombre:
                 queryset = queryset.filter(id_rol__nombre_rol=rol_nombre)
             return queryset
+        
+        if user.id_rol.nombre_rol == 'Empresa':
+            # Si solicita candidatos (para vincular)
+            if self.request.query_params.get('candidates') == 'true':
+                return Usuario.objects.filter(
+                    id_rol__nombre_rol='Cliente'
+                ).filter(
+                    Q(lugar_trabajo__isnull=True) | Q(lugar_trabajo__exact='')
+                )
+            
+            # Por defecto: devuelve SOLO sus propios trabajadores
+            return Usuario.objects.filter(lugar_trabajo=user.nombre)
 
         return Usuario.objects.filter(id_usuario=user.id_usuario)
             
@@ -94,6 +108,7 @@ class LoginView(APIView):
             "token": str(refresh.access_token),
             "refresh": str(refresh),
             "user_id": user.id_usuario,
+            "nombre": user.nombre,
             "rol": rol_nombre
         }, status=status.HTTP_200_OK)
 
@@ -565,8 +580,12 @@ class DocumentosUsuarioView(generics.ListAPIView):
         user = self.request.user
 
         #si es admin ve todos los documentos
-        if user.is_staff or user.is_superuser:
+        if user.is_staff or user.is_superuser or (hasattr(user, 'id_rol') and user.id_rol.nombre_rol == 'Administrador'):
             return DocumentoSubido.objects.all()
+
+        #si es empresa ve los documentos de SUS trabajadores
+        if hasattr(user, 'id_rol') and user.id_rol.nombre_rol == 'Empresa':
+            return DocumentoSubido.objects.filter(usuario__lugar_trabajo=user.nombre)
 
         #si es cliente solo los suyos
         return DocumentoSubido.objects.filter(usuario=user)

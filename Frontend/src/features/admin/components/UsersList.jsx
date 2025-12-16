@@ -110,7 +110,7 @@ const UsuarioList = () => {
             </div>
         );
     }
-    
+
     return (
         <>
             <div className="card shadow-sm">
@@ -188,14 +188,14 @@ const UsuarioList = () => {
                                                     <td>
                                                         <div className="d-flex justify-content-center gap-2">
                                                             <button
-                                                                className="btn btn-sm btn-outline-primary"
+                                                                className="btn btn-sm btn-light border"
                                                                 onClick={() => navigate(`/administrador/usuario/${u.id_usuario}`)}
                                                                 title="Ver detalles"
                                                             >
                                                                 <i className="bi bi-eye"></i>
                                                             </button>
                                                             <button
-                                                                className="btn btn-sm btn-outline-warning"
+                                                                className="btn btn-sm btn-outline-success"
                                                                 onClick={() => navigate(`/administrador/usuario/editar/${u.id_usuario}`)}
                                                                 title="Editar"
                                                             >

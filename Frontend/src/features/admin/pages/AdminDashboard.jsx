@@ -8,16 +8,15 @@ import authService from '../../../services/authService';
 import courseService from '../../../services/courseService';
 import documentoService from '../../../services/documentoService';
 import userService from '../../../services/userService';
+import Navbar from '../../../components/layout/Navbar';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
     const { user, logout: authLogout } = useAuth();
     const [documentCount, setDocumentCount] = useState(0);
     const [enRevisionCount, setEnRevisionCount] = useState(0)
-    const [userName, setUserName] = useState('Administrador');
     const [courseCount, setCourseCount] = useState(0);
     const [inProgressCount, setInProgressCount] = useState(0);
-    // Nuevo estado para clientes activos
     const [clientCount, setClientCount] = useState(0);
 
     const [loading, setLoading] = useState(true);
@@ -31,15 +30,6 @@ const AdminDashboard = () => {
             return;
         }
 
-        // Cargar nombre de usuario
-        const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-        if (storedUser.nombre) {
-            setUserName(storedUser.nombre);
-        } else if (user.nombre) {
-            setUserName(user.nombre);
-        }
-
-        // Cargar estadísticas de cursos
         // Cargar estadísticas
         fetchCourseStats();
         fetchDocumentsStats();
@@ -112,14 +102,6 @@ const AdminDashboard = () => {
         }
     };
 
-    const handleLogout = () => {
-        if (window.confirm('¿Estás seguro de que deseas cerrar sesión?')) {
-            authService.logout();
-            authLogout();
-            navigate('/login', { replace: true });
-        }
-    };
-
     const navegarModulo = (modulo) => {
         console.log('Navegando a módulo:', modulo);
         if (modulo === 'agregar-curso') {
@@ -151,28 +133,7 @@ const AdminDashboard = () => {
 
     return (
         <div className="administrador-dashboard">
-            <nav className="navbar navbar-expand-lg navbar-light">
-                <div className="container-fluid px-4">
-                    <a className="navbar-brand" href="/administrador/dashboard">
-                        <img src="/images/logos/logo.png" alt="PrevySeg Logo" />
-                    </a>
-
-                    <div className="d-flex align-items-center gap-3 ms-auto">
-                        <div className="user-profile">
-                            <div className="user-info text-end d-none d-md-block">
-                                <p className="user-name">{userName}</p>
-                                <p className="user-role">Panel de Control</p>
-                            </div>
-                            <img src="/placeholder.svg?height=40&width=40" alt="Perfil" className="user-avatar" />
-                        </div>
-                        {/* Cambiar onClick a handleLogout */}
-                        <button className="btn btn-logout" onClick={handleLogout}>
-                            <i className="bi bi-box-arrow-right me-1"></i>
-                            <span className="d-none d-sm-inline">Cerrar Sesión</span>
-                        </button>
-                    </div>
-                </div>
-            </nav>
+            <Navbar />
 
             <div className="main-container">
                 {/* Mostrar error si existe */}

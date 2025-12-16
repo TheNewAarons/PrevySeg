@@ -2,20 +2,15 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../services/authContext.jsx';
 import '../../admin/styles/AdminDashboard.css'; // Reutilizando estilo del admin
+import Navbar from '../../../components/layout/Navbar';
 
 const ClienteDashboard = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (!user) navigate("/login");
   }, [user, navigate]);
-
-  const handleLogout = () => {
-    if (window.confirm("¿Estás seguro que deseas cerrar sesión?")) {
-      logout();
-    }
-  };
 
   if (!user) {
     return (
@@ -29,27 +24,7 @@ const ClienteDashboard = () => {
 
   return (
     <div className="administrador-dashboard"> {/* Usando clase del admin para heredar estilos */}
-      <nav className="navbar navbar-expand-lg navbar-light">
-        <div className="container-fluid px-4">
-          <a className="navbar-brand" href="/cliente/dashboard">
-            <img src="/images/logos/logo.png" alt="PrevySeg Logo" />
-          </a>
-
-          <div className="d-flex align-items-center gap-3 ms-auto">
-            <div className="user-profile">
-              <div className="user-info text-end d-none d-md-block">
-                <p className="user-name">{user.nombre}</p>
-                <p className="user-role">Cliente</p>
-              </div>
-              <img src="/placeholder.svg?height=40&width=40" alt="Perfil" className="user-avatar" />
-            </div>
-            <button className="btn btn-logout" onClick={handleLogout}>
-              <i className="bi bi-box-arrow-right me-1"></i>
-              <span className="d-none d-sm-inline">Cerrar Sesión</span>
-            </button>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       <div className="main-container">
         <div className="page-header">

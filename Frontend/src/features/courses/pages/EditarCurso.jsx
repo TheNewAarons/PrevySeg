@@ -5,6 +5,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import courseService from '../../../services/courseService';
 import authService from '../../../services/authService';
 import '../../admin/styles/AdminDashboard.css';
+import Navbar from '../../../components/layout/Navbar';
 
 const EditarCurso = () => {
     const navigate = useNavigate();
@@ -220,13 +221,7 @@ const EditarCurso = () => {
     if (loading) {
         return (
             <div className="administrador-dashboard">
-                <nav className="navbar navbar-expand-lg navbar-light">
-                    <div className="container-fluid px-4">
-                        <a className="navbar-brand" href="/">
-                            <img src="/images/logos/logo.png" alt="PrevySeg Logo" />
-                        </a>
-                    </div>
-                </nav>
+                <Navbar />
                 <div className="main-container">
                     <div className="text-center py-5">
                         <div className="spinner-border text-primary" role="status">
@@ -241,18 +236,7 @@ const EditarCurso = () => {
 
     return (
         <div className="administrador-dashboard">
-            <nav className="navbar navbar-expand-lg navbar-light">
-                <div className="container-fluid px-4">
-                    <a className="navbar-brand" href="/">
-                        <img src="/images/logos/logo.png" alt="PrevySeg Logo" />
-                    </a>
-                    <div className="d-flex align-items-center gap-3 ms-auto">
-                        <button className="btn btn-secondary" onClick={() => navigate('/administrador/cursos')}>
-                            <i className="bi bi-arrow-left me-2"></i>Volver a Lista
-                        </button>
-                    </div>
-                </div>
-            </nav>
+            <Navbar />
 
             <div className="main-container">
                 <div className="container mt-4">

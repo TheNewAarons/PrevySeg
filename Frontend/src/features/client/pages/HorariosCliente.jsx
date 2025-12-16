@@ -6,10 +6,11 @@ import '../../admin/styles/AdminDashboard.css';
 import '../styles/HorariosCliente.css'; // New styles
 import courseService from '../../../services/courseService';
 import { useAuth } from '../../../services/authContext';
+import Navbar from '../../../components/layout/Navbar';
 
 const HorariosCliente = () => {
     const navigate = useNavigate();
-    const { user, logout } = useAuth();
+    const { user } = useAuth();
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -41,12 +42,6 @@ const HorariosCliente = () => {
         fetchCourses();
     }, [user, navigate]);
 
-    const handleLogout = () => {
-        if (window.confirm("¿Estás seguro que deseas cerrar sesión?")) {
-            logout();
-        }
-    };
-
     const fetchCourses = async () => {
         try {
             setLoading(true);
@@ -68,10 +63,6 @@ const HorariosCliente = () => {
             setError('');
         } catch (err) {
             console.error('Error al cargar cursos:', err);
-            if (err?.status === 401 || String(err?.message || '').includes('token_not_valid')) {
-                logout();
-                return;
-            }
             setError('Error al cargar el calendario. Por favor intenta nuevamente.');
         } finally {
             setLoading(false);
@@ -94,6 +85,11 @@ const HorariosCliente = () => {
             top: `${(offsetMinutes / 60) * HOUR_HEIGHT}px`,
             height: `${(durationMinutes / 60) * HOUR_HEIGHT}px`,
         };
+    };
+
+    // Helper to normalize strings for comparison (remove accents)
+    const normalizeStr = (str) => {
+        return str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : "";
     };
 
     // Flatten all schedule items into a single list of renderable events
@@ -129,26 +125,7 @@ const HorariosCliente = () => {
 
     return (
         <div className="administrador-dashboard">
-            <nav className="navbar navbar-expand-lg navbar-light">
-                <div className="container-fluid px-4">
-                    <a className="navbar-brand" href="/cliente/dashboard">
-                        <img src="/images/logos/logo.png" alt="PrevySeg Logo" />
-                    </a>
-                    <div className="d-flex align-items-center gap-3 ms-auto">
-                        <div className="user-profile">
-                            <div className="user-info text-end d-none d-md-block">
-                                <p className="user-name">{user?.nombre || "Usuario"}</p>
-                                <p className="user-role">Cliente</p>
-                            </div>
-                            <img src="/placeholder.svg?height=40&width=40" alt="Perfil" className="user-avatar" />
-                        </div>
-                        <button className="btn btn-logout" onClick={handleLogout}>
-                            <i className="bi bi-box-arrow-right me-1"></i>
-                            <span className="d-none d-sm-inline">Cerrar Sesión</span>
-                        </button>
-                    </div>
-                </div>
-            </nav>
+            <Navbar />
 
             <div className="container mt-4 mb-5">
                 <div className="d-flex justify-content-between align-items-center mb-4">
@@ -197,7 +174,7 @@ const HorariosCliente = () => {
                                 style={{ height: `${TOTAL_HEIGHT}px`, minHeight: 'auto' }}
                             >
                                 {allEvents
-                                    .filter(event => event.dia_semana === day)
+                                    .filter(event => normalizeStr(event.dia_semana) === normalizeStr(day))
                                     .map((event, idx) => (
                                         <div
                                             key={`${event.courseName}-${event.dia_semana}-${event.hora_inicio}-${idx}`}

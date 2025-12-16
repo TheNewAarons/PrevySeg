@@ -7,10 +7,13 @@ import UserDetailPage from './features/admin/pages/UserDetailPage'
 import EditUser from './features/admin/pages/EditUser'
 import AdministradorDashboard from './features/admin/pages/AdminDashboard'
 import EmpresaDashboard from './features/empresa/pages/EmpresaDashboard'
+import AgregarTrabajador from './features/empresa/pages/AgregarTrabajador'
 import CreateUserPage from './features/admin/pages/CreateUserPage'
 import ClienteDashboard from './features/client/pages/ClienteDashboard'
 import CrearCurso from './features/courses/pages/CrearCurso'
-import EditarCurso from './features/courses/pages/EditarCurso'
+import ListaTrabajadores from './features/empresa/pages/ListaTrabajadores';
+import RevisionDocumentos from './features/empresa/pages/RevisionDocumentos';
+import EditarCurso from './features/courses/pages/EditarCurso.jsx'
 import DetalleCurso from './features/courses/pages/DetalleCurso'
 import ListaCursos from './features/courses/pages/ListaCursos'
 import CursosEnCurso from './features/courses/pages/CursosEnCurso'
@@ -172,6 +175,22 @@ function App() {
                     <Route path='/empresa/dashboard' element={
                         <RoleRoute allowedRole="Empresa">
                             <EmpresaDashboard />
+                        </RoleRoute>
+                    } />
+
+                    <Route path='/empresa/revision-documentos' element={
+                        <RoleRoute allowedRole="Empresa">
+                            <RevisionDocumentos />
+                        </RoleRoute>
+                    } />
+                    <Route path='/empresa/agregar-trabajador' element={
+                        <RoleRoute allowedRole="Empresa">
+                            <AgregarTrabajador />
+                        </RoleRoute>
+                    } />
+                    <Route path='/empresa/lista-trabajadores' element={
+                        <RoleRoute allowedRole="Empresa">
+                            <ListaTrabajadores />
                         </RoleRoute>
                     } />
 
