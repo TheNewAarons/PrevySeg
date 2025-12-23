@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { validateRut, formatRut, validateAge } from "../../../utils/validation";
 
 const CreateUserForm = ({ onUserCreated }) => {
     const [formData, setFormData] = useState({
@@ -16,8 +17,10 @@ const CreateUserForm = ({ onUserCreated }) => {
     const [roles, setRoles] = useState([]);
     const [rolesLoading, setRolesLoading] = useState(true);
     const [rolesError, setRolesError] = useState(null);
+    const [showPassword, setShowPassword] = useState(false);
 
     useEffect(() => {
+        // ... existing useEffect ...
         const fetchRoles = async () => {
             try {
                 setRolesLoading(true);
@@ -52,11 +55,33 @@ const CreateUserForm = ({ onUserCreated }) => {
     }, []);
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        if (name === 'rut') {
+            setFormData({ ...formData, [name]: formatRut(value) });
+        } else {
+            setFormData({ ...formData, [name]: value });
+        }
+    };
+
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
     };
 
     const handleSubmit = async (e) => {
+        // ... existing handleSubmit ...
         e.preventDefault();
+
+        // Validaciones
+        if (!validateRut(formData.rut)) {
+            alert("El RUT ingresado no es válido.");
+            return;
+        }
+
+        if (formData.fecha_nacimiento && !validateAge(formData.fecha_nacimiento)) {
+            alert("El usuario debe ser mayor de 18 años.");
+            return;
+        }
+
         try {
             const userStorage = localStorage.getItem('user');
             if (!userStorage) {
@@ -145,15 +170,35 @@ const CreateUserForm = ({ onUserCreated }) => {
                 </div>
                 <div className="col-md-6">
                     <label className="form-label small fw-bold text-muted">Contraseña</label>
-                    <input
-                        className="form-control bg-light"
-                        type="password"
-                        name="password"
-                        placeholder="••••••••"
-                        onChange={handleChange}
-                        value={formData.password}
-                        required
-                    />
+                    <div style={{ position: 'relative' }}>
+                        <input
+                            className="form-control bg-light"
+                            type={showPassword ? "text" : "password"}
+                            name="password"
+                            placeholder="••••••••"
+                            onChange={handleChange}
+                            value={formData.password}
+                            required
+                            style={{ paddingRight: '40px' }}
+                        />
+                        <button
+                            type="button"
+                            className="btn btn-outline-secondary"
+                            onClick={togglePasswordVisibility}
+                            style={{
+                                position: 'absolute',
+                                right: '5px',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                border: 'none',
+                                background: 'transparent',
+                                padding: '5px 10px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
+                        </button>
+                    </div>
                 </div>
                 <div className="col-md-6">
                     <label className="form-label small fw-bold text-muted">Teléfono</label>

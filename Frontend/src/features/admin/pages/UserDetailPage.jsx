@@ -168,21 +168,7 @@ const UserDetailPage = () => {
                     </div>
 
                     <div className="border-top pt-2">
-                        <p className="small fw-bold mb-2">Documentos:</p>
-                        {(inscripcion.documentos && inscripcion.documentos.length > 0) ? (
-                            <ul className="list-unstyled small mb-0">
-                                {inscripcion.documentos.map((d, i) => (
-                                    <li key={i} className="mb-1 d-flex align-items-center justify-content-between">
-                                        <span className="text-truncate" style={{ maxWidth: '150px' }} title={d.nombre}>{d.nombre}</span>
-                                        <span className={`badge ${d.estado === 'APROBADO' ? 'bg-success' : d.estado === 'RECHAZADO' ? 'bg-danger' : 'bg-warning text-dark'} bg-opacity-75`} style={{ fontSize: '0.65rem' }}>
-                                            {d.estado}
-                                        </span>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <p className="small text-muted fst-italic mb-0">Sin documentos.</p>
-                        )}
+                        {/* Documentos ocultos en esta vista */}
                     </div>
                 </div>
             </div>
@@ -297,7 +283,7 @@ const UserDetailPage = () => {
                                                             <div className="fw-bold">{d.nombre}</div>
                                                             <div className="text-muted" style={{ fontSize: '0.75rem' }}>{d.curso}</div>
                                                         </div>
-                                                        <span className="badge bg-warning text-dark">{d.estado}</span>
+                                                        <span className="badge bg-warning text-dark">{d.estado.replace(/_/g, ' ')}</span>
                                                     </li>
                                                 ))}
                                             </ul>

@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import authService from '../../../services/authService';
 import { useNavigate } from 'react-router-dom';
 import '../styles/RegistroForm.css';
+import { validateRut, formatRut, validateAge } from "../../../utils/validation";
 
 const RegistroForm = () => {
     const navigate = useNavigate();
@@ -20,13 +21,31 @@ const RegistroForm = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
+        const { name, value } = e.target;
+        if (name === 'rut') {
+            setFormData({
+                ...formData,
+                [name]: formatRut(value),
+            });
+        } else {
+            setFormData({
+                ...formData,
+                [name]: value,
+            });
+        }
         if (error) setError(null);
+    };
+
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    };
+
+    const toggleConfirmPasswordVisibility = () => {
+        setShowConfirmPassword(!showConfirmPassword);
     };
 
     const validatePassword = (password) => {
@@ -40,6 +59,17 @@ const RegistroForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!validateRut(formData.rut)) {
+            setError("El RUT ingresado no es válido.");
+            return;
+        }
+
+        if (formData.fecha_nacimiento && !validateAge(formData.fecha_nacimiento)) {
+            setError("Debes ser mayor de 18 años para registrarte.");
+            return;
+        }
+
         const passwordErrors = validatePassword(formData.password);
         if (passwordErrors.length > 0) {
             setError(passwordErrors.join(', '));
@@ -63,13 +93,13 @@ const RegistroForm = () => {
         }
     };
     const handleGoHome = () => {
-        navigate('/', {replace : true})
+        navigate('/', { replace: true })
     }
 
     return (
         <div className="register-container">
             <div className="register-card">
-                <button 
+                <button
                     onClick={handleGoHome}
                     className="btn-back-home"
                     disabled={loading}
@@ -219,27 +249,67 @@ const RegistroForm = () => {
                     <div className="row mb-3">
                         <div className="col-md-6">
                             <label htmlFor="password" className="form-label">Contraseña</label>
-                            <input
-                                type="password"
-                                className="form-control"
-                                id="password"
-                                name="password"
-                                placeholder="••••••••"
-                                value={formData.password}
-                                onChange={handleChange}
-                                required
-                            />
+                            <div style={{ position: 'relative' }}>
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    className="form-control"
+                                    id="password"
+                                    name="password"
+                                    placeholder="••••••••"
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    required
+                                    style={{ paddingRight: '40px' }}
+                                />
+                                <button
+                                    type="button"
+                                    className="btn btn-outline-secondary"
+                                    onClick={togglePasswordVisibility}
+                                    style={{
+                                        position: 'absolute',
+                                        right: '5px',
+                                        top: '50%',
+                                        transform: 'translateY(-50%)',
+                                        border: 'none',
+                                        background: 'transparent',
+                                        padding: '5px 10px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
+                                </button>
+                            </div>
                         </div>
                         <div className="col-md-6">
                             <label htmlFor="confirm_password" className="form-label">Confirmar Contraseña</label>
-                            <input
-                                type="password"
-                                className="form-control"
-                                id="confirm_password"
-                                name="confirm_password"
-                                placeholder="••••••••"
-                                required
-                            />
+                            <div style={{ position: 'relative' }}>
+                                <input
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    className="form-control"
+                                    id="confirm_password"
+                                    name="confirm_password"
+                                    placeholder="••••••••"
+                                    required
+                                    style={{ paddingRight: '40px' }}
+                                />
+                                <button
+                                    type="button"
+                                    className="btn btn-outline-secondary"
+                                    onClick={toggleConfirmPasswordVisibility}
+                                    style={{
+                                        position: 'absolute',
+                                        right: '5px',
+                                        top: '50%',
+                                        transform: 'translateY(-50%)',
+                                        border: 'none',
+                                        background: 'transparent',
+                                        padding: '5px 10px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <i className={`bi ${showConfirmPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
 

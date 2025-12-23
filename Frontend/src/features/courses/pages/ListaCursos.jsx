@@ -6,6 +6,7 @@ import courseService from '../../../services/courseService';
 import authService from '../../../services/authService';
 import '../../admin/styles/AdminDashboard.css';
 import Navbar from '../../../components/layout/Navbar';
+import { formatPriceCLP } from '../../../utils/formatters';
 
 const ListaCursos = () => {
     const navigate = useNavigate();
@@ -194,7 +195,7 @@ const ListaCursos = () => {
                                                 <td>{course.profesor || '—'}</td>
                                                 <td>
                                                     {course.valor ? (
-                                                        <strong className="text-success">${course.valor}</strong>
+                                                        <strong className="text-success">{formatPriceCLP(course.valor)}</strong>
                                                     ) : '—'}
                                                 </td>
                                                 <td>
