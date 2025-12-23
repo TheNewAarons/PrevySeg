@@ -11,7 +11,7 @@ const LoginForm = () => {
         rut: '',
         password: '',
     });
-    const [showPassword, setShowPassword] = useState(false  )
+    const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -33,19 +33,19 @@ const LoginForm = () => {
         try {
             //Usa la función login del contexto
             const data = await login(formData.rut, formData.password);
-            
-            console.log('Login exitoso, data recibida:', data); 
-            
+
+            console.log('Login exitoso, data recibida:', data);
+
             //Obtener rol desde la respuesta
             const rol = data?.rol_nombre || data?.rol;
-            console.log('Rol detectado:', rol); 
+            console.log('Rol detectado:', rol);
             //Mapeo de rutas por rol
             let dashboardPath = '/cliente/dashboard';
-            
+
             if (rol) {
                 const rolLower = rol.toLowerCase();
-                console.log('Rol en minúsculas:', rolLower); 
-                
+                console.log('Rol en minúsculas:', rolLower);
+
                 if (rolLower === 'administrador') {
                     dashboardPath = '/administrador/dashboard';
                 } else if (rolLower === 'empresa') {
@@ -55,11 +55,11 @@ const LoginForm = () => {
                 }
             }
 
-            console.log('Navegando a:', dashboardPath); 
+            console.log('Navegando a:', dashboardPath);
 
             //IMPORTANTE: No usar setLoading(false) antes de navigate
             // porque puede causar problemas de renderizado
-            
+
             // Redirige al dashboard correspondiente
             navigate(dashboardPath, { replace: true });
 
@@ -70,13 +70,13 @@ const LoginForm = () => {
         }
     };
     const handleGoHome = () => {
-        navigate('/', {replace : true})
+        navigate('/', { replace: true })
     }
 
     return (
         <div className="login-container">
             <div className="login-card">
-                <button 
+                <button
                     onClick={handleGoHome}
                     className="btn-back-home"
                     disabled={loading}
@@ -113,7 +113,7 @@ const LoginForm = () => {
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
-                    </div>  
+                    </div>
                     <h1 className="brand-name">PrevySeg</h1>
                     <p className="brand-subtitle">Organismo Técnico de Capacitación</p>
                 </div>
@@ -169,7 +169,8 @@ const LoginForm = () => {
                                     border: 'none',
                                     background: 'transparent',
                                     padding: '5px 10px',
-                                    cursor: 'pointer'
+                                    cursor: 'pointer',
+                                    color: '#6c757d'
                                 }}
                                 aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                             >
@@ -181,15 +182,15 @@ const LoginForm = () => {
 
                     <div className="d-flex justify-content-between align-items-center mb-3">
                         <div className="form-check">
-                            <input 
-                                className="form-check-input" 
-                                type="checkbox" 
+                            <input
+                                className="form-check-input"
+                                type="checkbox"
                                 id="rememberMe"
                                 disabled={loading}
                             />
-                            <label 
-                                className="form-check-label" 
-                                htmlFor="rememberMe" 
+                            <label
+                                className="form-check-label"
+                                htmlFor="rememberMe"
                                 style={{ fontSize: '.875rem', color: '#666' }}
                             >
                                 Recordarme

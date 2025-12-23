@@ -173,7 +173,7 @@ const BuscarCursos = () => {
                                             </div>
                                             {yaInscrito && (
                                                 <div className="position-absolute bottom-0 start-0 w-100 bg-success text-white text-center py-1 opacity-90 small fw-bold">
-                                                    <i className="bi bi-check-circle-fill me-1"></i> INSCRITO
+                                                    <i className="bi bi-check-circle-fill me-1"></i> Inscrito
                                                 </div>
                                             )}
                                         </div>

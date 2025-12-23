@@ -49,14 +49,15 @@ const HorariosCliente = () => {
 
             // Map inscription data
             const enrolledCourses = (data.inscripciones || [])
-                .filter(ins => ins.curso_estado === 'en_curso') // Filter only active courses
+                // .filter(ins => ins.curso_estado === 'en_curso') // Removed filter to show all enrolled courses
                 .map((ins, index) => ({
                     id: ins.curso, // curso ID
                     nombre: ins.curso_nombre,
                     profesor: ins.curso_profesor,
                     horarios: ins.curso_horarios,
                     modalidad: ins.curso_modalidad,
-                    color: courseColors[index % courseColors.length] // Assign color
+                    color: courseColors[index % courseColors.length], // Assign color
+                    estado: ins.curso_estado // capture status
                 }));
 
             setCourses(enrolledCourses);
@@ -103,7 +104,8 @@ const HorariosCliente = () => {
                         courseName: course.nombre,
                         profesor: course.profesor,
                         color: course.color,
-                        modalidad: course.modalidad
+                        modalidad: course.modalidad,
+                        estado: course.estado // Pass status to event
                     });
                 });
             }
@@ -175,25 +177,36 @@ const HorariosCliente = () => {
                             >
                                 {allEvents
                                     .filter(event => normalizeStr(event.dia_semana) === normalizeStr(day))
-                                    .map((event, idx) => (
-                                        <div
-                                            key={`${event.courseName}-${event.dia_semana}-${event.hora_inicio}-${idx}`}
-                                            className="calendar-event"
-                                            style={{
-                                                ...getEventStyle(event.hora_inicio, event.hora_fin, day),
-                                                backgroundColor: event.color
-                                            }}
-                                            title={`${event.courseName}\n${event.hora_inicio.slice(0, 5)} - ${event.hora_fin.slice(0, 5)}\nProf: ${event.profesor}`}
-                                        >
-                                            <span className="event-title">{event.courseName}</span>
-                                            <div className="event-time">
-                                                {event.hora_inicio.slice(0, 5)} - {event.hora_fin.slice(0, 5)}
+                                    .map((event, idx) => {
+
+                                        // Status based Color Logic
+                                        // Green (#198754) for 'en_curso' (Active Course)
+                                        // Blue (#0d6efd) for 'confirmada' or others (Pending/Future)
+                                        const eventColor = event.estado === 'en_curso' ? '#198754' : '#0d6efd';
+                                        const borderColor = event.estado === 'en_curso' ? '#146c43' : '#0a58ca';
+
+                                        return (
+                                            <div
+                                                key={`${event.courseName}-${event.dia_semana}-${event.hora_inicio}-${idx}`}
+                                                className="calendar-event"
+                                                style={{
+                                                    ...getEventStyle(event.hora_inicio, event.hora_fin, day),
+                                                    backgroundColor: eventColor,
+                                                    borderLeft: `4px solid ${borderColor}`
+                                                }}
+                                                title={`${event.courseName}\n${event.hora_inicio.slice(0, 5)} - ${event.hora_fin.slice(0, 5)}\nProf: ${event.profesor}`}
+                                            >
+                                                <span className="event-title mb-1">{event.courseName}</span>
+                                                <div className="event-time fw-bold" style={{ fontSize: '0.85rem' }}>
+                                                    <i className="bi bi-clock me-1"></i>
+                                                    {event.hora_inicio.slice(0, 5)} - {event.hora_fin.slice(0, 5)}
+                                                </div>
+                                                <div className="event-time mt-1" style={{ fontSize: '0.75rem', opacity: 0.9 }}>
+                                                    {event.modalidad}
+                                                </div>
                                             </div>
-                                            <div className="event-time" style={{ fontSize: '0.7rem', opacity: 0.8 }}>
-                                                {event.modalidad}
-                                            </div>
-                                        </div>
-                                    ))
+                                        );
+                                    })
                                 }
                             </div>
                         ))}

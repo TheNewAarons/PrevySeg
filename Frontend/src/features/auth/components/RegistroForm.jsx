@@ -273,7 +273,8 @@ const RegistroForm = () => {
                                         border: 'none',
                                         background: 'transparent',
                                         padding: '5px 10px',
-                                        cursor: 'pointer'
+                                        cursor: 'pointer',
+                                        color: '#6c757d'
                                     }}
                                 >
                                     <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
@@ -304,7 +305,8 @@ const RegistroForm = () => {
                                         border: 'none',
                                         background: 'transparent',
                                         padding: '5px 10px',
-                                        cursor: 'pointer'
+                                        cursor: 'pointer',
+                                        color: '#6c757d'
                                     }}
                                 >
                                     <i className={`bi ${showConfirmPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>

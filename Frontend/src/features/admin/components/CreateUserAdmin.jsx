@@ -193,7 +193,8 @@ const CreateUserForm = ({ onUserCreated }) => {
                                 border: 'none',
                                 background: 'transparent',
                                 padding: '5px 10px',
-                                cursor: 'pointer'
+                                cursor: 'pointer',
+                                color: '#6c757d'
                             }}
                         >
                             <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>

@@ -115,20 +115,24 @@ const CursosEnCurso = () => {
                                                     </td>
                                                     <td>{course.profesor || '—'}</td>
                                                     <td>
-                                                        {course.dias_semana ? (
-                                                            <span className="badge bg-primary">
-                                                                {course.dias_semana}
-                                                            </span>
+                                                        {course.horarios && course.horarios.length > 0 ? (
+                                                            course.horarios.map((h, idx) => (
+                                                                <div key={idx} className="d-block mb-1 text-dark">
+                                                                    {h.dia_semana}
+                                                                </div>
+                                                            ))
                                                         ) : (
                                                             <span className="text-muted">No especificado</span>
                                                         )}
                                                     </td>
                                                     <td>
-                                                        {course.hora_inicio && course.hora_fin ? (
-                                                            <>
-                                                                <i className="bi bi-clock me-1"></i>
-                                                                {course.hora_inicio} - {course.hora_fin}
-                                                            </>
+                                                        {course.horarios && course.horarios.length > 0 ? (
+                                                            course.horarios.map((h, idx) => (
+                                                                <div key={idx} className="small mb-1">
+                                                                    <i className="bi bi-clock me-1"></i>
+                                                                    {h.hora_inicio.slice(0, 5)} - {h.hora_fin.slice(0, 5)}
+                                                                </div>
+                                                            ))
                                                         ) : (
                                                             <span className="text-muted">No especificado</span>
                                                         )}

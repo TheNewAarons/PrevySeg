@@ -152,7 +152,11 @@ const UserDetailPage = () => {
                 <div className="card-header bg-white border-bottom-0 pt-3">
                     <div className="d-flex justify-content-between align-items-start">
                         <h6 className="fw-bold mb-0 text-primary">{titulo}</h6>
-                        <span className="badge bg-light text-dark border">{inscripcion.estado_inscripcion}</span>
+                        <span className="badge bg-light text-dark border">
+                            {inscripcion.estado_inscripcion
+                                ? inscripcion.estado_inscripcion.charAt(0).toUpperCase() + inscripcion.estado_inscripcion.slice(1).toLowerCase()
+                                : ''}
+                        </span>
                     </div>
                 </div>
                 <div className="card-body">

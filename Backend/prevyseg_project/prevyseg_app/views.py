@@ -344,7 +344,7 @@ class InscribirseCursoView(APIView):
             inscripcion = InscripcionCurso.objects.create(
                 usuario=user,
                 curso=curso,
-                estado='iNSCRITO'
+                estado='INSCRITO'
             )
             
             #reducimos cupos disponibles
