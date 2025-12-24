@@ -518,3 +518,9 @@ body {
     font-size: 2rem;
   }
 }
+
+/* Hide native password reveal on Edge/IE */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}

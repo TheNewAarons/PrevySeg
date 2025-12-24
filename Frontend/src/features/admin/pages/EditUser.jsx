@@ -5,11 +5,12 @@ import authService from '../../../services/authService';
 import '../styles/AdminDashboard.css';
 import Navbar from '../../../components/layout/Navbar';
 
+import { validateAge } from "../../../utils/validation";
+
 const EditUser = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user, logout: authLogout } = useAuth();
-
     const [formData, setFormData] = useState({
         rut: '',
         nombre: '',
@@ -20,6 +21,7 @@ const EditUser = () => {
         lugar_trabajo: '',
         id_rol: '',
     });
+    const [initialData, setInitialData] = useState(null);
 
     const [cargando, setCargando] = useState(true);
     const [roles, setRoles] = useState([]);
@@ -71,6 +73,7 @@ const EditUser = () => {
 
                 const data = await response.json();
                 setFormData(data);
+                setInitialData(data);
             } catch (err) {
                 alert('Error cargando usuario: ' + err.message);
                 navigate('/administrador/list-users');
@@ -89,6 +92,12 @@ const EditUser = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (formData.fecha_nacimiento && !validateAge(formData.fecha_nacimiento)) {
+            alert("El usuario debe ser mayor de 18 años.");
+            return;
+        }
+
         try {
             const userStorage = localStorage.getItem("user");
             const token = JSON.parse(userStorage).token;
@@ -174,8 +183,8 @@ const EditUser = () => {
                                     className="form-control bg-light"
                                     name="rut"
                                     value={formData.rut}
-                                    onChange={handleChange}
-                                    required // RUT usually required
+                                    readOnly
+                                    disabled
                                 />
                             </div>
                             <div className="col-md-6">
@@ -267,7 +276,17 @@ const EditUser = () => {
                             <button type="button" className="btn btn-light border" onClick={() => navigate('/administrador/list-users')}>
                                 Cancelar
                             </button>
-                            <button type="submit" className="btn btn-success px-4" style={{ backgroundColor: 'var(--primary-dark)', borderColor: 'var(--primary-dark)' }}>
+                            <button
+                                type="submit"
+                                className="btn btn-success px-4"
+                                style={{
+                                    backgroundColor: (JSON.stringify(formData) !== JSON.stringify(initialData)) ? 'var(--primary-dark)' : 'grey',
+                                    borderColor: (JSON.stringify(formData) !== JSON.stringify(initialData)) ? 'var(--primary-dark)' : 'grey',
+                                    opacity: (JSON.stringify(formData) !== JSON.stringify(initialData)) ? 1 : 0.6,
+                                    cursor: (JSON.stringify(formData) !== JSON.stringify(initialData)) ? 'pointer' : 'not-allowed'
+                                }}
+                                disabled={JSON.stringify(formData) === JSON.stringify(initialData)}
+                            >
                                 <i className="bi bi-save me-2"></i>
                                 Guardar Cambios
                             </button>

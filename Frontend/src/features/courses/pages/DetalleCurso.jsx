@@ -6,6 +6,7 @@ import courseService from '../../../services/courseService';
 import authService from '../../../services/authService';
 import '../../admin/styles/AdminDashboard.css';
 import Navbar from '../../../components/layout/Navbar';
+import { formatPriceCLP } from '../../../utils/formatters';
 
 const DetalleCurso = () => {
     const navigate = useNavigate();
@@ -58,14 +59,7 @@ const DetalleCurso = () => {
             }
         }
     };
-    const formatMoneyCLP = (value) => {
-        if (value === null || value === undefined) return '—';
-        try {
-            return new Intl.NumberFormat('es-CL').format(Number(value));
-        } catch {
-            return String(value);
-        }
-    };
+
 
     const formatTime = (time) => {
         if (!time) return '—';
@@ -181,7 +175,7 @@ const DetalleCurso = () => {
                                         <div className="col-sm-6">
                                             <div className="p-3 bg-light rounded text-center h-100">
                                                 <small className="text-muted d-block mb-1">Valor</small>
-                                                <h5 className="fw-bold text-success mb-0">${formatMoneyCLP(course.valor)}</h5>
+                                                <h5 className="fw-bold text-success mb-0">{formatPriceCLP(course.valor)}</h5>
                                             </div>
                                         </div>
                                         <div className="col-sm-6">

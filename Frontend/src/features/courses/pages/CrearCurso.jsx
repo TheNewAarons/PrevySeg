@@ -142,6 +142,7 @@ const CrearCurso = () => {
                 estado: "por_empezar",
             });
             setHorarios(horarios.map(h => ({ ...h, inicio: '', fin: '', activo: false })));
+            navigate('/administrador/dashboard');
             setSelectedDocIds([]);
         } catch (err) {
             console.error("Error creando curso:", err);

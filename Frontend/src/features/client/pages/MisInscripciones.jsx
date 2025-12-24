@@ -74,7 +74,7 @@ const MisInscripciones = () => {
                                     <div className="course-body">
                                         <div className="d-flex justify-content-between align-items-start mb-3">
                                             <span className={`badge rounded-pill ${ins.estado_inscripcion === 'CONFIRMADA' ? 'bg-success bg-opacity-10 text-success' : 'bg-secondary bg-opacity-10 text-secondary'}`}>
-                                                {ins.estado_inscripcion}
+                                                {ins.estado_inscripcion.charAt(0).toUpperCase() + ins.estado_inscripcion.slice(1).toLowerCase()}
                                             </span>
                                             <small className="text-muted"><i className="bi bi-hash me-1"></i>{ins.inscripcion_id}</small>
                                         </div>
