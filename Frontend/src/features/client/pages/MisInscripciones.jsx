@@ -8,6 +8,7 @@ import Navbar from '../../../components/layout/Navbar';
 const MisInscripciones = () => {
     const [inscripciones, setInscripciones] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [processingPaymentId, setProcessingPaymentId] = useState(null);
     const navigate = useNavigate();
     const { user } = useAuth();
 
@@ -73,8 +74,11 @@ const MisInscripciones = () => {
 
                                     <div className="course-body">
                                         <div className="d-flex justify-content-between align-items-start mb-3">
-                                            <span className={`badge rounded-pill ${ins.estado_inscripcion === 'CONFIRMADA' ? 'bg-success bg-opacity-10 text-success' : 'bg-secondary bg-opacity-10 text-secondary'}`}>
-                                                {ins.estado_inscripcion.charAt(0).toUpperCase() + ins.estado_inscripcion.slice(1).toLowerCase()}
+                                            <span className={`badge rounded-pill ${ins.estado_inscripcion === 'INSCRITO' ? 'bg-success bg-opacity-10 text-success' :
+                                                ins.estado_inscripcion === 'PENDIENTE_PAGO' ? 'bg-warning bg-opacity-10 text-dark border border-warning' :
+                                                    'bg-secondary bg-opacity-10 text-secondary'
+                                                }`}>
+                                                {ins.estado_inscripcion.replace('_', ' ')}
                                             </span>
                                             <small className="text-muted"><i className="bi bi-hash me-1"></i>{ins.inscripcion_id}</small>
                                         </div>
@@ -107,23 +111,81 @@ const MisInscripciones = () => {
                                             )}
                                         </div>
 
-                                        <div className="mt-4 pt-3 border-top">
-                                            <button
-                                                className="btn btn-inscribirse w-100"
-                                                onClick={() => navigate(`/cliente/cursos/${ins.curso_id}/inscripcion`)}
-                                            >
-                                                Gestionar Inscripción
-                                                <i className="bi bi-arrow-right ms-2"></i>
-                                            </button>
-                                        </div>
+                                    </div>
+
+                                    <div className="mt-4 pt-3 border-top d-grid gap-2">
+                                        {/* Logic for payment button */}
+                                        {(() => {
+                                            const allDocsApproved = ins.documentos.every(doc => doc.estado === 'APROBADO');
+                                            // const hasPendingDocs = ins.documentos.length > 0; 
+
+                                            if (ins.pagado || ins.estado_inscripcion === 'INSCRITO') {
+                                                return (
+                                                    <button className="btn btn-success disabled w-100">
+                                                        <i className="bi bi-check-circle-fill me-2"></i>Inscrito y Pagado
+                                                    </button>
+                                                );
+                                            } else if (ins.estado_inscripcion === 'PENDIENTE_PAGO' || (allDocsApproved && !ins.pagado)) {
+                                                return (
+                                                    <button
+                                                        className="btn btn-warning w-100 fw-bold text-dark"
+                                                        disabled={processingPaymentId === ins.curso_id}
+                                                        onClick={async () => {
+                                                            try {
+                                                                setProcessingPaymentId(ins.curso_id);
+                                                                const data = await courseService.initiateWebpayTransaction(ins.curso_id);
+
+                                                                // Redirect to Webpay
+                                                                // Create a form and submit it automatically
+                                                                const form = document.createElement("form");
+                                                                form.method = "POST";
+                                                                form.action = data.url;
+
+                                                                const tokenInput = document.createElement("input");
+                                                                tokenInput.type = "hidden";
+                                                                tokenInput.name = "token_ws";
+                                                                tokenInput.value = data.token;
+                                                                form.appendChild(tokenInput);
+
+                                                                document.body.appendChild(form);
+                                                                form.submit();
+
+                                                            } catch (error) {
+                                                                console.error(error);
+                                                                alert("Error al iniciar pago: " + error.message);
+                                                                setProcessingPaymentId(null);
+                                                            }
+                                                        }}
+                                                    >
+                                                        {processingPaymentId === ins.curso_id ? (
+                                                            <span><span className="spinner-border spinner-border-sm me-2"></span>Procesando...</span>
+                                                        ) : (
+                                                            <span><i className="bi bi-credit-card me-2"></i>Pagar Ahora</span>
+                                                        )}
+                                                    </button>
+                                                );
+                                            } else {
+                                                // Default logic for managing docs
+                                                return (
+                                                    <button
+                                                        className="btn btn-inscribirse w-100"
+                                                        onClick={() => navigate(`/cliente/cursos/${ins.curso_id}/inscripcion`)}
+                                                    >
+                                                        Gestionar Inscripción
+                                                        <i className="bi bi-arrow-right ms-2"></i>
+                                                    </button>
+                                                );
+                                            }
+                                        })()}
                                     </div>
                                 </div>
                             </div>
+
                         ))}
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 };
 

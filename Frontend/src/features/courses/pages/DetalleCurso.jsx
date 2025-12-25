@@ -147,6 +147,9 @@ const DetalleCurso = () => {
                                         <button className="btn btn-outline-primary btn-sm px-4" onClick={() => navigate(`/administrador/cursos/${id}/editar`)}>
                                             <i className="bi bi-pencil me-2"></i>Editar
                                         </button>
+                                        <button className="btn btn-outline-info btn-sm px-4" onClick={() => navigate(`/administrador/cursos/${id}/asistencia`)}>
+                                            <i className="bi bi-calendar-check me-2"></i>Asistencia
+                                        </button>
                                         <button className="btn btn-outline-danger btn-sm px-4" onClick={handleDelete}>
                                             <i className="bi bi-trash me-2"></i>Eliminar
                                         </button>
@@ -165,6 +168,37 @@ const DetalleCurso = () => {
                                     <p className="text-secondary mb-4">{course.descripcion}</p>
 
                                     <h6 className="fw-bold text-dark border-bottom pb-2 mb-3">Detalles Académicos</h6>
+
+                                    {/* SENCE Details */}
+                                    {(course.codigo_sence || course.horas_sence || course.valor_hora_sence) && (
+                                        <div className="alert alert-light border mb-4">
+                                            <div className="d-flex align-items-center mb-2">
+                                                <i className="bi bi-patch-check-fill text-primary me-2"></i>
+                                                <strong className="text-primary">Información SENCE</strong>
+                                            </div>
+                                            <div className="row g-2 small">
+                                                {course.codigo_sence && (
+                                                    <div className="col-sm-4">
+                                                        <span className="text-muted d-block">Código:</span>
+                                                        <strong>{course.codigo_sence}</strong>
+                                                    </div>
+                                                )}
+                                                {course.horas_sence && (
+                                                    <div className="col-sm-4">
+                                                        <span className="text-muted d-block">Horas Franquicia:</span>
+                                                        <strong>{course.horas_sence} hrs</strong>
+                                                    </div>
+                                                )}
+                                                {course.valor_hora_sence && (
+                                                    <div className="col-sm-4">
+                                                        <span className="text-muted d-block">Valor Hora:</span>
+                                                        <strong>{formatPriceCLP(course.valor_hora_sence)}</strong>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <div className="row g-3">
                                         <div className="col-sm-6">
                                             <div className="p-3 bg-light rounded text-center h-100">

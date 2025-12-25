@@ -26,6 +26,9 @@ import Home from './pages/Home.jsx'
 import InscripcionCurso from './features/courses/pages/DetalleInscripcion.jsx'
 import FinalizarInscripcionCurso from './features/courses/pages/FinalizarInscripcion.jsx'
 import MisInscripciones from './features/client/pages/MisInscripciones.jsx'
+import WebpayReturn from './features/client/pages/WebpayReturn'
+import AsistenciaCurso from './features/admin/pages/AsistenciaCurso.jsx'
+import ComplianceDashboard from './features/admin/pages/ComplianceDashboard.jsx'
 import { AuthProvider } from './services/authContext.jsx'
 import { PublicRoute, RoleRoute } from './services/protectedRouted.jsx'
 
@@ -90,6 +93,12 @@ function App() {
                         </RoleRoute>
                     } />
 
+                    <Route path='/webpay-return' element={
+                        <RoleRoute allowedRole="Cliente">
+                            <WebpayReturn />
+                        </RoleRoute>
+                    } />
+
                     <Route path='/cliente/horarios' element={
                         <RoleRoute allowedRole="Cliente">
                             <HorariosCliente />
@@ -136,6 +145,18 @@ function App() {
                     <Route path='/administrador/horarios' element={
                         <RoleRoute allowedRole="Administrador">
                             <Horarios />
+                        </RoleRoute>
+                    } />
+
+                    <Route path='/administrador/compliance' element={
+                        <RoleRoute allowedRole="Administrador">
+                            <ComplianceDashboard />
+                        </RoleRoute>
+                    } />
+
+                    <Route path='/administrador/cursos/:id/asistencia' element={
+                        <RoleRoute allowedRole="Administrador">
+                            <AsistenciaCurso />
                         </RoleRoute>
                     } />
 

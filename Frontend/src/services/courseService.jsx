@@ -10,7 +10,7 @@ const API_URL = "http://127.0.0.1:8000/api/cursos/";
  */
 const getCourses = async (params = {}) => {
     try {
-        const headers = getAuthHeaders(); 
+        const headers = getAuthHeaders();
 
         // Construir querystring dinámico
         const queryString = new URLSearchParams(params).toString();
@@ -45,7 +45,7 @@ const getCourses = async (params = {}) => {
  */
 const getCourseById = async (id) => {
     try {
-        const headers = getAuthHeaders(); 
+        const headers = getAuthHeaders();
 
         const response = await fetch(`${API_URL}${id}/`, {
             method: "GET",
@@ -109,7 +109,7 @@ const createCourse = async (courseData) => {
  */
 const updateCourse = async (id, courseData) => {
     try {
-        const headers = getAuthHeaders(); 
+        const headers = getAuthHeaders();
 
         const response = await fetch(`${API_URL}${id}/`, {
             method: "PUT",
@@ -142,7 +142,7 @@ const updateCourse = async (id, courseData) => {
  */
 const deleteCourse = async (id) => {
     try {
-        const headers = getAuthHeaders(); 
+        const headers = getAuthHeaders();
 
         const response = await fetch(`${API_URL}${id}/`, {
             method: "DELETE",
@@ -297,6 +297,54 @@ const getInscripcionesUsuario = async (usuarioId) => {
     return data;
 };
 
+// Webpay
+const initiateWebpayTransaction = async (cursoId) => {
+    const headers = getAuthHeaders();
+    // Assuming API base is http://127.0.0.1:8000/api/ which is parent of API_URL
+    const baseUrl = API_URL.replace('cursos/', 'webpay/');
+
+    const response = await fetch(`${baseUrl}iniciar/${cursoId}/`, {
+        method: "POST",
+        headers,
+    });
+
+    const contentType = response.headers.get("content-type") || "";
+    const data = contentType.includes("application/json")
+        ? await response.json()
+        : { detail: await response.text() };
+
+    if (!response.ok) {
+        throw new Error(data.error || data.detail || "Error al iniciar Webpay");
+    }
+    return data;
+};
+
+const confirmWebpayTransaction = async (token) => {
+    // This might be public or authenticated. Let's send auth header just in case, views allow Any but maybe we change it.
+    // Actually ConfirmarPagoView is AllowAny.
+    const headers = {
+        'Content-Type': 'application/json'
+    };
+
+    const baseUrl = API_URL.replace('cursos/', 'webpay/');
+
+    const response = await fetch(`${baseUrl}confirmar/`, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify({ token_ws: token })
+    });
+
+    const contentType = response.headers.get("content-type") || "";
+    const data = contentType.includes("application/json")
+        ? await response.json()
+        : { detail: await response.text() };
+
+    if (!response.ok) {
+        throw new Error(data.error || data.detail || "Error al confirmar Webpay");
+    }
+    return data;
+};
+
 const courseService = {
     getCourses,
     getCourseById,
@@ -310,6 +358,8 @@ const courseService = {
     getCursosDisponibles,
     getMisInscripciones,
     getInscripcionesUsuario,
+    initiateWebpayTransaction,
+    confirmWebpayTransaction,
 };
 
 export default courseService;

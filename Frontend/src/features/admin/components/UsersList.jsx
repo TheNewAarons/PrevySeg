@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Dropdown } from "react-bootstrap";
 import { getRoleName, getRoleBadgeClass } from "../../../utils/roles";
 const UsuarioList = () => {
     const [usuarios, setUsuarios] = useState([]);
@@ -201,13 +202,21 @@ const UsuarioList = () => {
                                                             >
                                                                 <i className="bi bi-pencil"></i>
                                                             </button>
-                                                            <button
-                                                                className="btn btn-sm btn-outline-danger"
-                                                                onClick={() => setSelectedUser(u)}
-                                                                title="Eliminar"
-                                                            >
-                                                                <i className="bi bi-trash"></i>
-                                                            </button>
+
+                                                            <Dropdown>
+                                                                <Dropdown.Toggle variant="light" size="sm" className="border text-muted" id={`dropdown-actions-${u.id_usuario}`}>
+                                                                    <i className="bi bi-three-dots-vertical"></i>
+                                                                </Dropdown.Toggle>
+
+                                                                <Dropdown.Menu>
+                                                                    <Dropdown.Item
+                                                                        className="text-danger"
+                                                                        onClick={() => setSelectedUser(u)}
+                                                                    >
+                                                                        <i className="bi bi-trash me-2"></i>Eliminar Usuario
+                                                                    </Dropdown.Item>
+                                                                </Dropdown.Menu>
+                                                            </Dropdown>
                                                         </div>
                                                     </td>
                                                 </tr>

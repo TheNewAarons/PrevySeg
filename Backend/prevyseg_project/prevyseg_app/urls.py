@@ -10,12 +10,16 @@ from .views import (
     MisInscripcionesView, TipoDocumentoListView,
     SubirDocumentoCursoView, DocumentosCursoView,
     InscripcionesUsuarioAdminView,
+    AsistenciaViewSet, # Added AsistenciaViewSet
 )
+from .webpay_views import IniciarPagoView, ConfirmarPagoView
+from .reporting_views import export_asistencia_sence, export_nomina_curso, export_nomina_json, dashboard_compliance_stats
 
 router = DefaultRouter()
 router.register(r'usuarios', UsuarioViewSet, basename='usuarios')
 router.register(r'roles', RolViewSet, basename='roles')
-router.register(r'cursos', CursoViewSet, basename='cursos')
+router.register(r'cursos', CursoViewSet, basename='cursos') # Kept original style for consistency
+router.register(r'asistencia', AsistenciaViewSet, basename='asistencia') # Corrected syntax and basename
 
 urlpatterns = [
     #Auth
@@ -44,6 +48,16 @@ urlpatterns = [
 
     #Inscripcion para visualizacion del Administrador
     path("cursos/usuarios/<int:usuario_id>/inscripciones/", InscripcionesUsuarioAdminView.as_view(), name="inscripciones-user-admin"),
+
+    # Webpay
+    path('webpay/iniciar/<int:curso_id>/', IniciarPagoView.as_view(), name='webpay-iniciar'),
+    path('webpay/confirmar/', ConfirmarPagoView.as_view(), name='webpay-confirmar'),
+
+    # SENCE Reporting
+    path('reporting/asistencia/<int:curso_id>/', export_asistencia_sence, name='export-asistencia-sence'),
+    path('reporting/nomina/<int:curso_id>/', export_nomina_curso, name='export-nomina-curso'),
+    path('reporting/nomina-json/<int:curso_id>/', export_nomina_json, name='export-nomina-json'),
+    path('reporting/dashboard-stats/', dashboard_compliance_stats, name='dashboard-compliance-stats'),
 
     #CRUD admin (router)
     path('', include(router.urls)),

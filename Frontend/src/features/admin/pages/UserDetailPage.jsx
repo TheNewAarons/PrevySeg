@@ -152,9 +152,12 @@ const UserDetailPage = () => {
                 <div className="card-header bg-white border-bottom-0 pt-3">
                     <div className="d-flex justify-content-between align-items-start">
                         <h6 className="fw-bold mb-0 text-primary">{titulo}</h6>
-                        <span className="badge bg-light text-dark border">
+                        <span className={`badge ${inscripcion.estado_inscripcion === 'INSCRITO' ? 'bg-success bg-opacity-10 text-success border border-success' :
+                                inscripcion.estado_inscripcion === 'PENDIENTE_PAGO' ? 'bg-warning bg-opacity-10 text-dark border border-warning' :
+                                    'bg-light text-dark border'
+                            }`}>
                             {inscripcion.estado_inscripcion
-                                ? inscripcion.estado_inscripcion.charAt(0).toUpperCase() + inscripcion.estado_inscripcion.slice(1).toLowerCase()
+                                ? inscripcion.estado_inscripcion.replace('_', ' ').charAt(0).toUpperCase() + inscripcion.estado_inscripcion.replace('_', ' ').slice(1).toLowerCase()
                                 : ''}
                         </span>
                     </div>

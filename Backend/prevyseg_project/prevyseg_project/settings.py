@@ -161,3 +161,5 @@ SIMPLE_JWT = {
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# Frontend URL for redirections (e.g. Webpay)
+FRONTEND_URL = "http://localhost:5173"

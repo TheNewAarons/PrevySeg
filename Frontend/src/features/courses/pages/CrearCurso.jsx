@@ -22,7 +22,10 @@ const CrearCurso = () => {
         cupos_disponibles: '',
         modalidad: 'Presencial',
         area: 'seguridad',
-        estado: 'por_empezar'
+        estado: 'por_empezar',
+        codigo_sence: '',
+        horas_sence: '',
+        valor_hora_sence: ''
     });
 
     // Estado para manejar los horarios por dia
@@ -118,6 +121,9 @@ const CrearCurso = () => {
                 cupos_disponibles: formData.cupos_disponibles
                     ? Number(formData.cupos_disponibles)
                     : null,
+                codigo_sence: formData.codigo_sence || null,
+                horas_sence: formData.horas_sence ? Number(formData.horas_sence) : null,
+                valor_hora_sence: formData.valor_hora_sence ? Number(formData.valor_hora_sence) : null,
                 documentos_requeridos_ids: selectedDocIds,
                 horarios: horarios.filter(h => h.activo).map(h => ({
                     dia_semana: h.dia,
@@ -200,6 +206,22 @@ const CrearCurso = () => {
                             <div className="col-md-4 mb-3">
                                 <label className="form-label">Cupos Disponibles</label>
                                 <input type="number" className="form-control" name="cupos_disponibles" value={formData.cupos_disponibles} onChange={handleChange} required />
+                            </div>
+                        </div>
+
+                        {/* SENCE Fields (Phase 1) */}
+                        <div className="row mb-3">
+                            <div className="col-md-4 mb-3">
+                                <label className="form-label text-primary">Código SENCE</label>
+                                <input type="text" className="form-control" name="codigo_sence" value={formData.codigo_sence} onChange={handleChange} placeholder="Ej: 1234567890" />
+                            </div>
+                            <div className="col-md-4 mb-3">
+                                <label className="form-label text-primary">Horas SENCE</label>
+                                <input type="number" className="form-control" name="horas_sence" value={formData.horas_sence} onChange={handleChange} placeholder="Horas franquicia" />
+                            </div>
+                            <div className="col-md-4 mb-3">
+                                <label className="form-label text-primary">Valor Hora SENCE</label>
+                                <input type="number" className="form-control" name="valor_hora_sence" value={formData.valor_hora_sence} onChange={handleChange} placeholder="$ por hora" />
                             </div>
                         </div>
 

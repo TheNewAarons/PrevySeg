@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import InscripcionCurso, Rol, Usuario, Curso, DocumentoSubido, TipoDocumento, HorarioCurso
+from .models import InscripcionCurso, Rol, Usuario, Curso, DocumentoSubido, TipoDocumento, HorarioCurso, Asistencia
 from django.contrib.auth import authenticate
 from django.utils import timezone
 import re
@@ -278,7 +278,11 @@ class CursoDetailSerializer(serializers.ModelSerializer):
             'id', 'nombre', 'descripcion', 'horas', 'profesor', 'valor',
             'tipo_certificado', 'fecha_inicio', 'cupos_disponibles',
             'modalidad', 'area', 'horarios',
-            'estado', 'documentos_requeridos', 'ya_inscrito', 'documentos_subidos'
+            'estado', 'documentos_requeridos', 'ya_inscrito', 'documentos_subidos',
+            # SENCE fields
+            'codigo_sence',
+            'horas_sence',
+            'valor_hora_sence'
         ]
     
     def get_ya_inscrito(self, obj):
@@ -321,6 +325,7 @@ class InscripcionCursoSerializer(serializers.ModelSerializer):
     class Meta:
         model = InscripcionCurso
         fields = '__all__'
+        read_only_fields = ['pagado', 'token_ws', 'monto', 'fecha_pago']
     
     def validate(self, data):
         user = self.context['request'].user
@@ -432,3 +437,11 @@ class DocumentoSubidoDetailSerializer(serializers.ModelSerializer):
         return value
 
 
+
+class AsistenciaSerializer(serializers.ModelSerializer):
+    nombre_alumno = serializers.ReadOnlyField(source='usuario.nombre')
+    rut_alumno = serializers.ReadOnlyField(source='usuario.rut')
+
+    class Meta:
+        model = Asistencia
+        fields = '__all__'

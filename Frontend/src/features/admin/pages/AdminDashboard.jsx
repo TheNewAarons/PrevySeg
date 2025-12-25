@@ -152,9 +152,14 @@ const AdminDashboard = () => {
                     </div>
                 ) : (
                     <>
-                        <div className="page-header">
+                        <div className="d-flex justify-content-between align-items-center mb-4">
                             <h1 className="page-title">Panel de Administración</h1>
-                            <p className="page-subtitle">Gestiona todos los aspectos de PrevySeg OTEC</p>
+                            <button className="btn btn-outline-primary" onClick={() => navigate('/administrador/compliance')}>
+                                <i className="bi bi-shield-check me-2"></i>Conformidad SENCE
+                            </button>
+                            <button className="btn-logout" onClick={() => { authService.logout(); navigate('/login'); }}>
+                                <i className="bi bi-box-arrow-right me-2"></i> Cerrar Sesión
+                            </button>
                         </div>
 
                         <div className="stats-row">

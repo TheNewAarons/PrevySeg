@@ -7,8 +7,10 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import (
     RegistroSerializer, LoginSerializer, UserSerializer, RolSerializer, CursoSerializer, DocumentoSubidoSerializer, 
-    CursoDetailSerializer, InscripcionCursoSerializer, DocumentoSubidoDetailSerializer, TipoDeDocumentoSerializers  )
-from .models import InscripcionCurso, Usuario, Rol, Curso, DocumentoSubido, TipoDocumento
+    CursoDetailSerializer, InscripcionCursoSerializer, DocumentoSubidoDetailSerializer, TipoDeDocumentoSerializers,
+    HorarioCursoSerializer, AsistenciaSerializer
+)
+from .models import Usuario, Rol, TipoDocumento, Curso, DocumentoSubido, InscripcionCurso, HorarioCurso, Asistencia
 from rest_framework.views import APIView
 from django.db import IntegrityError
 from .permissions import IsSelforAdmin
@@ -344,7 +346,7 @@ class InscribirseCursoView(APIView):
             inscripcion = InscripcionCurso.objects.create(
                 usuario=user,
                 curso=curso,
-                estado='INSCRITO'
+                estado='PENDIENTE_PAGO'
             )
             
             #reducimos cupos disponibles
@@ -364,7 +366,7 @@ class InscribirseCursoView(APIView):
                 },
                 "fecha_inscripcion": inscripcion.fecha_inscripcion,
                 "cupos_restantes": curso.cupos_disponibles,
-                "nota": "Recordatorio: El proceso de pago se implementará en la siguiente fase del proyecto."
+                "nota": "Tu inscripción ha sido creada. Por favor realiza el pago para confirmarla."
             }, status=status.HTTP_201_CREATED)
             
         except Exception as e:
@@ -617,6 +619,7 @@ class MisInscripcionesView(generics.ListAPIView):
                 'curso_estado': inscripcion.curso.estado, # Para filtro en frontend
                 'curso_horarios': list(inscripcion.curso.horarios.values('dia_semana', 'hora_inicio', 'hora_fin')), # Esquema de horarios
                 'estado_inscripcion': inscripcion.estado,
+                'pagado': inscripcion.pagado,
                 'fecha_inscripcion': inscripcion.fecha_inscripcion,
                 'documentos': [
                     {
@@ -883,3 +886,24 @@ class TipoDocumentoListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = TipoDeDocumentoSerializers
     queryset = TipoDocumento.objects.all()
+
+class AsistenciaViewSet(viewsets.ModelViewSet):
+    """
+    CRUD para gestionar la asistencia.
+    """
+    queryset = Asistencia.objects.all()
+    serializer_class = AsistenciaSerializer
+    permission_classes = [permissions.IsAuthenticated] # Ajustar permisos según rol
+
+    def get_queryset(self):
+        # Permitir filtrar por curso o fecha
+        queryset = Asistencia.objects.all()
+        curso_id = self.request.query_params.get('curso', None)
+        fecha = self.request.query_params.get('fecha', None)
+        
+        if curso_id:
+            queryset = queryset.filter(curso_id=curso_id)
+        if fecha:
+            queryset = queryset.filter(fecha=fecha)
+            
+        return queryset

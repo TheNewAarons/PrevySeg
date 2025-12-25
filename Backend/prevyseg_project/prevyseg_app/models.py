@@ -119,6 +119,11 @@ class Curso(models.Model):
         default='seguridad'
     )
     
+    # Campos SENCE (Phase 1 Integration)
+    codigo_sence = models.CharField(max_length=20, unique=True, null=True, blank=True, help_text="Código SENCE oficial del curso")
+    horas_sence = models.PositiveIntegerField(null=True, blank=True, help_text="Horas cronológicas reconocidas por SENCE")
+    valor_hora_sence = models.PositiveIntegerField(null=True, blank=True, help_text="Valor hora SENCE para franquicia tributaria")
+    
     # Campos de horario
     # Campos de horario eliminados en favor de modelo HorarioCurso
     
@@ -180,6 +185,7 @@ class DocumentoSubido(models.Model):
 # Complemento a RF-10
 class InscripcionCurso(models.Model):
     ESTADOS = [
+        ('PENDIENTE_PAGO', 'Pendiente de pago'),
         ('INSCRITO', 'Inscrito'),
         ('EN_CURSO', 'En curso'),
         ('FINALIZADO', 'FINALIZADO'),
@@ -188,10 +194,38 @@ class InscripcionCurso(models.Model):
     curso = models.ForeignKey(Curso, on_delete=models.CASCADE)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='INSCRITO')
     fecha_inscripcion = models.DateTimeField(auto_now_add=True)
+    
+    # Campos para Webpay
+    pagado = models.BooleanField(default=False)
+    token_ws = models.CharField(max_length=100, unique=True, null=True, blank=True)
+    monto = models.IntegerField(null=True, blank=True)
+    fecha_pago = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         # Verificamos que el usuario no se inscriba mas de 1 vez al mismo curso
         unique_together = ('usuario', 'curso')
 
     def __str__(self):
-        return f"{self.usuario.rut} - {self.curso.nombre}"
+        return f"{self.usuario.rut} - {self.curso.nombre} - {'Pagado' if self.pagado else 'Pendiente'}"
+
+class Asistencia(models.Model):
+    METODOS = [
+        ('Manual', 'Manual'),
+        ('Biometrico', 'Biometrico'),
+    ]
+    
+    id_asistencia = models.AutoField(primary_key=True)
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    curso = models.ForeignKey(Curso, on_delete=models.CASCADE)
+    fecha = models.DateField()
+    hora_entrada = models.TimeField()
+    hora_salida = models.TimeField(null=True, blank=True)
+    metodo = models.CharField(max_length=20, choices=METODOS, default='Manual')
+    observaciones = models.TextField(blank=True, null=True)
+    
+    class Meta:
+        unique_together = ('usuario', 'curso', 'fecha') # Un registro por alumno por día y curso
+        ordering = ['-fecha', 'hora_entrada']
+
+    def __str__(self):
+        return f"{self.fecha} - {self.usuario.rut} - {self.curso.nombre}"
