@@ -13,8 +13,10 @@ __pycache__/
 *.log
 # Archivos de base de datos SQLite (si no usas Docker)
 /backend/db.sqlite3
+/Backend/prevyseg_project/db.sqlite3
 # Archivos de media subidos por el usuario (si los pones en la raíz del backend)
 /backend/media
+/Backend/prevyseg_project/media/
 # Carpetas de migración de Python para caché
 */migrations/*.pyc
 # ------------------------------------
